@@ -25,6 +25,7 @@ class Event implements GroupVariables
             self::$prefix.'TelRespInscription' => 'Admin inscription mobile',
             self::$prefix.'NomRespInscription' => 'Admin inscription Nom',
             self::$prefix.'PrenomRespInscription' => 'Admin inscription Prénom',
+            self::$prefix.'Clients' => 'Clients',
             self::$prefix.'Date_Debut' => 'Date début',
             self::$prefix.'Date_Fin' => 'Date fin',
             self::$prefix.'Lieu' => 'Lieu',

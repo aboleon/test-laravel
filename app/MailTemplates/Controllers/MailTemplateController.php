@@ -3,6 +3,8 @@
 namespace App\MailTemplates\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\MailTemplates\Config;
+use App\MailTemplates\Contracts\Template;
 use App\MailTemplates\DataTables\MailTemplateDataTable;
 use App\MailTemplates\Enum\MailTemplateFormat;
 use App\MailTemplates\Enum\MailTemplateMode;
@@ -37,9 +39,9 @@ class MailTemplateController extends Controller
     public function create(): Renderable
     {
         $data = [
-            'data' => new MailTemplate(),
+            'data'  => new MailTemplate(),
             'route' => route('panel.mailtemplates.store'),
-            'page' => null
+            'page'  => null,
         ];
 
         return view('mailtemplates.edit')->with($data);
@@ -58,16 +60,16 @@ class MailTemplateController extends Controller
 
             $this->redirect_to = route('panel.mailtemplates.edit', $mailtemplate);
             $this->saveAndRedirect(route('panel.mailtemplates.index'));
-
         } catch (Throwable $e) {
             $this->responseException($e);
         }
+
         return $this->sendResponse();
     }
 
     public function getDatatable(Request $request): JsonResponse
     {
-        if (!$request->ajax()) {
+        if ( ! $request->ajax()) {
             abort(404);
         }
 
@@ -115,16 +117,7 @@ class MailTemplateController extends Controller
             $as = request('as');
         }
 
-        /*
-         * inté variable
-        $event = Event::find(33);
-        $event_contact = EventContact::find(360);
-        $parsed = (new Courrier($event, $mailtemplate, $event_contact))->serve();
-        */
-
-        $event = Event::inRandomOrder()->first();
-
-        $parsed = new Courrier($event, $mailtemplate, $event->contacts->random())->highlight()->serve();
+        $parsed = $this->getRandomParsed($mailtemplate);
 
 
         if ($as == 'pdf') {
@@ -132,14 +125,14 @@ class MailTemplateController extends Controller
         }
 
         return view('mailtemplates.show')->with([
-            'parsed' => $parsed
+            'parsed' => $parsed,
         ]);
     }
 
     public function edit(MailTemplate $mailtemplate): Renderable
     {
         $data = [
-            'data' => $mailtemplate,
+            'data'  => $mailtemplate,
             'route' => route('panel.mailtemplates.update', $mailtemplate),
         ];
 
@@ -158,7 +151,6 @@ class MailTemplateController extends Controller
 
             $this->redirect_to = route('panel.mailtemplates.edit', $mailtemplate);
             $this->saveAndRedirect(route('panel.mailtemplates.index'));
-
         } catch (Throwable $e) {
             $this->responseException($e);
         }
@@ -181,31 +173,68 @@ class MailTemplateController extends Controller
 
     public function duplicate(MailTemplate $template): RedirectResponse
     {
-        $cloned = $template->replicate();
+        $cloned             = $template->replicate();
         $cloned->identifier = Str::random(10);
-        $cloned->setTranslation('subject', app()->getLocale(), $cloned->subject . (' (dupliqué)'));
+        $cloned->setTranslation('subject', app()->getLocale(), $cloned->subject.(' (dupliqué)'));
         $cloned->touch();
         $cloned->save();
         $this->redirectTo(route('panel.mailtemplates.edit', $cloned));
+
         return $this->sendResponse();
     }
 
     private function basicValidation(MailTemplate $mailtemplate)
     {
-        $this->validation_rules = [
-            'identifier' => 'required|unique:mailtemplates,identifier' . ($mailtemplate->id ? ',' . $mailtemplate->id : ''),
-            'subject.' . $this->defaultLocale() => 'required',
-            'content.' . $this->defaultLocale() => 'required',
-            'orientation' => 'required',
-            'format' => 'required',
+        $this->validation_rules    = [
+            'identifier'                      => 'required|unique:mailtemplates,identifier'.($mailtemplate->id ? ','.$mailtemplate->id : ''),
+            'subject.'.$this->defaultLocale() => 'required',
+            'content.'.$this->defaultLocale() => 'required',
+            'orientation'                     => 'required',
+            'format'                          => 'required',
         ];
         $this->validation_messages = [
-            'identifier.required' => __('validation.required', ['attribute' => "L'identifiant"]),
-            'orientation.required' => __('validation.required', ['attribute' => "L'orientation"]),
-            'format.required' => __('validation.required', ['attribute' => "Le format"]),
-            'identifier.unique' => __('validation.unique', ['attribute' => "L'identifiant"]),
-            'subject.' . $this->defaultLocale() . '.required' => __('validation.required', ['attribute' => "Le sujet du mail"]),
-            'content.' . $this->defaultLocale() . '.required' => __('validation.required', ['attribute' => "Le contenu du mail"]),
+            'identifier.required'                         => __('validation.required', ['attribute' => "L'identifiant"]),
+            'orientation.required'                        => __('validation.required', ['attribute' => "L'orientation"]),
+            'format.required'                             => __('validation.required', ['attribute' => "Le format"]),
+            'identifier.unique'                           => __('validation.unique', ['attribute' => "L'identifiant"]),
+            'subject.'.$this->defaultLocale().'.required' => __('validation.required', ['attribute' => "Le sujet du mail"]),
+            'content.'.$this->defaultLocale().'.required' => __('validation.required', ['attribute' => "Le contenu du mail"]),
         ];
+    }
+
+    public function showVariables(): Renderable
+    {
+        // Get all variable groups from Config
+        $variableGroups = Config::activeGroups();
+
+        $tables = [];
+
+        foreach ($variableGroups as $groupClass) {
+            $variables = $groupClass::variables();
+
+            $tableData = [];
+            foreach ($variables as $variable => $label) {
+                $tableData[] = [
+                    'label'       => $label,
+                    'variable'    => $variable,
+                    'placeholder' => '{'.$variable.'}',
+                ];
+            }
+
+            $tables[] = [
+                'title' => $groupClass::title(),
+                'data'  => $tableData,
+            ];
+        }
+
+        return view('mailtemplates.variables', ['tables' => $tables]);
+    }
+
+    private function getRandomParsed(MailTemplate $mailtemplate): Template
+    {
+        $event        = Event::inRandomOrder()->first();
+        $eventContact = $event->contacts->isNotEmpty() ? $event->contacts->random() : null;
+
+        return new Courrier($event, $mailtemplate, $eventContact)->highlight()->serve();
     }
 }

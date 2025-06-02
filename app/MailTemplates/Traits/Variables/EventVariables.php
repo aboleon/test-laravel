@@ -1,6 +1,9 @@
 <?php
 namespace App\MailTemplates\Traits\Variables;
 use App\Actions\Front\AutoConnectHelper;
+use App\Enum\OrderClientType;
+use App\Enum\OrderType;
+use App\Models\Order;
 use Illuminate\Support\Carbon;
 use MetaFramework\Accessors\Countries;
 
@@ -84,6 +87,31 @@ Trait EventVariables {
     public function EVENT_MobileGrant(): string
     {
         return $this->event->pec?->grantAdmin?->profile?->mobile ?? '';
+    }
+
+    public function EVENT_Clients(): string
+    {
+        // Get all orders for this event of type "order"
+        $clientNames = Order::where('event_id', $this->event->id)
+            ->where('type', OrderType::ORDER->value)
+            ->whereNotNull('client_id')
+            ->with(['account', 'group'])
+            ->get()
+            ->map(function ($order) {
+                // Get client name based on client_type
+                if ($order->client_type === OrderClientType::GROUP->value && $order->group) {
+                    return $order->group->name;
+                } elseif ($order->account) {
+                    return trim($order->account->first_name . ' ' . $order->account->last_name);
+                }
+                return null;
+            })
+            ->filter() // Remove null values
+            ->unique() // Remove duplicates
+            ->sort() // Sort alphabetically
+            ->values();
+
+        return $clientNames->implode(', ');
     }
 
     public function EVENT_Photo():string
