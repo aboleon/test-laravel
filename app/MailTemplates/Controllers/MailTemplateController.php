@@ -204,6 +204,22 @@ class MailTemplateController extends Controller
 
     public function showVariables(): Renderable
     {
+        // Get a random event and event contact for testing
+        $event = Event::inRandomOrder()->first();
+        $eventContact = $event && $event->contacts->isNotEmpty() ? $event->contacts->random() : null;
+
+        // Create a dummy MailTemplate for the Courrier class
+        $dummyTemplate = new MailTemplate();
+        $dummyTemplate->subject = 'Test Subject';
+        $dummyTemplate->content = 'Test Content';
+
+        // Create a Courrier instance with real data
+        $courrier = new Courrier($event, $dummyTemplate, $eventContact);
+        $courrier->highlight()->serve();
+
+        // Get computed values with real data
+        $computedValues = $courrier->computed();
+
         // Get all variable groups from Config
         $variableGroups = Config::activeGroups();
 
@@ -214,10 +230,13 @@ class MailTemplateController extends Controller
 
             $tableData = [];
             foreach ($variables as $variable => $label) {
+                $wrappedVariable = '{'.$variable.'}';
+                $realValue = $computedValues[$wrappedVariable] ?? '<span style="color:red;">Non défini</span>';
+
                 $tableData[] = [
                     'label'       => $label,
                     'variable'    => $variable,
-                    'placeholder' => '{'.$variable.'}',
+                    'value'       => $realValue,
                 ];
             }
 
@@ -227,7 +246,11 @@ class MailTemplateController extends Controller
             ];
         }
 
-        return view('mailtemplates.variables', ['tables' => $tables]);
+        return view('mailtemplates.variables', [
+            'tables' => $tables,
+            'event' => $event,
+            'eventContact' => $eventContact
+        ]);
     }
 
     private function getRandomParsed(MailTemplate $mailtemplate): Template
