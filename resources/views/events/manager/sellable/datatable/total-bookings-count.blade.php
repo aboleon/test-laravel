@@ -1,0 +1,1 @@
+<a class="total-booking" href="{{route('panel.manager.event.sellable.edit', ['event'=> $data->event_id, 'sellable' => $data->id])}}?mfw_tab=inscriptions-tabpane-tab">{{$data->total_bookings_count}}</a>
