@@ -19,6 +19,9 @@ trait MailTemplate
 
     public ?array $variables_data = NULL;
 
+    // Flag to track if highlighting is enabled
+    private bool $highlightVariables = false;
+
 
 
     public function computed(): array
@@ -28,7 +31,27 @@ trait MailTemplate
         }
 
         foreach (array_keys($this->variables()) as $item) {
-            $this->variables_data['{' . $item . '}'] = method_exists($this, $item) ? $this->{$item}() : '<span style="color:red">'.$item.'</span>';
+            if (method_exists($this, $item)) {
+                $value = $this->{$item}();
+
+                // Only apply special styling if highlighting is enabled
+                if ($this->highlightVariables) {
+                    // Check if value is empty
+                    if (empty($value) && $value !== '0' && $value !== 0) {
+                        $value = '<span style="color:red;">vide</span>';
+                    } else {
+                        // Apply highlighting for non-empty values - blue
+                        $value = '<span style="color: blue;">' . $value . '</span>';
+                    }
+                }
+            } else {
+                // Method doesn't exist
+                $value = $this->highlightVariables
+                    ? '<span style="color:black; text-decoration: line-through;">Method missing</span>'
+                    : '<span style="color:red">'.$item.'</span>';
+            }
+
+            $this->variables_data['{' . $item . '}'] = $value;
         }
         return $this->variables_data;
     }
@@ -49,11 +72,37 @@ trait MailTemplate
         return $this;
     }
 
+    /**
+     * Enable highlighting of variable values in red
+     *
+     * @return static
+     */
+    public function highlight(): static
+    {
+        $this->highlightVariables = true;
+        // Reset computed data to force recomputation with highlighting
+        $this->variables_data = null;
+        return $this;
+    }
+
+    /**
+     * Disable highlighting of variable values (default behavior)
+     *
+     * @return static
+     */
+    public function unhighlight(): static
+    {
+        $this->highlightVariables = false;
+        // Reset computed data to force recomputation without highlighting
+        $this->variables_data = null;
+        return $this;
+    }
+
     public function content(): array
     {
         return [
-          'subject' => $this->subject,
-          'content' => $this->content
+            'subject' => $this->subject,
+            'content' => $this->content
         ];
     }
 }

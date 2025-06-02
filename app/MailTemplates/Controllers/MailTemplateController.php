@@ -122,9 +122,10 @@ class MailTemplateController extends Controller
         $parsed = (new Courrier($event, $mailtemplate, $event_contact))->serve();
         */
 
-        $parsed = (new Courrier(Event::inRandomOrder()->first(), $mailtemplate))->serve();
+        $event = Event::inRandomOrder()->first();
 
-        de($parsed);
+        $parsed = new Courrier($event, $mailtemplate, $event->contacts->random())->highlight()->serve();
+
 
         if ($as == 'pdf') {
             return (new PdfPrinter($parsed))->stream();

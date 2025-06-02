@@ -7,15 +7,17 @@ use App\MailTemplates\Contracts\GroupVariables;
 class Manager implements GroupVariables
 {
 
+    public static string $prefix = 'MANAGER_';
+
     public static function variables(): array
     {
         return [
-            'Email' => 'AdminEvent_Email',
-            'Fonction' => 'AdminEvent_Fonction',
-            'Ligne directe' => 'AdminEvent_LigneDirecte',
-            'Nom' => 'AdminEvent_Nom',
-            'Numéro de téléphone mobile' => 'AdminEvent_mobile',
-            'Prénom' => 'AdminEvent_Prenom',
+            'Email'                      => self::$prefix.'_Email',
+            'Fonction'                   => self::$prefix.'_Fonction',
+            'Ligne directe'              => self::$prefix.'_LigneDirecte',
+            'Nom'                        => self::$prefix.'_Nom',
+            'Numéro de téléphone mobile' => self::$prefix.'_mobile',
+            'Prénom'                     => self::$prefix.'_Prenom',
         ];
     }
 

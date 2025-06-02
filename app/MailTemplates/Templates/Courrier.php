@@ -9,6 +9,7 @@ use App\MailTemplates\Contracts\Template;
 use App\MailTemplates\Models\MailTemplate as Target;
 use App\MailTemplates\Traits\MailTemplate;
 use App\MailTemplates\Traits\Variables\AllVariables;
+use App\Models\AccountAddress;
 use App\Models\Event;
 use App\Models\EventContact;
 use App\Traits\EventCommons;
@@ -44,7 +45,7 @@ class Courrier implements Template
     ];
 
     public readonly ?string $banner;
-    public readonly ?string $eventContactAddress;
+    public readonly ?AccountAddress $eventContactAddress;
     public readonly ?Accounts $accountAccessor;
 
     private array $attachmentConfig = [
@@ -133,7 +134,9 @@ class Courrier implements Template
             return;
         }
 
-        $this->accountAccessor = new Accounts($this->eventContact->account);
-        $this->eventContactAddress = $this->accountAccessor->billingAddress();
+        if ($this->eventContact->account) {
+            $this->accountAccessor     = new Accounts($this->eventContact->account);
+            $this->eventContactAddress = $this->accountAccessor->billingAddress();
+        }
     }
 }
