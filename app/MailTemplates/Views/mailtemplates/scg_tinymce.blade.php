@@ -36,10 +36,10 @@
                                 onAction: function() {},
                                 enabled: false
                             },
-                            @foreach ($item::variables() as $key => $variable)
+                            @foreach ($item::variables() as $variable => $label)
                                 {!! '{
                                           type: \'choiceitem\',
-                                          text: \'' . addSlashes($key) . '\',
+                                          text: \'' . addSlashes($label) . '\',
                                           value: \'{' . $variable . '}\'
                                         },'  !!}
                                 @endforeach

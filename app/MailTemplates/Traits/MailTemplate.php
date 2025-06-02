@@ -30,6 +30,9 @@ trait MailTemplate
             return $this->variables_data;
         }
 
+        // Debug: Let's see what variables we're getting
+        // error_log('Variables: ' . print_r($this->variables(), true));
+
         foreach (array_keys($this->variables()) as $item) {
             if (method_exists($this, $item)) {
                 $value = $this->{$item}();

@@ -6,6 +6,8 @@ use App\MailTemplates\Contracts\GroupVariables;
 
 class Event implements GroupVariables
 {
+    public static string $prefix = 'EVENT_';
+
     public static function signature(): string
     {
         return 'wg_event';
@@ -14,24 +16,24 @@ class Event implements GroupVariables
     public static function variables(): array
     {
         return [
-            'Acronyme' => 'EVENT_Acronyme',
-            'Adresse' => 'EVENT_Adresse',
-            'Admin grant mobile' => 'EVENT_MobileGrant',
-            'Admin grant nom' => 'EVENT_NomGrant',
-            'Admin grant prénom' => 'EVENT_PrenomGrant',
-            'Admin inscription Email' => 'EVENT_EmailRespInscription',
-            'Admin inscription mobile' => 'EVENT_TelRespInscription',
-            'Admin inscription Nom' => 'EVENT_NomRespInscription',
-            'Admin inscription Prénom' => 'EVENT_PrenomRespInscription',
-            'Date début' => 'EVENT_Date_Debut',
-            'Date fin' => 'EVENT_Date_Fin',
-            'Lieu' => 'EVENT_Lieu',
-            'Nom de l\'évent' => 'EVENT_Nom',
-            'Pays' => 'EVENT_Pays',
-            'Photo de l\'évenement' => 'EVENT_Photo',
-            'Type d\'évènement' => 'EVENT_Type',
-            'Url de connexion front' => 'EVENT_Url',
-            'Ville' => 'EVENT_Ville',
+            self::$prefix.'Acronyme' => 'Acronyme',
+            self::$prefix.'Adresse' => 'Adresse',
+            self::$prefix.'MobileGrant' => 'Admin grant mobile',
+            self::$prefix.'NomGrant' => 'Admin grant nom',
+            self::$prefix.'PrenomGrant' => 'Admin grant prénom',
+            self::$prefix.'EmailRespInscription' => 'Admin inscription Email',
+            self::$prefix.'TelRespInscription' => 'Admin inscription mobile',
+            self::$prefix.'NomRespInscription' => 'Admin inscription Nom',
+            self::$prefix.'PrenomRespInscription' => 'Admin inscription Prénom',
+            self::$prefix.'Date_Debut' => 'Date début',
+            self::$prefix.'Date_Fin' => 'Date fin',
+            self::$prefix.'Lieu' => 'Lieu',
+            self::$prefix.'Nom' => 'Nom de l\'évent',
+            self::$prefix.'Pays' => 'Pays',
+            self::$prefix.'Photo' => 'Photo de l\'évenement',
+            self::$prefix.'Type' => 'Type d\'évènement',
+            self::$prefix.'Url' => 'Url de connexion front',
+            self::$prefix.'Ville' => 'Ville',
         ];
     }
 
@@ -44,5 +46,4 @@ class Event implements GroupVariables
     {
         return 'bookmark';
     }
-
 }

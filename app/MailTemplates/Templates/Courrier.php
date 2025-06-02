@@ -72,7 +72,6 @@ class Courrier implements Template
     {
         return collect(self::VARIABLE_GROUPS)
             ->flatMap(fn(string $group) => $group::variables())
-            ->flip()
             ->toArray();
     }
 

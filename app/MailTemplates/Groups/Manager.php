@@ -12,12 +12,12 @@ class Manager implements GroupVariables
     public static function variables(): array
     {
         return [
-            'Email'                      => self::$prefix.'_Email',
-            'Fonction'                   => self::$prefix.'_Fonction',
-            'Ligne directe'              => self::$prefix.'_LigneDirecte',
-            'Nom'                        => self::$prefix.'_Nom',
-            'Numéro de téléphone mobile' => self::$prefix.'_mobile',
-            'Prénom'                     => self::$prefix.'_Prenom',
+            self::$prefix.'Email' => 'Email',
+            self::$prefix.'Fonction' => 'Fonction',
+            self::$prefix.'LigneDirecte' => 'Ligne directe',
+            self::$prefix.'Nom' => 'Nom',
+            self::$prefix.'mobile' => 'Numéro de téléphone mobile',
+            self::$prefix.'Prenom' => 'Prénom',
         ];
     }
 

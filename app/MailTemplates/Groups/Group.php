@@ -6,13 +6,14 @@ use App\MailTemplates\Contracts\GroupVariables;
 
 class Group implements GroupVariables
 {
+    public static string $prefix = 'GROUPES_';
 
     public static function variables(): array
     {
         return [
-            'Intitulé groupe' => 'GROUPES_Nom_Groupe',
-            'Nom contact admin groupe' => 'GROUPES_Nom_Responsable',
-            'Prénom contact admin groupe' => 'GROUPES_Prenom_Responsable',
+            self::$prefix.'Nom_Groupe' => 'Intitulé groupe',
+            self::$prefix.'Nom_Responsable' => 'Nom contact admin groupe',
+            self::$prefix.'Prenom_Responsable' => 'Prénom contact admin groupe',
         ];
     }
 
@@ -25,5 +26,4 @@ class Group implements GroupVariables
     {
         return 'table-cell-properties';
     }
-
 }
