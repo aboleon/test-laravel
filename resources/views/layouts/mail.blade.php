@@ -37,6 +37,7 @@
     }
 
 </style>
+@stack('css')
 <body style="margin: auto; max-width: 700px; padding: 0; background: #f5f3ee;">
 
 <div style="text-align: center">

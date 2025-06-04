@@ -100,6 +100,11 @@ class EventContact extends Model
         return $this->belongsTo(AccountProfile::class, 'user_id', 'user_id');
     }
 
+    public function passports(): HasMany
+    {
+        return $this->hasMany(AccountDocument::class, 'user_id', 'user_id');
+    }
+
     public function address(): HasMany
     {
         return $this->hasMany(AccountAddress::class, 'user_id', 'user_id');

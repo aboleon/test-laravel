@@ -3,6 +3,7 @@ namespace App\MailTemplates\Traits\Variables;
 use App\Actions\Front\AutoConnectHelper;
 use App\Enum\OrderClientType;
 use App\Enum\OrderType;
+use App\Models\EventClient;
 use App\Models\Order;
 use Illuminate\Support\Carbon;
 use MetaFramework\Accessors\Countries;
@@ -91,37 +92,72 @@ Trait EventVariables {
 
     public function EVENT_Clients(): string
     {
-        // Get all orders for this event of type "order"
-        $clientNames = Order::where('event_id', $this->event->id)
-            ->where('type', OrderType::ORDER->value)
-            ->whereNotNull('client_id')
-            ->with(['account', 'group'])
+        // Get all accounts from EventClient for this event
+        $clientNames = EventClient::where('event_id', $this->event->id)
+            ->with('account')
             ->get()
-            ->map(function ($order) {
-                // Get client name based on client_type
-                if ($order->client_type === OrderClientType::GROUP->value && $order->group) {
-                    return $order->group->name;
-                } elseif ($order->account) {
-                    return trim($order->account->first_name . ' ' . $order->account->last_name);
+            ->map(function ($eventClient) {
+                // Get account name
+                if ($eventClient->account) {
+                    return trim($eventClient->account->first_name . ' ' . $eventClient->account->last_name);
                 }
                 return null;
             })
-            ->filter() // Remove null values
-            ->unique() // Remove duplicates
-            ->sort() // Sort alphabetically
+            ->filter()
+            ->unique()
+            ->sort()
             ->values();
 
         return $clientNames->implode(', ');
     }
-
-    public function EVENT_Photo():string
+    public function EVENT_BannerLarge(): string
     {
-        return '!! A DEFINIR !!!';
+        if (!$this->event) {
+            return '';
+        }
+
+        $banner = $this->getBanner($this->event, 'banner_large');
+
+        if ($banner) {
+            return '<img src="' . $banner . '" alt="'.$this->event->texts->name.'" style="max-width: 100%;" />';
+        }
+
+        return '';
+    }
+
+    public function EVENT_BannerMedium(): string
+    {
+        if (!$this->event) {
+            return '';
+        }
+
+        $banner = $this->getBanner($this->event, 'banner_medium');
+
+        if ($banner) {
+            return '<img src="' . $banner . '" alt="'.$this->event->texts->name.'" style="max-width: 100%;" />';
+        }
+
+        return '';
+    }
+
+    public function EVENT_Thumbnail(): string
+    {
+        if (!$this->event) {
+            return '';
+        }
+
+        $banner = $this->getBanner($this->event, 'thumbnail');
+
+        if ($banner) {
+            return '<img src="' . $banner . '" alt="'.$this->event->texts->name.'" style="max-width: 100%;" />';
+        }
+
+        return '';
     }
 
     public function EVENT_Url(): string
     {
-        if(!$this->eventContact || !str_contains($this->template->content, '{EVENT_Url}')) {
+        if(!$this->eventContact) {
             return '';
         }
 

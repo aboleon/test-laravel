@@ -1,4 +1,4 @@
-@php use App\Accessors\EventAccessor; @endphp
+@php use App\Accessors\EventAccessor;use App\Models\GenericMedia; @endphp
 @props([
     'event',
     'group' => 'banner_large',
@@ -6,6 +6,7 @@
 ])
 @php
     $url = EventAccessor::getEventFrontUrl($event);
+    $default = Mediaclass::ghostUrl(GenericMedia::class, $group);
 @endphp
 
 <a class="d-block event-banner" href="{{$url}}">

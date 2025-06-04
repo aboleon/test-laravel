@@ -31,7 +31,7 @@
                     <tbody>
                     @if($event)
                         <tr>
-                            <th width="120"><strong>Événement</strong></th>
+                            <th width="120">Événement</th>
                             <td>
                                 #{{ $event->id }} -
                                 <a href="{{ route('panel.events.edit', $event->id) }}" target="_blank">
@@ -41,7 +41,7 @@
                         </tr>
                     @endif
                     <tr>
-                        <th width="120"><strong>Contact</strong></th>
+                        <th width="120">Contact</th>
                         <td>
                             @if($eventContact)
                                 #{{ $eventContact->id }} -

@@ -205,9 +205,11 @@ class MailTemplateController extends Controller
     public function showVariables(): Renderable
     {
         // Get a random event and event contact for testing
-        $event = Event::inRandomOrder()->first();
-        $eventContact = $event && $event->contacts->isNotEmpty() ? $event->contacts->random() : null;
+        //$event = Event::inRandomOrder()->first();
+        //$eventContact = $event && $event->contacts->isNotEmpty() ? $event->contacts->random() : null;
 
+        $event = Event::find(46);
+        $eventContact = EventContact::find(413);
         // Create a dummy MailTemplate for the Courrier class
         $dummyTemplate = new MailTemplate();
         $dummyTemplate->subject = 'Test Subject';

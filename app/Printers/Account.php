@@ -18,7 +18,7 @@ class Account
         $close_tag = '</address>';
 
         $output = $open_tag .
-            '<h5 class="card-title text-dark">' . ($data->name ?: 'Sans titre') . '</h5>' .
+            (!empty($data->name) ? '<h5 class="card-title text-dark">' . ($data->name) . '</h5>' : '').
             trim($data->street_number . ' ' . $data->route) . '<br>' .
             trim($data->postal_code . ' ' . $data->locality) . '<br>' .
             Countries::getCountryNameByCode($data->country_code) . '<br>';

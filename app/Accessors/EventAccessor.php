@@ -170,7 +170,7 @@ class EventAccessor
 
     public static function getBannerUrlByEvent(Event $event, string $group = 'banner_large'): string|null
     {
-       $banner = (new self($event))->getBanner($event, $group);
+       $banner = new self($event)->getBanner($event, $group);
        if ($banner) {
            return asset($banner);
        }
@@ -185,6 +185,17 @@ class EventAccessor
             'locale' => $locale,
             'event'  => $event->id,
             'slug'   => Str::slug($event->texts?->name) ?: 'undefined',
+        ]);
+    }
+    // TODO: get rid of static method
+    public function getFrontUrl(?string $locale = null): string
+    {
+        $locale = $locale ?: app()->getLocale();
+
+        return route('front.event.show', [
+            'locale' => $locale,
+            'event'  => $this->event->id,
+            'slug'   => Str::slug($this->event->texts?->name) ?: 'undefined',
         ]);
     }
 

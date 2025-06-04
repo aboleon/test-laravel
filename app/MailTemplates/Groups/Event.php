@@ -31,10 +31,12 @@ class Event implements GroupVariables
             self::$prefix.'Lieu' => 'Lieu',
             self::$prefix.'Nom' => 'Nom de l\'évent',
             self::$prefix.'Pays' => 'Pays',
-            self::$prefix.'Photo' => 'Photo de l\'évenement',
             self::$prefix.'Type' => 'Type d\'évènement',
             self::$prefix.'Url' => 'Url de connexion front',
             self::$prefix.'Ville' => 'Ville',
+            self::$prefix.'BannerLarge' => 'Bannière Large',
+            self::$prefix.'BannerMedium' => 'Bannière Medium',
+            self::$prefix.'Thumbnail' => 'Vignette',
         ];
     }
 

@@ -56,7 +56,7 @@ class EventContactController extends Controller
 
         # Les Accès rapides
         if ($secondaryFilter) {
-            $filteredIds = (new EventContactsSecondaryDashboardFilter($secondaryFilter))->setEvent($event)->run()->getIds();
+            $filteredIds = new EventContactsSecondaryDashboardFilter($secondaryFilter)->setEvent($event)->run()->getIds();
         }
 
 
@@ -133,7 +133,7 @@ class EventContactController extends Controller
             ]);
         }
 
-        $eventContactAccessor = (new EventContactAccessor())
+        $eventContactAccessor = new EventContactAccessor()
             ->setEventContact($eventContact)
             ->setEvent($event);
 
@@ -149,7 +149,7 @@ class EventContactController extends Controller
 
         return view('events.manager.event_contact.edit', [
             'eventContactAccessor'  => $eventContactAccessor,
-            'accountAccessor'       => (new Accounts($eventContact->account)),
+            'accountAccessor'       => new Accounts($eventContact->account),
             'redirect_to'           => route('panel.manager.event.event_contact.index', [
                 'event' => $event,
                 'group' => $eventContact->participationType?->group ?? 'all',
@@ -168,7 +168,7 @@ class EventContactController extends Controller
             'deposits'              => EventDepositView::where('event_id', $event->id)
                 ->where('event_contact_id', $eventContact->id)
                 ->orderBy('id', 'desc')->get(),
-        ])->with((new AccountController())->getAccountEditViewData($eventContact->user->account));
+        ])->with(new AccountController()->getAccountEditViewData($eventContact->user->account));
     }
 
     public function update(EventContactRequest $request, Event $event, EventContact $eventContact): RedirectResponse
@@ -237,7 +237,7 @@ class EventContactController extends Controller
     public function destroy(Event $event, EventContact $eventContact): RedirectResponse
     {
         if (
-            ! (new EventContactAccessor())
+            ! new EventContactAccessor()
                 ->setEventContact($eventContact)
                 ->setEvent($event)
                 ->isDeletable()
@@ -254,7 +254,7 @@ class EventContactController extends Controller
             default => 'all',
         };
 
-        return (new Suppressor($eventContact))
+        return new Suppressor($eventContact)
             ->remove()
             ->whitout('object')
             ->responseSuccess(__('Le contact est bien dissocié de l\'événément.'))
@@ -281,7 +281,7 @@ class EventContactController extends Controller
         }
 
         try {
-            $model = (new ReflectionClass('\App\Models\\'.$modelPath))->newInstance();
+            $model = new ReflectionClass('\App\Models\\'.$modelPath)->newInstance();
         } catch (Throwable $e) {
             $this->responseException($e, $request->get('model')." n'est pas une class valide.");
 

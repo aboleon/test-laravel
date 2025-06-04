@@ -2,6 +2,7 @@
 
 namespace App\MailTemplates\Traits\Variables;
 
+use App\Accessors\Accounts;
 use App\Actions\Front\AutoConnectHelper;
 use App\Printers\Account;
 use MetaFramework\Accessors\Countries;
@@ -19,14 +20,14 @@ trait ParticipantVariables
         return '';
     }
 
-    public function PARTICIPANT_DateExpiration(): string
+    public function PARTICIPANT_PassportExpiration(): string
     {
-        return '';
+        return $this->eventContact?->passports?->first()?->expires_at?->format('d/m/Y');
     }
 
     public function PARTICIPANT_NumDocument(): string
     {
-        return '';
+        return $this->eventContact?->passports?->first()?->serial;
     }
 
     public function PARTICIPANT_AdresseFacturation(): string
@@ -51,11 +52,6 @@ trait ParticipantVariables
     public function PARTICIPANT_Email(): string
     {
         return $this->eventContact?->account?->email ?? '';
-    }
-
-    public function PARTICIPANT_Fax(): string
-    {
-        return '';
     }
 
     public function PARTICIPANT_Fonction(): string
@@ -106,7 +102,7 @@ trait ParticipantVariables
         return '';
     }
 
-    public function PARTICIPANT_Commandes(): string
+    public function PARTICIPANT_Orders(): string
     {
         return '';
     }
