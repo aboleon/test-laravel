@@ -22,36 +22,40 @@ class Courrier implements Template
 
     private const string SIGNATURE = 'courrier';
 
-    private const array VARIABLE_GROUPS = [
-        \App\MailTemplates\Groups\Event::class,
-        \App\MailTemplates\Groups\Group::class,
-        \App\MailTemplates\Groups\Manager::class,
-        \App\MailTemplates\Groups\Participant::class,
-    ];
+    private const array VARIABLE_GROUPS
+        = [
+            \App\MailTemplates\Groups\Event::class,
+            \App\MailTemplates\Groups\Group::class,
+            \App\MailTemplates\Groups\Manager::class,
+            \App\MailTemplates\Groups\Participant::class,
+        ];
 
-    private const array EVENT_RELATIONS = [
-        'texts',
-        'type',
-        'admin.profile',
-        'place.address',
-        'adminSubs.profile',
-        'pec.grantAdmin.profile'
-    ];
+    private const array EVENT_RELATIONS
+        = [
+            'texts',
+            'type',
+            'admin.profile',
+            'place.address',
+            'adminSubs.profile',
+            'pec.grantAdmin.profile',
+        ];
 
-    private const array EVENT_CONTACT_RELATIONS = [
-        'profile',
-        'account.address',
-        'account.phones'
-    ];
+    private const array EVENT_CONTACT_RELATIONS
+        = [
+            'profile',
+            'account.address',
+            'account.phones',
+        ];
 
     public readonly ?string $banner;
     public ?AccountAddress $eventContactAddress = null;  // Changed: removed readonly, added default null
     public ?Accounts $accountAccessor = null;  // Changed: removed readonly, added default null
 
-    private array $attachmentConfig = [
-        'file' => null,
-        'options' => []
-    ];
+    private array $attachmentConfig
+        = [
+            'file'    => null,
+            'options' => [],
+        ];
 
     public function __construct(
         public readonly Event $event,
@@ -85,12 +89,14 @@ class Courrier implements Template
     public function setFilePath(string $file): self
     {
         $this->attachmentConfig['file'] = $file;
+
         return $this;
     }
 
     public function setFileOptions(array $options): self
     {
         $this->attachmentConfig['options'] = $options;
+
         return $this;
     }
 
@@ -128,8 +134,9 @@ class Courrier implements Template
     private function initializeEventContact(): void
     {
         if ($this->eventContact === null) {
-            $this->accountAccessor = null;
+            $this->accountAccessor     = null;
             $this->eventContactAddress = null;
+
             return;
         }
 
@@ -137,7 +144,7 @@ class Courrier implements Template
             $this->accountAccessor     = new Accounts($this->eventContact->account);
             $this->eventContactAddress = $this->accountAccessor->billingAddress();
         } else {
-            $this->accountAccessor = null;
+            $this->accountAccessor     = null;
             $this->eventContactAddress = null;
         }
     }

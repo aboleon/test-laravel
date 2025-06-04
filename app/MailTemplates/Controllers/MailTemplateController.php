@@ -204,54 +204,90 @@ class MailTemplateController extends Controller
 
     public function showVariables(): Renderable
     {
-        // Get a random event and event contact for testing
-        //$event = Event::inRandomOrder()->first();
-        //$eventContact = $event && $event->contacts->isNotEmpty() ? $event->contacts->random() : null;
+        // Get all events for the dropdown
+        $events = Event::with('texts')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        $event = Event::find(46);
-        $eventContact = EventContact::find(413);
-        // Create a dummy MailTemplate for the Courrier class
-        $dummyTemplate = new MailTemplate();
-        $dummyTemplate->subject = 'Test Subject';
-        $dummyTemplate->content = 'Test Content';
+        // Initialize variables
+        $event = null;
+        $eventContact = null;
+        $eventContacts = collect();
 
-        // Create a Courrier instance with real data
-        $courrier = new Courrier($event, $dummyTemplate, $eventContact);
-        $courrier->highlight()->serve();
+        // Check if specific event/contact requested
+        if (request('event_id')) {
+            $event = Event::find(request('event_id'));
 
-        // Get computed values with real data
-        $computedValues = $courrier->computed();
+            if ($event) {
+                // Load event with necessary relations
+                $event->load('texts', 'contacts.account');
+                $eventContacts = $event->contacts;
 
-        // Get all variable groups from Config
-        $variableGroups = Config::activeGroups();
+                // Get specific contact if requested, otherwise get first
+                if (request('event_contact_id')) {
+                    $eventContact = $event->contacts->where('id', request('event_contact_id'))->first();
+                } else {
+                    $eventContact = $event->contacts->first();
+                }
+            }
+        } else {
+            // On first load, get a random event with contacts
+            $event = Event::has('contacts')->with('texts', 'contacts.account')->inRandomOrder()->first();
 
+            if ($event) {
+                $eventContacts = $event->contacts;
+                $eventContact = $eventContacts->isNotEmpty() ? $eventContacts->random() : null;
+            }
+        }
+
+        // Initialize variables
         $tables = [];
 
-        foreach ($variableGroups as $groupClass) {
-            $variables = $groupClass::variables();
+        if ($event) {
+            // Create a dummy MailTemplate for the Courrier class
+            $dummyTemplate = new MailTemplate();
+            $dummyTemplate->subject = 'Test Subject';
+            $dummyTemplate->content = 'Test Content';
 
-            $tableData = [];
-            foreach ($variables as $variable => $label) {
-                $wrappedVariable = '{'.$variable.'}';
-                $realValue = $computedValues[$wrappedVariable] ?? '<span style="color:red;">Non défini</span>';
+            // Create a Courrier instance with real data
+            $courrier = new Courrier($event, $dummyTemplate, $eventContact);
+            $courrier->highlight()->serve();
 
-                $tableData[] = [
-                    'label'       => $label,
-                    'variable'    => $variable,
-                    'value'       => $realValue,
+            // Get computed values with real data
+            $computedValues = $courrier->computed();
+
+            // Get all variable groups from Config
+            $variableGroups = Config::activeGroups();
+
+            foreach ($variableGroups as $groupClass) {
+                $variables = $groupClass::variables();
+
+                $tableData = [];
+                foreach ($variables as $variable => $label) {
+                    $wrappedVariable = '{'.$variable.'}';
+                    $realValue = $computedValues[$wrappedVariable] ?? '<span style="color:red;">Non défini</span>';
+
+                    $tableData[] = [
+                        'label'       => $label,
+                        'variable'    => $variable,
+                        'value'       => $realValue,
+                    ];
+                }
+
+                $tables[] = [
+                    'title' => $groupClass::title(),
+                    'data'  => $tableData,
                 ];
             }
-
-            $tables[] = [
-                'title' => $groupClass::title(),
-                'data'  => $tableData,
-            ];
         }
+
 
         return view('mailtemplates.variables', [
             'tables' => $tables,
             'event' => $event,
-            'eventContact' => $eventContact
+            'eventContact' => $eventContact,
+            'eventContacts' => $eventContacts,
+            'events' => $events
         ]);
     }
 

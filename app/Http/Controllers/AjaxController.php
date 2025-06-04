@@ -49,7 +49,7 @@ use App\Actions\Front\Paybox\PayboxActions;
 use App\Actions\Groups\Search\Select2Groups;
 use App\Http\Controllers\Dev\ArtisanController;
 use App\MailTemplates\Models\MailTemplate;
-use App\Models\{AdvancedSearchFilter, CustomPaymentCall, Establishment, Order\Accompanying, Order\RoomNote, Setting};
+use App\Models\{AdvancedSearchFilter, CustomPaymentCall, Establishment, EventContact, Order\Accompanying, Order\RoomNote, Setting};
 use App\Models\EventManager\Grant\GrantDepositLocation;
 use App\Models\EventManager\Grant\GrantLocation;
 use Exception;
@@ -1147,5 +1147,29 @@ class AjaxController extends Controller
             ->enableAjaxMode()
             ->generate()
             ->fetchResponse();
+    }
+
+    public function getEventContactsForSelectedEvent(): array
+    {
+        if (!request()->has('event_id')) {
+            return [];
+        }
+
+        // Get event contacts with their account information
+        $eventContacts = EventContact::with('account')
+            ->where('event_id', (int)request('event_id'))
+            ->get();
+
+        // Build array with contact ID as key and formatted name as value
+        $contacts = [];
+
+        foreach ($eventContacts as $contact) {
+
+            $contacts[$contact->id] = '#' . $contact->id . ' - ' . $contact->account?->names() ?: '';
+        }
+
+        $this->responseElement('contacts', $contacts);
+
+        return $this->fetchResponse();
     }
 }
