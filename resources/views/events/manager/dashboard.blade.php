@@ -11,11 +11,12 @@
     <div class="row mx-1 gy-4">
         <div class="col-md-6">
             @include('events.manager.dashboard.hotels')
-            @include('events.manager.dashboard.services')
+            @include('events.manager.dashboard.deposits-grant')
+            @include('events.manager.dashboard.unpaid-deposits-grant')
         </div>
         <div class="col-md-6">
+            @include('events.manager.dashboard.services')
             @include('events.manager.dashboard.participants')
-            @include('events.manager.dashboard.deposits-grant')
             @include('events.manager.dashboard.deposits-sellable')
         </div>
         {{--@include('events.manager.dashboard.deposits')--}}

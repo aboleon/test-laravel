@@ -7,6 +7,7 @@ use App\Dashboards\Queries\DashboardOratorsQuery;
 use App\Dashboards\Queries\DashboardOrdersPecOnlyByGroupQuery;
 use App\Dashboards\Queries\DashboardOrdersWithoutPecByGroupQuery;
 use App\Dashboards\Queries\DashboardPecOrdersQuery;
+use App\Dashboards\Traits\DashboardTrait;
 use App\Enum\ParticipantType;
 use App\Models\Event;
 use Illuminate\Contracts\Support\Renderable;
@@ -16,6 +17,7 @@ use stdClass;
 
 class OrdersDashboard
 {
+    use DashboardTrait;
 
     public readonly Event $event;
 
@@ -29,21 +31,14 @@ class OrdersDashboard
         return Prices::readableFormat($value / 100);
     }
 
-    public static function filterByGroup(array $data, string $group): bool|stdClass
-    {
-        $filtered = array_filter($data, fn($item) => $item->participation_group == $group);
-
-        return ! empty($filtered) ? reset($filtered) : false;
-    }
-
     public function dashboard(Event $event): Renderable
     {
         $this->event = $event;
-        $group_types = ParticipantType::values();
+        $group_types = $this->getGroups();
         array_unshift($group_types, 'all');
 
         return view('orders.dashboard')->with([
-            'instance'         => new self,
+            'instance'         =>$this,
             'event'            => $this->event,
             'groups'           => $group_types,
             'global'           => $this->getGlobal(),
