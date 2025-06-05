@@ -137,37 +137,54 @@
                 <th colspan="4" class="bg-dark text-white">Tout sauf PEC</th>
             </tr>
             @php
+                $all_groups = ['congress', 'industry', 'orator', 'all'];
                 $subdata = [];
-            @endphp
-            @foreach($groups as $group)
-                @php
-                    $dataset =  \App\Dashboards\OrdersDashboard::filterByGroup($non_pec_by_group, $group);
-                    if (!$dataset) {
-                        continue;
-                    }
-                $subdata['services'][$group] = [
-                    'label' => 'Prestations ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
-                    'net' => $dataset->services_total_net,
-                    'vat' => $dataset->services_total_vat,
-                    'total' => $dataset->services_total,
-                ];
-                $subdata['accommodation'][$group] = [
-                    'label' => 'Hébergement ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
-                    'net' => $dataset->accommodations_total_net,
-                    'vat' => $dataset->accommodations_total_vat,
-                    'total' => $dataset->accommodations_total,
-                ];
-                @endphp
-            @endforeach
 
-            @foreach($subdata as $group)
-                @foreach($group as $key => $entry)
-                    <tr{!! $key == 'all' ? ' class="fw-bold"' : '' !!}>
-                        <td>{{ $entry['label'] }}</td>
-                        <td>{{ $entry['net'] }}</td>
-                        <td>{{ $entry['vat'] }}</td>
-                        <td>{{ $entry['total'] }}</td>
-                    </tr>
+                // Initialize all groups with zero values
+                foreach($all_groups as $group) {
+                    $subdata['services'][$group] = [
+                        'label' => 'Prestations ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
+                        'net' => '0.00',
+                        'vat' => '0.00',
+                        'total' => '0.00',
+                    ];
+                    $subdata['accommodation'][$group] = [
+                        'label' => 'Hébergement ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
+                        'net' => '0.00',
+                        'vat' => '0.00',
+                        'total' => '0.00',
+                    ];
+                }
+
+                // Update with actual data where it exists
+                foreach($non_pec_by_group as $dataset) {
+                    $group = $dataset->participation_group;
+
+                    $subdata['services'][$group] = [
+                        'label' => 'Prestations ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
+                        'net' => $dataset->services_total_net,
+                        'vat' => $dataset->services_total_vat,
+                        'total' => $dataset->services_total,
+                    ];
+                    $subdata['accommodation'][$group] = [
+                        'label' => 'Hébergement ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
+                        'net' => $dataset->accommodations_total_net,
+                        'vat' => $dataset->accommodations_total_vat,
+                        'total' => $dataset->accommodations_total,
+                    ];
+                }
+            @endphp
+
+            @foreach($subdata as $category)
+                @foreach(['congress', 'industry', 'orator', 'all'] as $group)
+                    @if(isset($category[$group]))
+                        <tr{!! $group == 'all' ? ' class="fw-bold"' : '' !!}>
+                            <td>{{ $category[$group]['label'] }}</td>
+                            <td>{{ $category[$group]['net'] }}</td>
+                            <td>{{ $category[$group]['vat'] }}</td>
+                            <td>{{ $category[$group]['total'] }}</td>
+                        </tr>
+                    @endif
                 @endforeach
             @endforeach
 
@@ -176,36 +193,52 @@
             </tr>
             @php
                 $subdata = [];
-            @endphp
-            @foreach($groups as $group)
-                @php
-                    $dataset =  \App\Dashboards\OrdersDashboard::filterByGroup($pec_by_group, $group);
-                    if (!$dataset) {
-                        continue;
-                    }
-                $subdata['services'][$group] = [
-                    'label' => 'Prestations ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
-                    'net' => $dataset->services_total_net,
-                    'vat' => $dataset->services_total_vat,
-                    'total' => $dataset->services_total,
-                ];
-                $subdata['accommodation'][$group] = [
-                    'label' => 'Hébergement ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
-                    'net' => $dataset->accommodations_total_net,
-                    'vat' => $dataset->accommodations_total_vat,
-                    'total' => $dataset->accommodations_total,
-                ];
-                @endphp
-            @endforeach
 
-            @foreach($subdata as $group)
-                @foreach($group as $key => $entry)
-                    <tr{!! $key == 'all' ? ' class="fw-bold"' : '' !!}>
-                        <td>{{ $entry['label'] }}</td>
-                        <td>{{ $entry['net'] }}</td>
-                        <td>{{ $entry['vat'] }}</td>
-                        <td>{{ $entry['total'] }}</td>
-                    </tr>
+                // Initialize all groups with zero values
+                foreach($all_groups as $group) {
+                    $subdata['services'][$group] = [
+                        'label' => 'Prestations ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
+                        'net' => '0.00',
+                        'vat' => '0.00',
+                        'total' => '0.00',
+                    ];
+                    $subdata['accommodation'][$group] = [
+                        'label' => 'Hébergement ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
+                        'net' => '0.00',
+                        'vat' => '0.00',
+                        'total' => '0.00',
+                    ];
+                }
+
+                // Update with actual data where it exists
+                foreach($pec_by_group as $dataset) {
+                    $group = $dataset->participation_group;
+
+                    $subdata['services'][$group] = [
+                        'label' => 'Prestations ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
+                        'net' => $dataset->services_total_net,
+                        'vat' => $dataset->services_total_vat,
+                        'total' => $dataset->services_total,
+                    ];
+                    $subdata['accommodation'][$group] = [
+                        'label' => 'Hébergement ' . ($group == 'all' ? 'total' : \App\Enum\ParticipantType::translated($group)),
+                        'net' => $dataset->accommodations_total_net,
+                        'vat' => $dataset->accommodations_total_vat,
+                        'total' => $dataset->accommodations_total,
+                    ];
+                }
+            @endphp
+
+            @foreach($subdata as $category)
+                @foreach(['congress', 'industry', 'orator', 'all'] as $group)
+                    @if(isset($category[$group]))
+                        <tr{!! $group == 'all' ? ' class="fw-bold"' : '' !!}>
+                            <td>{{ $category[$group]['label'] }}</td>
+                            <td>{{ $category[$group]['net'] }}</td>
+                            <td>{{ $category[$group]['vat'] }}</td>
+                            <td>{{ $category[$group]['total'] }}</td>
+                        </tr>
+                    @endif
                 @endforeach
             @endforeach
 

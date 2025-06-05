@@ -7,7 +7,6 @@ use App\Dashboards\Queries\DashboardOratorsQuery;
 use App\Dashboards\Queries\DashboardOrdersPecOnlyByGroupQuery;
 use App\Dashboards\Queries\DashboardOrdersWithoutPecByGroupQuery;
 use App\Dashboards\Queries\DashboardPecOrdersQuery;
-use App\Enum\OrderClientType;
 use App\Enum\ParticipantType;
 use App\Models\Event;
 use Illuminate\Contracts\Support\Renderable;
