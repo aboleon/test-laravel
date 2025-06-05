@@ -175,12 +175,6 @@ class SharedAccountFilters implements FilterProviderInterface
                 'operators' => 'string_operators',
             ],
             [
-                'id'        => 'account_profile.function',
-                'label'     => 'Fonction',
-                'type'      => 'string',
-                'operators' => 'string_operators',
-            ],
-            [
                 'id'        => 'account_profile.passport_first_name',
                 'label'     => 'Prénom passeport',
                 'type'      => 'string',

@@ -25,7 +25,6 @@ use App\Models\AdvancedSearchFilter;
 use App\Models\Event;
 use App\Models\EventContact;
 use App\Models\Group;
-use App\View\Components\EventContactsSecondaryFilter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

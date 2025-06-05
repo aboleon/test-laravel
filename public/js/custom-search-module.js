@@ -185,33 +185,33 @@ $(document).ready(function () {
          */
         createRuleElement: function (ruleId) {
             const ruleHtml = `
-                <div class="search-rule row align-items-end mb-2" id="${ruleId}" data-rule-id="${ruleId}">
-                    <div class="col-md-4">
-                        <label class="form-label">Champ</label>
-                        <select class="form-select field-selector" name="${ruleId}-field">
-                            <option value="">--- Sélectionner ---</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 operator-container">
-                        <label class="form-label">Opérateur</label>
-                        <select class="form-select operator-selector" name="${ruleId}-operator" disabled>
-                            <option value="">--- Sélectionner ---</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 value-container">
-                        <label class="form-label">Valeur</label>
-                        <div class="value-input-container">
-                            <!-- Value input will be inserted here -->
-                            <input type="text" class="form-control" name="${ruleId}-value" disabled>
-                        </div>
-                    </div>
-                    <div class="col-md-1">
-                        <button type="button" class="btn btn-danger delete-rule">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
+        <div class="search-rule row align-items-end mb-2" id="${ruleId}" data-rule-id="${ruleId}">
+            <div class="col-md-3">
+                <label class="form-label">Champ</label>
+                <select class="form-select field-selector" name="${ruleId}-field">
+                    <option value="">--- Sélectionner ---</option>
+                </select>
+            </div>
+            <div class="col-md-3 operator-container">
+                <label class="form-label">Opérateur</label>
+                <select class="form-select operator-selector" name="${ruleId}-operator" disabled>
+                    <option value="">--- Sélectionner ---</option>
+                </select>
+            </div>
+            <div class="col-md-5 value-container">
+                <label class="form-label">Valeur</label>
+                <div class="value-input-container d-flex align-items-center">
+                    <!-- Value input will be inserted here -->
+                    <input type="text" class="form-control" name="${ruleId}-value" disabled>
                 </div>
-            `;
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger delete-rule">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
 
             return $(ruleHtml);
         },
@@ -466,16 +466,39 @@ $(document).ready(function () {
 
             // Handle custom input function if provided
             if (typeof filter.input === 'function') {
-                const customInput = filter.input({id: filter.id}, inputName);
-                container.append(customInput);
+                // For between operator with custom function, we need to handle it specially
+                if (operator === 'between') {
+                    // Create first input
+                    const customInput1 = filter.input({id: filter.id}, inputName);
+                    container.append(customInput1);
 
-                // Initialize flatpickr if needed
-                this.initializeFlatpickr(container);
+                    // Add separator
+                    container.append('<span class="mx-2">et</span>');
 
-                // Initialize autocomplete if needed
-                this.initializeAutocomplete(container, ruleId, filter);
+                    // Create second input
+                    const customInput2 = filter.input({id: filter.id}, `${inputName}_end`);
+                    container.append(customInput2);
 
-                return;
+                    // Initialize flatpickr for both inputs
+                    this.initializeFlatpickr(container);
+
+                    // Initialize autocomplete if needed
+                    this.initializeAutocomplete(container, ruleId, filter);
+
+                    return;
+                } else {
+                    // Single input
+                    const customInput = filter.input({id: filter.id}, inputName);
+                    container.append(customInput);
+
+                    // Initialize flatpickr if needed
+                    this.initializeFlatpickr(container);
+
+                    // Initialize autocomplete if needed
+                    this.initializeAutocomplete(container, ruleId, filter);
+
+                    return;
+                }
             }
 
             // Create input element based on the filter type and input specification
@@ -499,9 +522,9 @@ $(document).ready(function () {
                         for (const [value, label] of Object.entries(filter.values)) {
                             const radioId = `${ruleId}-${filter.id}-${value}`;
                             input.append(`
-                        <input type="radio" class="btn-check" name="${inputName}" id="${radioId}" value="${value}" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="${radioId}">${label}</label>
-                    `);
+                <input type="radio" class="btn-check" name="${inputName}" id="${radioId}" value="${value}" autocomplete="off">
+                <label class="btn btn-outline-primary" for="${radioId}">${label}</label>
+            `);
                         }
                     }
                     break;
@@ -638,9 +661,27 @@ $(document).ready(function () {
          * Handle value input change
          */
         handleValueChange: function (ruleId, value) {
-            // Update rule state with the selected value
             const ruleState = this.findRuleInState(ruleId);
-            if (ruleState) {
+            if (!ruleState) return;
+
+            const $input = $(event.target);
+            const inputName = $input.attr('name');
+
+            // Check if this is a "between" operator with two values
+            if (inputName && inputName.endsWith('_end')) {
+                // This is the second value for "between" operator
+                if (!ruleState.value || typeof ruleState.value !== 'object') {
+                    ruleState.value = {};
+                }
+                ruleState.value.end = value;
+            } else if (ruleState.operator === 'between') {
+                // This is the first value for "between" operator
+                if (!ruleState.value || typeof ruleState.value !== 'object') {
+                    ruleState.value = {};
+                }
+                ruleState.value.start = value;
+            } else {
+                // Single value
                 ruleState.value = value;
             }
         },
@@ -764,7 +805,7 @@ $(document).ready(function () {
             $container.on('change', '.value-input-container input, .value-input-container select', (e) => {
                 const ruleId = $(e.target).closest('.search-rule').data('rule-id');
                 const value = $(e.target).val();
-                this.handleValueChange(ruleId, value);
+                this.handleValueChange.call(this, ruleId, value, e);
             });
 
             // Group operator change
@@ -880,6 +921,9 @@ $(document).ready(function () {
         /**
          * Format a group for submission (updated for nested)
          */
+        /**
+         * Format a group for submission (updated for nested)
+         */
         formatGroup: function (group) {
             const result = {
                 condition: group.operator,
@@ -900,7 +944,13 @@ $(document).ready(function () {
                     // Add value only if operator requires it
                     const noValueOperators = ['is_empty', 'is_not_empty', 'is_null', 'is_not_null'];
                     if (!noValueOperators.includes(rule.operator)) {
-                        formattedRule.value = rule.value;
+                        // Special handling for "between" operator
+                        if (rule.operator === 'between' && rule.value && typeof rule.value === 'object') {
+                            // Convert object {start: ..., end: ...} to array [start, end]
+                            formattedRule.value = [rule.value.start || '', rule.value.end || ''];
+                        } else {
+                            formattedRule.value = rule.value;
+                        }
                     }
 
                     // Get the original field configuration to preserve related and parse
@@ -994,16 +1044,27 @@ $(document).ready(function () {
                 this.setGroupRules(groupId, savedRules);
             }
         },
+// Add a helper function to format dates
+        formatDateForDisplay: function(dateStr) {
+            if (!dateStr) return '';
 
-        /**
-         * Set rules for a specific group from saved data
-         */
+            // Check if date is in yyyy-mm-dd format
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                const [year, month, day] = dateStr.split('-');
+                return `${day}/${month}/${year}`;
+            }
+
+            // Return as-is if already in correct format or unrecognized
+            return dateStr;
+        },
+
+// Update setGroupRules to properly set dates with correct format
         setGroupRules: function (groupId, groupData) {
             if (!groupData.rules || !groupData.rules.length) return;
 
             groupData.rules.forEach(ruleData => {
                 if (ruleData.nested && ruleData.query) {
-                    // Handle nested rule - the field ID is already in the format "nested.field"
+                    // Handle nested rule
                     ruleData.query.rules.forEach(nestedRule => {
                         const ruleId = this.addRule(groupId);
 
@@ -1015,7 +1076,47 @@ $(document).ready(function () {
 
                                 setTimeout(() => {
                                     if (nestedRule.value !== undefined) {
-                                        $(`#${ruleId} .value-input-container input, #${ruleId} .value-input-container select`).val(nestedRule.value).trigger('change');
+                                        const $container = $(`#${ruleId} .value-input-container`);
+
+                                        // Handle "between" operator with array values
+                                        if (nestedRule.operator === 'between') {
+                                            if (Array.isArray(nestedRule.value) && nestedRule.value.length === 2) {
+                                                // Wait a bit more for flatpickr to initialize
+                                                setTimeout(() => {
+                                                    const $input1 = $container.find('input[name$="-value"]');
+                                                    const $input2 = $container.find('input[name$="-value_end"]');
+
+                                                    // Use flatpickr's setDate method if available
+                                                    if ($input1[0] && $input1[0]._flatpickr) {
+                                                        $input1[0]._flatpickr.setDate(nestedRule.value[0], true);
+                                                    } else {
+                                                        $input1.val(this.formatDateForDisplay(nestedRule.value[0]));
+                                                    }
+
+                                                    if ($input2[0] && $input2[0]._flatpickr) {
+                                                        $input2[0]._flatpickr.setDate(nestedRule.value[1], true);
+                                                    } else {
+                                                        $input2.val(this.formatDateForDisplay(nestedRule.value[1]));
+                                                    }
+                                                }, 200);
+                                            }
+                                        } else {
+                                            // Handle single date field
+                                            const $input = $container.find('input, select').first();
+
+                                            // Check if it's a date field
+                                            if ($input.hasClass('query-builder-flatpickr') || $input.attr('data-type') === 'flatpickr') {
+                                                setTimeout(() => {
+                                                    if ($input[0] && $input[0]._flatpickr) {
+                                                        $input[0]._flatpickr.setDate(nestedRule.value, true);
+                                                    } else {
+                                                        $input.val(this.formatDateForDisplay(nestedRule.value));
+                                                    }
+                                                }, 200);
+                                            } else {
+                                                $input.val(nestedRule.value).trigger('change');
+                                            }
+                                        }
                                     }
                                 }, 100);
                             }, 100);
@@ -1033,7 +1134,47 @@ $(document).ready(function () {
 
                             setTimeout(() => {
                                 if (ruleData.value !== undefined) {
-                                    $(`#${ruleId} .value-input-container input, #${ruleId} .value-input-container select`).val(ruleData.value).trigger('change');
+                                    const $container = $(`#${ruleId} .value-input-container`);
+
+                                    // Handle "between" operator
+                                    if (ruleData.operator === 'between') {
+                                        if (Array.isArray(ruleData.value) && ruleData.value.length === 2) {
+                                            // Wait for flatpickr to initialize
+                                            setTimeout(() => {
+                                                const $input1 = $container.find('input[name$="-value"]');
+                                                const $input2 = $container.find('input[name$="-value_end"]');
+
+                                                // Use flatpickr's setDate method if available
+                                                if ($input1[0] && $input1[0]._flatpickr) {
+                                                    $input1[0]._flatpickr.setDate(ruleData.value[0], true);
+                                                } else {
+                                                    $input1.val(this.formatDateForDisplay(ruleData.value[0]));
+                                                }
+
+                                                if ($input2[0] && $input2[0]._flatpickr) {
+                                                    $input2[0]._flatpickr.setDate(ruleData.value[1], true);
+                                                } else {
+                                                    $input2.val(this.formatDateForDisplay(ruleData.value[1]));
+                                                }
+                                            }, 200);
+                                        }
+                                    } else {
+                                        // Handle single value
+                                        const $input = $container.find('input, select').first();
+
+                                        // Check if it's a date field
+                                        if ($input.hasClass('query-builder-flatpickr') || $input.attr('data-type') === 'flatpickr') {
+                                            setTimeout(() => {
+                                                if ($input[0] && $input[0]._flatpickr) {
+                                                    $input[0]._flatpickr.setDate(ruleData.value, true);
+                                                } else {
+                                                    $input.val(this.formatDateForDisplay(ruleData.value));
+                                                }
+                                            }, 200);
+                                        } else {
+                                            $input.val(ruleData.value).trigger('change');
+                                        }
+                                    }
                                 }
                             }, 100);
                         }, 100);

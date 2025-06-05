@@ -301,9 +301,17 @@ abstract class BaseFilter
                                     if (is_numeric($value)) {
                                         $setConditions[] = "{$fieldReference} {$sqlOp['operator']} {$value}";
                                     } else {
-                                        // Escape quotes for string values
-                                        $escapedValue = str_replace("'", "''", $value);
-                                        $setConditions[] = "{$fieldReference} {$sqlOp['operator']} '{$escapedValue}'";
+                                        // Special handling for BETWEEN operator with array values
+                                        if ($rule['operator'] === 'between' && is_array($value) && count($value) === 2) {
+                                            // Escape both values
+                                            $escapedValue1 = str_replace("'", "''", $value[0]);
+                                            $escapedValue2 = str_replace("'", "''", $value[1]);
+                                            $setConditions[] = "{$fieldReference} BETWEEN '{$escapedValue1}' AND '{$escapedValue2}'";
+                                        } else {
+                                            // Escape quotes for string values
+                                            $escapedValue = str_replace("'", "''", $value);
+                                            $setConditions[] = "{$fieldReference} {$sqlOp['operator']} '{$escapedValue}'";
+                                        }
                                     }
                                 }
                             }
