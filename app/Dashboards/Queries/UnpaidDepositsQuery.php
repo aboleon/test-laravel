@@ -15,6 +15,7 @@ class UnpaidDepositsQuery
     {
         $groups = $this->setGroups()->unsetGroup('industry')->getGroupsAsString();
 
+
         $this->queryResponse = DB::select(
             "
 WITH deposit_counts AS (

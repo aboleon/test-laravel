@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{DashboardController, ForceDeleteController, GenericMediaController, NavController, RestoreController, SearchController};
+use App\Http\Controllers\{DashboardController, DownloadController, ForceDeleteController, GenericMediaController, NavController, GlobalExportController, RestoreController, SearchController};
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +24,13 @@ Route::middleware(['auth:sanctum', 'verified', 'roles:' . (new User())->adminUse
         // Generic
         Route::delete('forceDelete', [ForceDeleteController::class, 'process'])->name('forcedelete');
         Route::post('restore', [RestoreController::class, 'process'])->name('restore');
+
+        Route::get('/download/file', [DownloadController::class, 'download'])
+            ->name('download.file');
+
+        Route::get('stream/merged-pdf/{token}', [GlobalExportController::class, 'streamMergedPdf'])
+            ->name('stream.merged.pdf');
+
 
         Route::any('/', [DashboardController::class, 'show']);
 

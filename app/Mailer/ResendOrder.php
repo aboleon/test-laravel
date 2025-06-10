@@ -8,6 +8,7 @@ use App\Mail\MailerMail;
 use App\Models\Order;
 use App\Traits\EventCommons;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class ResendOrder extends MailerAbstract
 {
@@ -17,26 +18,35 @@ class ResendOrder extends MailerAbstract
     private ?Order $order = null;
     private ?OrderAccessor $orderAccessor = null;
 
-    public function send()
+    public function send(): void
     {
-        return Mail::send(new MailerMail($this));
+        try {
+            Mail::send(new MailerMail($this));
+            $this->responseSuccess("L'e-mail de relance pour la commande #".$this->order->id." a été envoyé.");
+        } catch (Throwable $e) {
+            $this->responseException($e, "L'e-mail de relance pour la commande #".$this->order->id." n'a pas pu être envoyé.");
+        }
     }
 
     public function setData(): void
     {
-        $this->order = $this->model ?: Order::where('uuid', $this->identifier)->first();
+        $this->order = $this->model ?: Order::where('id', $this->identifier)->first();
 
         if ($this->order) {
             $this->orderAccessor = (new OrderAccessor($this->order));
         } else {
-            abort(404, "Order not found with uuid ".$this->identifier);
+            abort(404, "La commande  #".$this->identifier ." n'a pas été trouvée.");
+        }
+
+        if ($this->orderAccessor->isPaid()) {
+            $this->responseWarning("La commande #".$this->order->id ." a déjà été soldée. E-mail de relance non envoyé.");
         }
 
         $this->data = [
-            'order'   => $this->order,
-            'orderAccessor'   => $this->orderAccessor,
-            'banner'  => $this->getBanner($this->order->event,'banner_large'),
-            'connect_link' => AutoConnectHelper::generateAutoConnectUrlForEventContact($this->order->getEventContact()),
+            'order'         => $this->order,
+            'orderAccessor' => $this->orderAccessor,
+            'banner'        => $this->getBanner($this->order->event, 'banner_large'),
+            'connect_link'  => AutoConnectHelper::generateAutoConnectUrlForEventContact($this->order->getEventContact()),
         ];
     }
 

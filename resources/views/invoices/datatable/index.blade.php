@@ -27,7 +27,7 @@
     </div>
 
     @include('lib.datatable')
-    @include('invoices.modal.export-modal', ['action' => 'generateInvoiceExport'])
+    @include('invoices.modal.export-modal', ['action' => 'generateInvoiceExport', 'event' => $event])
     @push('js')
         {{ $dataTable->scripts() }}
         <script src="{{ asset('js/orders/invoice_from_modal.js') }}"></script>

@@ -5,12 +5,12 @@
     <table class="table table-compact">
         <tbody>
         <tr>
-            <th>Total Potentiel</th>
-            <td>{{ $event->contacts()->count() }}</td>
+            <th width="30%">Total Potentiel</th>
+            <td class="text-end pe-0 pe-sm-5">{{ $event->contacts()->count() }}</td>
         </tr>
         <tr>
-            <th>Total Inscrits</th>
-            <td>
+            <th width="30%">Total Inscrits</th>
+            <td class="text-end pe-0 pe-sm-5">
                 @php
                     $totalRow = collect($participantsStats['data'])->firstWhere('participation_group', 'all');
                 @endphp
@@ -19,8 +19,8 @@
         </tr>
         @foreach($participantsStats['groups'] as $group)
             <tr>
-                <th style="padding-left: 20px;">- {{ \App\Enum\ParticipantType::translated($group) }}</th>
-                <td>
+                <th width="30%" style="padding-left: 20px;">- {{ \App\Enum\ParticipantType::translated($group) }}</th>
+                <td class="text-end pe-0 pe-sm-5">
                     @php
                         $groupRow = $instance->filterByGroup($participantsStats['data'], $group);
                     @endphp

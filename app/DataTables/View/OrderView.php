@@ -2,6 +2,7 @@
 
 namespace App\DataTables\View;
 
+use App\Enum\OrderStatus;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Order\Refund;
@@ -39,5 +40,10 @@ class OrderView extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'id');
+    }
+
+    public function isUnpaid(): bool
+    {
+        return $this->status != OrderStatus::PAID->value;
     }
 }

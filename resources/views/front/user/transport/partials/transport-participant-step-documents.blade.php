@@ -17,7 +17,7 @@
                                           icon="bi bi-file-earmark-arrow-up-fill"
                                           :description="false"
                                           :nomedia="__('mediaclass.no_documents')"
-                                          :label="__('front/ui.media.add_traveil_documents')"/>
+                                          :label="__('front/ui.media.add_travel_documents')"/>
 
             </div>
             @if (!isset($final_submit) or isset($standalone_submit))

@@ -44,7 +44,8 @@ class EventTransportDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
-        return (new EloquentDataTable($query))
+        $dataTable = (new EloquentDataTable($query))
+            ->setRowId('id')
             ->addColumn('checkbox', function ($row) {
                 return '<div class="form-check"><input type="checkbox" class="form-check-input row-checkbox" value="'.$row->id.'"></div>';
             })
@@ -52,8 +53,11 @@ class EventTransportDataTable extends DataTable
                 ? view('components.enabled-mark', ['enabled' => $data->pec_authorized,'label'=>'Pec'])
                 : ''
             )
-            ->addColumn('name', function ($data) {
-                return $data->name;
+            ->addColumn('name', function ($row) {
+                return '<a href="'. route('panel.manager.event.event_contact.edit', [
+                        'event' => $this->event->id,
+                        'event_contact' => $row->events_contacts_id,
+                    ]).'">'.$row->name.'</a>';
             })
             ->addColumn('pec', function ($data) {
                 return $data->pec;
@@ -125,12 +129,12 @@ class EventTransportDataTable extends DataTable
             // sort
             //--------------------------------------------
 //            ->orderColumn('date', 'event_program_days.datetime_start $1')
-            ->orderColumn('name', 'name $1')
+            ->orderColumn('name', "CONCAT(users.first_name, ' ', users.last_name) $1")
             ->orderColumn('departure_start_location', 'departure_start_location $1')
             ->orderColumn('departure_end_location', 'departure_end_location $1')
             ->orderColumn('return_start_location', 'return_start_location $1')
             ->orderColumn('return_end_location', 'return_end_location $1')
-            ->orderColumn('participation_type', 'participation_type $1')
+            ->orderColumn('participation_type', 'participation_types.name $1')
             //--------------------------------------------
             // search
             //--------------------------------------------
@@ -154,8 +158,25 @@ class EventTransportDataTable extends DataTable
                 $sql = "return_end_location like ?";
                 $query->whereRaw($sql, ["%{$keyword}%"]);
             })
-            ->rawColumns(['pec_authorized','action', 'checkbox']);
+            ->filter(function ($query) {
+                if (request()->has('search.value')) {
+                    $search = request('search.value');
+                    if (!empty($search)) {
+                        $query->where(function ($q) use ($search) {
+                            $q->whereRaw("CONCAT(users.first_name, ' ', users.last_name) LIKE ?", ["%{$search}%"])
+                                ->orWhere('event_transports.id', 'LIKE', "%{$search}%")
+                                ->orWhere('event_transports.departure_start_location', 'LIKE', "%{$search}%")
+                                ->orWhere('event_transports.departure_end_location', 'LIKE', "%{$search}%")
+                                ->orWhere('event_transports.return_start_location', 'LIKE', "%{$search}%")
+                                ->orWhere('event_transports.return_end_location', 'LIKE', "%{$search}%");
+                        });
+                    }
+                }
+            }, true)
+            ->rawColumns(['pec_authorized','action', 'checkbox','name']);
 //            ->blacklist(['action', 'checkbox', 'interventions']); // code-notes 7334
+
+        return $dataTable;
     }
 
     /**
@@ -325,48 +346,48 @@ class EventTransportDataTable extends DataTable
             $columns[] = Column::computed('checkbox')->title('<div class="form-check"><input type="checkbox" class="form-check-input" id="datatable-select-all"/></div>')->orderable(false)->searchable(false)->width('50');
         }
 
-        $columns[] = Column::make('pec_authorized')->title(' ')->orderable(false);
-        $columns[] = Column::make('name')->title(__('transport.name'))->searchable();
+        $columns[] = Column::make('pec_authorized')->title(' ')->orderable(false)->searchable(false);
+        $columns[] = Column::make('name')->title(__('transport.name'))->searchable(false);
 
         if ($usePec) {
-            $columns[] = Column::make('pec')->title(__('transport.pec'));
+            $columns[] = Column::make('pec')->title(__('transport.pec'))->searchable(false);
         }
 
         if ($useParticipationType) {
-            $columns[] = Column::make('participation_type')->title(__('transport.participation_type'));
+            $columns[] = Column::make('participation_type')->title(__('transport.participation_type'))->searchable(false);
         }
 
-        $columns[] = Column::make('departure_step')->title(__('transport.departure_step'));
+        $columns[] = Column::make('departure_step')->title(__('transport.departure_step'))->searchable(false);
 
         if ($useTransportType) {
-            $columns[] = Column::make('departure_transport_type')->title(__('transport.departure_transport_type'));
+            $columns[] = Column::make('departure_transport_type')->title(__('transport.departure_transport_type'))->searchable(false);
         }
-        $columns[] = Column::make('departure_start_date')->title(__('transport.departure_start_date'));
-        $columns[] = Column::make('departure_end_time')->title(__('transport.departure_start_time'));
-        $columns[] = Column::make('departure_start_location')->title(__('transport.departure_start_location'));
-        $columns[] = Column::make('departure_end_location')->title(__('transport.departure_end_location'));
+        $columns[] = Column::make('departure_start_date')->title(__('transport.departure_start_date'))->searchable(false);
+        $columns[] = Column::make('departure_end_time')->title(__('transport.departure_start_time'))->searchable(false);
+        $columns[] = Column::make('departure_start_location')->title(__('transport.departure_start_location'))->searchable(false);
+        $columns[] = Column::make('departure_end_location')->title(__('transport.departure_end_location'))->searchable(false);
 
-        $columns[] = Column::make('return_step')->title(__('transport.return_step'));
+        $columns[] = Column::make('return_step')->title(__('transport.return_step'))->searchable(false);
 
         if ($useTransportType) {
-            $columns[] = Column::make('return_transport_type')->title(__('transport.return_transport_type'));
+            $columns[] = Column::make('return_transport_type')->title(__('transport.return_transport_type'))->searchable(false);
         }
 
-        $columns[] = Column::make('return_start_date')->title(__('transport.return_start_date'));
-        $columns[] = Column::make('return_start_time')->title(__('transport.return_start_time'));
-        $columns[] = Column::make('return_start_location')->title(__('transport.return_start_location'));
-        $columns[] = Column::make('return_end_location')->title(__('transport.return_end_location'));
+        $columns[] = Column::make('return_start_date')->title(__('transport.return_start_date'))->searchable(false);
+        $columns[] = Column::make('return_start_time')->title(__('transport.return_start_time'))->searchable(false);
+        $columns[] = Column::make('return_start_location')->title(__('transport.return_start_location'))->searchable(false);
+        $columns[] = Column::make('return_end_location')->title(__('transport.return_end_location'))->searchable(false);
 
         // other columns
 
         if ($useTransfer) {
-            $columns[] = Column::make('transfer')->title(__('transport.transfer'));
+            $columns[] = Column::make('transfer')->title(__('transport.transfer'))->searchable(false);
         }
 
-        $columns[] = Column::make('price_before_tax')->title(__('transport.price_before_tax'));
-        $columns[] = Column::make('price_after_tax')->title(__('transport.price_after_tax'));
-        $columns[] = Column::make('max_reimbursement_amount')->title(__('transport.max_reimbursement_amount'));
-        $columns[] = Column::make('has_documents')->title(__('transport.has_documents'));
+        $columns[] = Column::make('price_before_tax')->title(__('transport.price_before_tax'))->searchable(false);
+        $columns[] = Column::make('price_after_tax')->title(__('transport.price_after_tax'))->searchable(false);
+        $columns[] = Column::make('max_reimbursement_amount')->title(__('transport.max_reimbursement_amount'))->searchable(false);
+        $columns[] = Column::make('has_documents')->title(__('transport.has_documents'))->searchable(false);
 
         $columns[] = Column::computed('action')->addClass('text-end')->title(__('transport.actions'));
 

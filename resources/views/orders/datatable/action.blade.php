@@ -5,7 +5,7 @@
         <x-mfw::delete-modal-link reference="{{ $data->id }}"/>
     @endif
 
-    @if(!$orderAccessor->ispaid())
+    @if($orderAccessor->isUnpaid())
         <li data-bs-toggle="modal" data-bs-target="#resend_by_mail_{{ $data->id }}">
             <a href="#" class="mfw-edit-link btn btn-sm btn-warning"
                data-bs-placement="top" data-bs-title="Relance par e-mail"
@@ -60,11 +60,11 @@
               reference="destroy_{{ $data->id }}"/>
 @endif
 
-@if(!$orderAccessor->ispaid())
-    <x-mfw::modal :route="route('panel.mailer', ['type' => 'resendOrder', 'identifier' => $data->uuid])"
-                  title="Relancer la commande par e-mail ?"
-                  :params="['uuid' => $data->uuid]"
+@if($orderAccessor->isUnpaid())
+    <x-mfw::modal :route="route('panel.mailer', ['type' => 'resendOrder', 'identifier' => $data->id])"
+                  title="Relance commande"
+                  :params="['id' => $data->id]"
                   class="resendorderbymail"
-                  question=""
+                  question="Relancer la commande par e-mail ?"
                   reference="resend_by_mail_{{ $data->id }}"/>
 @endif

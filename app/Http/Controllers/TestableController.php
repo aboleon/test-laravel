@@ -12,6 +12,7 @@ use App\Accessors\Users;
 use App\Models\Account;
 use App\Models\Event;
 use App\Models\EventContact;
+use App\Models\Order\Attribution;
 use App\Models\User;
 use App\Services\Filters\EventContactFilter;
 use App\Traits\EventCommons;
@@ -34,14 +35,8 @@ class TestableController extends Controller
 
     public function index() {
 
-        $event = Event::find(44);
-        d(
-            EventAccessor::getBannerUrlByEvent($event)
-        );
-        exit;
-
-        return view('testable');
-
+        $a  = EventAccessor::getBannerUrlByEvent(Event::find(46));
+        d($a);
     }
 
     public function search()

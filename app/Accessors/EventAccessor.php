@@ -168,7 +168,7 @@ class EventAccessor
     }
 
 
-    public static function getBannerUrlByEvent(Event $event, string $group = 'banner_large'): string|null
+    public static function getBannerUrlByEvent(Event $event, string $group = 'banner_large'): ?string
     {
        $banner = new self($event)->getBanner($event, $group);
        if ($banner) {

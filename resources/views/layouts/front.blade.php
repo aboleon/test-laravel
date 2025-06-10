@@ -140,7 +140,6 @@
             color: white;
         }
 
-
         @php
             if (isset($event) && $event):
                 $frontConfig = $event->frontConfig;

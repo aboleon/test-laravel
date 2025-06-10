@@ -14,7 +14,6 @@ use App\Actions\{Account\AssociateUsersToEventAction,
     Dictionnary\AddEntryInSimpleDictionnary,
     Dictionnary\AddProfession,
     EstablishmentActions,
-    Export\ExportGlobalPdf,
     GroupContactActions,
     Groups\AssociateGroupsToEventAction,
     Groups\ExportGroupsWrapperAction,
@@ -723,6 +722,7 @@ class AjaxController extends Controller
     public function saveSavedSearch(): array
     {
         $filters = (string)AdvancedSearchFilter::getFilters(request('type'));
+
         return (new SavedSearchAction())->storeSavedSearch(request('name'), request('type'), $filters, request('id'));
     }
 
@@ -1004,9 +1004,29 @@ class AjaxController extends Controller
         return (new MailController())->ajaxMode()->distribute('refundable', (string)request('uuid'))->fetchResponse();
     }
 
+    /**
+     * @return array
+     * Envoi d'un mail de relance commande depuis une ligne datatable dans Orders
+     */
     public function sendResendOrderFromModal(): array
     {
-        return (new MailController())->ajaxMode()->distribute('resendOrder', (string)request('uuid'))->fetchResponse();
+        return (new MailController())->ajaxMode()->distribute('resendOrder', (int)request('id'))->fetchResponse();
+    }
+
+    /**
+     * @return array
+     * Envoi en masse de mails de relance commande depuis sélection liste datatable dans Orders
+     */
+    public function sendMassOrderReminder(): array
+    {
+        if (request()->filled('row_id')) {
+            foreach ((array)request('row_id') as $id) {
+                $this->pushMessages(
+                    new MailController()->ajaxMode()->distribute('resendOrder', $id)
+                );
+            }
+        }
+        return $this->fetchResponse();
     }
 
     public function sendEventContactConfirmationFromModal(): array
@@ -1108,12 +1128,13 @@ class AjaxController extends Controller
 
     public function SendMailTemplate(): array
     {
-        $this->response['callback']  = 'sendMailLoad';
-        $this->response['content'] = view('mailtemplates.modal.modal-content')->with([
-            'mailtemplates' => Mailtemplate::all()->pluck('subject','id')->sort()->toArray(),
-            'event_id' => request('event_id'),
-            'ids' => request('ids'),
+        $this->response['callback'] = 'sendMailLoad';
+        $this->response['content']  = view('mailtemplates.modal.modal-content')->with([
+            'mailtemplates' => Mailtemplate::all()->pluck('subject', 'id')->sort()->toArray(),
+            'event_id'      => request('event_id'),
+            'ids'           => request('ids'),
         ])->render();
+
         return $this->fetchResponse();
     }
 
@@ -1125,7 +1146,7 @@ class AjaxController extends Controller
             ->fetchResponse();
     }
 
-    public function sendPdf():array
+    public function sendPdf(): array
     {
         return (new EventContactActions())
             ->enableAjaxMode()
@@ -1133,25 +1154,25 @@ class AjaxController extends Controller
             ->fetchResponse();
     }
 
-    public function generateInvoiceExport(): array
+    public function generateInvoiceExport()//: array
     {
-        return (new ExportGlobalPdf())
-            ->enableAjaxMode()
-            ->generate()
+        return new GlobalExportController()
+            ->ajaxMode()
+            ->generateInvoiceExport()
             ->fetchResponse();
     }
 
     public function generateRefundExport(): array
     {
-        return (new ExportGlobalPdf())
-            ->enableAjaxMode()
-            ->generate()
+        return new GlobalExportController()
+            ->ajaxMode()
+            ->generateRefundExport()
             ->fetchResponse();
     }
 
     public function getEventContactsForSelectedEvent(): array
     {
-        if (!request()->has('event_id')) {
+        if ( ! request()->has('event_id')) {
             return [];
         }
 
@@ -1164,8 +1185,7 @@ class AjaxController extends Controller
         $contacts = [];
 
         foreach ($eventContacts as $contact) {
-
-            $contacts[$contact->id] = '#' . $contact->id . ' - ' . $contact->account?->names() ?: '';
+            $contacts[$contact->id] = '#'.$contact->id.' - '.$contact->account?->names() ?: '';
         }
 
         $this->responseElement('contacts', $contacts);

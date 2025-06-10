@@ -31,8 +31,8 @@
     </x-slot>
 
     <div class="shadow p-4 bg-body-tertiary rounded">
-        <x-mfw::response-messages/>
-        <x-datatables-mass-delete model="Order" name="title" question="<strong>Est-ce que vous confirmez la suppression de ces commandes ?</p>"/>
+        {{-- <x-datatables-mass-delete model="Order" name="title" question="<strong>Est-ce que vous confirmez la suppression de ces commandes ?</p>"/>--}}
+        <x-datatables-order-reminder />
         {!! $dataTable->table()  !!}
     </div>
 

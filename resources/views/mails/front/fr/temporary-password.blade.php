@@ -1,10 +1,11 @@
 <x-front-mail-layout>
-
-    <div style="text-align: center">
-        <img src="{{ $eventMediaUrl }}"
-             alt="{{$eventName}}"
-             style="width: 100%; display: block; margin: 0 auto;" />
-    </div>
+    @if($eventMediaUrl)
+        <div style="text-align: center">
+            <img src="{{ $eventMediaUrl }}"
+                 alt="{{$eventName}}"
+                 style="width: 100%; display: block; margin: 0 auto;"/>
+        </div>
+    @endif
 
     <div class="p-20">
 

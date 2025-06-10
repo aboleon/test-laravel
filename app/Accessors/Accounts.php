@@ -5,6 +5,7 @@ namespace App\Accessors;
 use App\Models\Account;
 use App\Models\AccountAddress;
 use App\Models\AccountPhone;
+use App\Models\User;
 use App\Services\Validators\AddressValidator;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
@@ -200,7 +201,7 @@ class Accounts
     }
 
 
-    public static function getPhotoByAccount(Account $account, bool $useDefault = true): string|null
+    public static function getPhotoByAccount(Account|User $account, bool $useDefault = true): string|null
     {
         $mediaclass = new Mediaclass();
 

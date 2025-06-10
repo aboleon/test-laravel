@@ -19,7 +19,7 @@ class Service
         // Initialize EventContactAccessor to handle attributions
         $eventContactAccessor = (new EventContactAccessor())->setEventContact($eventContact);
 
-        // Fetch attributed services
+        // Fetch attributed services with serviceCart relationship
         $attributedServices = $eventContactAccessor->serviceAttributions()->load('order');
 
         // Map original service carts
@@ -29,26 +29,33 @@ class Service
 
         // Map attributed services
         $mappedAttributions = $attributedServices->map(function ($attribution) use ($eventContact) {
-            // Assuming `$attribution` has `service`, `quantity`, and `price` fields
-            $service = $attribution->shoppable;
-
+            $service  = $attribution->shoppable;
             $quantity = $attribution->quantity ?? 1;
 
+            // Get the unit price from the related service cart
+            $unitPrice  = $attribution->cart?->unit_price ?: 0;
+            $totalPrice = $unitPrice * $quantity;
+
             return [
-                'title' => $service->title ?? __('front/services.dashboard_no_title'),
-                'text' => implode('<br>', [
-                    __('front/services.dashboard_quantity') . ": " . $quantity,
-                    __('front/services.dashboard_price') . ": ". __('front/ui.free_of_charge')
+                'title'        => $service->title ?? __('front/services.dashboard_no_title'),
+                'text'         => implode('<br>', [
+                    __('front/services.dashboard_quantity').": ".$quantity,
+                    __('front/services.dashboard_price').": ".__('front/ui.free_of_charge'),
+                    __('front/services.dashboard_unit_price').": ".$unitPrice." €",
+                    __('front/services.dashboard_total').": ".$totalPrice." €",
                 ]),
                 'extra_badges' => [],
-                'badge' => [
+                'badge'        => [
                     'class' => 'text-bg-warning rounded-pill',
-                    'text' => __('front/ui.attribution_paid_by', ['payer' => $attribution->order->client()->names()]),
+                    'text'  => __('front/ui.attribution_paid_by', ['payer' => $attribution->order->client()->names()]),
                 ],
-                'source' => 'attribution',
-                'paid_by' => $attribution->order->client()->names(),
-                'order_id' => $attribution->order->id,
-                'event_id' => $attribution->order->event_id,
+                'source'       => 'attribution',
+                'paid_by'      => $attribution->order->client()->names(),
+                'order_id'     => $attribution->order->id,
+                'event_id'     => $attribution->order->event_id,
+                'total_pec'    => $attribution->cart?->total_pec ?: 0,
+                'unit_price'   => $unitPrice,
+                'total_price'  => $totalPrice,
             ];
         });
 
@@ -59,16 +66,16 @@ class Service
 // Helper method to format service items
     private static function formatServiceItem(ServiceCart $cartService, EventContact $eventContact, string $source): array
     {
-        $service = $cartService->service;
-        $badge = [];
+        $service     = $cartService->service;
+        $badge       = [];
         $extraBadges = [];
 
         if ($cartService->order->client_id !== $eventContact->user_id) {
             $payerName = $cartService->order->client()->names();
-            $badge = [
+            $badge     = [
                 'badge' => [
                     'class' => 'text-bg-purple rounded-pill',
-                    'text' => __('front/ui.paid_by', ['payer' => $payerName]),
+                    'text'  => __('front/ui.paid_by', ['payer' => $payerName]),
                 ],
             ];
         }
@@ -76,27 +83,27 @@ class Service
         if ($cartService->cancelled_at) {
             $extraBadges[] = [
                 'class' => 'text-bg-danger rounded-pill',
-                'text' => __('front/order.cancelled'),
+                'text'  => __('front/order.cancelled'),
             ];
         }
 
         $texts = [];
 
         if ($service->service_date) {
-            $texts[] = __('front/services.dashboard_date') . ": " . $service->service_date;
+            $texts[] = __('front/services.dashboard_date').": ".$service->service_date;
         }
 
         if ($service->service_starts) {
             $timing = $service->service_starts->format('H\hi');
             if ($service->service_ends) {
-                $timing .= " - " . $service->service_ends->format('H\hi');
+                $timing .= " - ".$service->service_ends->format('H\hi');
             }
-            $texts[] = __('front/services.dashboard_timings') . ": " . $timing;
+            $texts[] = __('front/services.dashboard_timings').": ".$timing;
         }
 
-        $location = $service->place ? __('front/services.dashboard_location') . ": " . $service->place->name : '';
+        $location = $service->place ? __('front/services.dashboard_location').": ".$service->place->name : '';
         if ($service->room) {
-            $location .= " - " . $service->room->name;
+            $location .= " - ".$service->room->name;
         }
 
         if ($location) {
@@ -104,18 +111,25 @@ class Service
         }
 
         if ($service->description) {
-            $texts[] = __('front/services.dashboard_description') . ": " . $service->description;
+            $texts[] = __('front/services.dashboard_description').": ".$service->description;
         }
 
-        $texts[] = __('front/services.dashboard_quantity') . ": " . $cartService->quantity;
+        $texts[]  = __('front/services.dashboard_quantity').": ".$cartService->quantity;
         $totalTtc = $cartService->total_net + $cartService->total_vat;
-        $texts[] = __('front/services.dashboard_price') . ": " . $totalTtc . " €";
+        $texts[]  = __('front/services.dashboard_price').": ".$totalTtc." €".
+            (
+            $cartService->total_pec > 0
+                ? ' <span style="text-decoration: line-through;">'.$cartService->unit_price * $cartService->quantity.' €</span>'
+                : ''
+            );
 
         return array_merge([
-            'title' => $service->title,
-            'text' => implode('<br>', $texts),
+            'title'        => $service->title,
+            'text'         => implode('<br>', $texts),
             'extra_badges' => $extraBadges,
-            'source' => $source,
+            'source'       => $source,
+            'total_pec'    => $cartService->total_pec,
+            'unit_price'   => $cartService->unit_price,
         ], $badge);
     }
 

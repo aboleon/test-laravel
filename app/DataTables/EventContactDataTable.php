@@ -80,7 +80,7 @@ class EventContactDataTable extends DataTable
 
 
         $groupId = request("group_id");
-        $query = EventContactView::query()
+        $query   = EventContactView::query()
             ->where('event_id', $this->event->id)
             ->when($this->group !== 'all', function ($q) {
                 if (in_array($this->group, ['industry', 'orator', 'congress'])) {
@@ -95,17 +95,24 @@ class EventContactDataTable extends DataTable
                 return $q->whereRaw("CONCAT(',', `group_ids`, ',') LIKE ?", ["%,$groupId,%"]);
             })
             ->when($this->withOrder == 'yes', function ($q) {
-                return $q->where("nb_orders", ">", 0);
+                return $q->where(
+                    fn($where)
+                        => $where
+                        ->where("nb_orders", ">", 0)
+                        ->orWhereNotNull('has_paid_service_deposit')
+                        ->orWhereNotNull('has_paid_grant_deposit'),
+                );
             })
             ->when($this->withOrder == 'no', function ($q) {
                 return $q->where("nb_orders", 0);
             });
 
-        if (!$this->filteredIds) {
+        if ( ! $this->filteredIds) {
             if ($searchFilters) {
                 // Use JOIN with advanced_searches table instead of WHERE IN
                 $query->join('advanced_searches', function ($join) {
-                    $join->on('event_contact_view.id', '=', 'advanced_searches.id')
+                    $join
+                        ->on('event_contact_view.id', '=', 'advanced_searches.id')
                         ->where('advanced_searches.auth_id', '=', auth()->id())
                         ->where('advanced_searches.type', '=', SavedSearches::EVENT_CONTACTS->value);
                 });

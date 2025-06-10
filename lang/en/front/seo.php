@@ -1,0 +1,42 @@
+<?php
+
+return [
+    "home_title" => "Divine ID - sparkling events",
+    "home_description" => "Explore a diverse array of professional congresses and sparkling events with Divine [id]. From medical symposiums to critical issue discussions and algorithm workshops, our curated selection caters to a wide range of interests. Choose your next conference experience and connect with experts and peers in your field. Join us for insightful sessions and vibrant networking opportunities at upcoming events in 2024 and beyond. Find, register, and participate in industry-leading congresses today!",
+    "privacy_policy_title" => "Divine ID - Privacy Policy",
+    "privacy_policy_description" => "This privacy policy will explain how our organization uses the personal data we collect from you when you use our website.",
+    "login_title" => "Divine ID - Login",
+    "login_description" => "Login to my account",
+    "forgot_password_title" => "Password reset",
+    "forgot_password_description" => "Password reset page",
+    "check_individual_title" => "Individual registration",
+    "check_individual_description" => "Individual registration page",
+    "check_speaker_title" => "Speaker registration",
+    "check_speaker_description" => "Speaker registration page",
+    "register_title" => "Register",
+    "register_description" => "Register page",
+    "contact_title" => "Contact",
+    "contact_description" => "Contact page",
+    //--------------------------------------------
+    // logged in pages (description not important)
+    //--------------------------------------------
+    "dashboard_title" => "Divine ID - Dashboard",
+    "remaining_payments_title" => "Divine ID - Remaining Payments",
+    "orders_title" => "Divine ID - My Orders",
+    "group_dashboard_title" => "Divine ID - Group Dashboard",
+    "group_buy_title" => "Divine ID - Group Purchase",
+    "group_order_title" => "Divine ID - Group Order",
+    "group_members_title" => "Divine ID - Group Members",
+    "account_title" => "Divine ID - My personal information",
+    "credentials_title" => "Divine ID - My credentials",
+    "loyalty_card_title" => "Divine ID - My Loyalty Cards",
+    "identity_card_title" => "Divine ID - My Identity Cards",
+    "address_title" => "Divine ID - My Addresses",
+    "documents_title" => "Divine ID - My Documents",
+    "service_registration_title" => "Divine ID - Services and registrations",
+    "accommodation" => "Divine ID - Accommodations",
+    "intervention" => "Divine ID - Interventions",
+    "invitation" => "Divine ID - Invitations",
+    "cart" => "Divine ID - Cart",
+    "transport" => "Divine ID - Transports",
+];

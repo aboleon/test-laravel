@@ -1,0 +1,37 @@
+<?php
+
+return [
+    "accommodation_" => "Hébergement|Hébergements",
+    "accommodation" => "Hébergement(s)",
+    "to_benefit_free_room_contact_us1" => "En tant qu’intervenant, vous pouvez bénéficier d’une prise en charge pour votre participation au congrès. Contactez",
+    "to_benefit_free_room_contact_us2" => "pour nous contacter pour obtenir les modalités et vous inscrire.",
+    "min_price_per_night" => "A partir de <b>:price</b> / nuit",
+    "hotel_services" => "Prestations de l'hôtel",
+    "processing_fee_per_room" => "Frais de dossier :price par chambre réservée",
+    "col_room_type" => "Type de chambre",
+    "col_dates" => "Dates",
+    "col_nb_person" => "Nb de personnes",
+    "col_accompany_details" => "Détails accompagnants",
+    "col_price" => "Prix du séjour",
+    "col_processing_fee" => "Frais de dossier",
+    "col_comments" => "Commentaires",
+    "col_actions" => "Actions",
+    "date_from" => "Du:",
+    "date_to" => "Au:",
+    "industry_support_grant" => "Prise en charge grant industriel",
+    "the" => "le",
+    "book" => "Réserver",
+    "col_room_category" => "Catégorie",
+    'booked_for' => 'Réservé pour :number :people',
+    'cant_obtain_price' => "Une erreur est survenue lors du calcul du prix par nuit. Merci de réessayer plus tard.",
+    'room_' => 'Chambre|Chambres',
+    'hotel_' => 'Hôtel|Hôtels',
+    'room' => 'Chambre(s)',
+    'hotel' => 'Hôtel(s)',
+    'morning_departure' => 'départ le matin',
+    'choose_date' => 'Choisissez la date de votre séjour',
+    'exclude_end' => 'Date de fin exclue (départ le matin)',
+    'pec_hotel_limitation' => "Vous pouvez bénéficier de la prise en charge sur une réservation de chambre.<br>Toute autre réservation sera au prix hors prise en charge.",
+    'pec_hotel_limitation_reached' => "Vous avez déjà bénéficié d’une prise en charge pour l’hébergement sur les dates suivantes: :dates. Cela est limité à une chambre par nuit sur l’ensemble des hôtels proposés. Indiquez vos dates pour vérifier si vous pouvez encore bénéficier d’une prise en charge sur des dates complémentaires. Le prix indiqué tient compte des réservations déjà effectuées."
+
+];

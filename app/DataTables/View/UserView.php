@@ -17,7 +17,9 @@ class UserView extends Model
             $query->where(fn($where)
                 => $where
                 ->where('first_name', 'like', '%'.$keyword.'%')
-                ->orWhere('last_name', 'like', '%'.$keyword.'%'));
+                ->orWhere('last_name', 'like', '%'.$keyword.'%')
+                ->orWhere('email', 'like', '%'.$keyword.'%')
+            );
         }
 
         return $query;

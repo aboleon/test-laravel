@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Accessors\EventManager\EventDepositStats;
 use App\Dashboards\Queries\DashboardParticipantsQuery;
+use App\Dashboards\Queries\EventContactCountByServiceFamilyQuery;
+use App\Dashboards\Queries\EventContactsWhitoutAnyOrderQuery;
+use App\Dashboards\Queries\PecAndGrantDepositOrdersQuery;
 use App\Dashboards\Queries\UnpaidDepositsQuery;
 use App\Dashboards\Traits\DashboardTrait;
 use App\Models\Event;
@@ -29,6 +32,9 @@ class EventManagerController extends Controller
                 'statusOrder' => $deposits->getStatusOrder(),
                 'participantsStats' => new DashboardParticipantsQuery()->setEvent($event)->run(),
                 'unpaidDepositsStats' => new UnpaidDepositsQuery()->setEvent($event)->run(),
+                'pecAndGrantDepositStats' => new PecAndGrantDepositOrdersQuery()->setEvent($event)->run(),
+                'eventContactsWhitoutAnyOrder' => new EventContactsWhitoutAnyOrderQuery()->setEvent($event)->run(),
+                'eventContactCountByServiceFamily' => new EventContactCountByServiceFamilyQuery()->setEvent($event)->run(),
             ]);
     }
 

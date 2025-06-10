@@ -19,7 +19,7 @@
                 <i class="fas fa-pen"></i>
             </a>
             <x-mfw::simple-modal id="reimburse-modal"
-                                 class="btn btn-sm btn-warning {is_cb_paybox}"
+                                 class="btn btn-sm btn-primary {is_cb_paybox}"
                                  title="Rembourser un règlement"
                                  confirm="Rembourser"
                                  linktitle="Rembourser"
@@ -27,7 +27,7 @@
                                  callback="ajaxReimbursePayment"
                                  onshow="loadajaxReimbursePayment"
                                  modalsize="modal-lg"
-                                 text='<i class="fas fa-undo-alt text-dark"></i>'/>
+                                 text='Rembourser'/>
             <x-ajax-modal
                 class="btn btn-sm btn-danger btn-delete-order-payment invoiced {{ $invoiced ? 'd-none' : '' }}"
                 icon_class="fas fa-trash"

@@ -12,7 +12,6 @@
 
     <x-mfw::response-messages/>
 
-
     <div @class([
       'header',
       'text-center',

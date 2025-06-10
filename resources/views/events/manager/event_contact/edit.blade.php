@@ -72,21 +72,24 @@
          id="event-contact-main-container">
         <x-mfw::validation-banner/>
         <x-mfw::response-messages/>
+        <div class="row align-items-center text-black">
 
-        <h3 class="mb-3 d-flex justify-content-between align-items-center">
+        <h3 class="col-md-6">
 
-            <span>{{ $eventContact->user->names() }}</span>
-            <div class="text-muted small">
-                <span>Rattaché le {{ $eventContact->created_at->format('d/m/Y') }}</span>
-                <span class="ms-2">
-                    @if($eventContact->created_by)
-                        par {{ $eventContact->createdBy->names() }}
+            <span>{{ $eventContact->account->names() }}</span>
+        </h3>
+
+            <div class="col-md-6 text-end">
+                <span>Rattaché le {{ $eventContact->created_at->format('d/m/Y') }}
+ /
+                    @if($eventContact->profile->created_by != $eventContact->user_id)
+                        Créé par {{ $eventContact->profile->creator->names() }}
                     @else
-
+                        Enregistré en front
                     @endif
                 </span>
             </div>
-        </h3>
+        </div>
 
 
         @if($userEventGroups->isNotEmpty())

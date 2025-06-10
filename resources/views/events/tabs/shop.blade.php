@@ -1,6 +1,5 @@
 <div class="tab-pane fade" id="shop-tabpane" role="tabpanel" aria-labelledby="shop-tabpane-tab">
     <div class="row pt-4">
-
         <div class="col-xl-6">
             <div class="row">
                 <div class="col-12 mb-3">

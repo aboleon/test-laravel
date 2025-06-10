@@ -21,6 +21,10 @@ class MailController extends Controller
             try {
                 $mailer = new $mailer();
 
+                if ($this->isAjaxMode()) {
+                    $mailer->enableAjaxMode();
+                }
+
                 if (is_object($identifier)) {
                     $mailer->setModel($identifier);
                 }
@@ -31,13 +35,20 @@ class MailController extends Controller
 
                 if (method_exists($mailer, 'setData')) {
                     $mailer->setData();
+                    if ($mailer->hasErrors()) {
+                        $this->pushMessages($mailer);
+                        return $this;
+                    }
                 }
 
                 $mailer->send();
 
                 if ( ! $mailer->hasErrors()) {
-                    $this->pushMessages($mailer);
-                    $this->responseSuccess("L'email a été envoyé.");
+                    $mailerMessages = $mailer->fetchResponse()[$mailer->getMessageKey()] ?? [];
+
+                    empty($mailerMessages)
+                        ? $this->responseSuccess("L'email a été envoyé.")
+                        : $this->pushMessages($mailer);
                 }
             } catch (Throwable $e) {
                 $this->responseException($e);

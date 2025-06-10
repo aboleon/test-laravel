@@ -17,7 +17,7 @@ class TemporaryPasswordMail extends Mailable
         public string $temporaryPassword,
         public string $eventName,
         public string $eventUrl,
-        public string $eventMediaUrl
+        public ?string $eventMediaUrl = null
     )
     {
     }

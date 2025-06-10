@@ -3,7 +3,7 @@
 use App\Http\Controllers\{AjaxController,
     AjaxPublicController,
     PDFController,
-    PDFGlobalExportController,
+    GlobalExportController,
     PdfHubController,
     TestableController};
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -44,7 +44,7 @@ Route::group(['middleware' => 'auth.very_basic'], function () {
     Route::get('/pdf-print', [PdfHubController::class, 'printPdf'])->name('pdf_print');
     Route::get('pdf/{type}/{identifier}', [PDFController::class, 'distribute'])->name('pdf-printer');
     Route::post('/pdf-merged', [PdfController::class, 'streamMergedPdf']);
-    Route::post('/pdf-global-export', [PDFGlobalExportController::class, 'globalExport'])->name('pdf-globalExport');
+    Route::post('/pdf-global-export', [GlobalExportController::class, 'globalExport'])->name('pdf-globalExport');
 });
 
 Route::get('/dashboard', function () {

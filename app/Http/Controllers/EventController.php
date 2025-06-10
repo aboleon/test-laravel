@@ -110,7 +110,11 @@ class EventController extends Controller
         $this->event->update($this->config_data);
         $this->event->texts()->update(request('event.texts'));
         $this->event->pec()->update($pec_data);
-        $this->event->shop()->update(request('event.shop'));
+        $shop_data = request('event.shop');
+        if (!request()->has('event.shop.is_active')) {
+            $shop_data['is_active'] = 0;
+        }
+        $this->event->shop()->update($shop_data);
 
         $frontConfigData                     = request('event.front_config');
         $frontConfigData['speaker_pay_room'] = $frontConfigData['speaker_pay_room'] ?? null;
@@ -212,18 +216,21 @@ class EventController extends Controller
     private function syncPivots(): void
     {
         # Manage event services
-        $eventServices = request('event_services', []);
-        foreach ($eventServices as $key => &$service) {
-            if ( ! array_key_exists('unlimited', $service)) {
-                $service['unlimited'] = null;
-            }
-            if ( ! array_key_exists('service_date_doesnt_count', $service)) {
-                $service['service_date_doesnt_count'] = null;
-            }
-            if ( ! array_key_exists('fo_family_position', $service)) {
-                $service['fo_family_position'] = null;
-            }
-        }
+        $eventServices = collect(request('event_services', []))
+            ->filter(function ($service) {
+                // Only sync services that were actually selected (have service_id)
+                return isset($service['service_id']);
+            })
+            ->mapWithKeys(function ($service, $serviceId) {
+                return [$serviceId => [
+                    'max' => $service['max'] ?? 1,
+                    'unlimited' => isset($service['unlimited']) && $service['unlimited'] ? 1 : null,
+                    'service_date_doesnt_count' => isset($service['service_date_doesnt_count']) && $service['service_date_doesnt_count'] ? 1 : null,
+                    'fo_family_position' => $service['fo_family_position'] ?? 0,
+                ]];
+            })
+            ->toArray();
+
         $this->event->services()->sync($eventServices);
 
         $this->event->shopDocs()->sync((array)request('shop_docs'));

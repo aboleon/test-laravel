@@ -11,7 +11,7 @@ use MetaFramework\Mediaclass\Printer;
 trait EventCommons
 {
 
-    public function getBanner(Event $event, string $group = 'banner_medium'): ?string
+    public function getBanner(Event $event, string $group = 'banner_medium'): string
     {
         if ($event->media->isNotEmpty()) {
             $media = $event->media->filter(fn($m) => $m->group == $group)->first();

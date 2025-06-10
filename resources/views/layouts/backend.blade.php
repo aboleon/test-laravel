@@ -64,7 +64,7 @@
         </div>
 
         @section('messages')
-            <x-mfw::response-messages/>
+            <x-mfw::response-messages :ajax="route('ajax')"/>
         @show
 
         <div id="main">

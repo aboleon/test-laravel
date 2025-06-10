@@ -1,0 +1,35 @@
+<?php
+
+return [
+    'no_data_in_db'                                 => "Aucun enregistrement dans la base de données",
+    'bad_access'                                    => [
+        'must_authenticate' => "Vous devez vous authentifier",
+        'is_not_owner'      => 'Vous ne pouvez pas accéder à ce contenu.',
+        'role'              => "Vous n'avez pas le niveau d'accès nécessaire pour effectuer cette action.",
+        'mail_not_send'     => "L'e-mail n'a pas été envoyé.",
+    ],
+    'action_got_wrong'                              => "Cette action n'a pas abouti.",
+    'order_not_found'                               => "Aucune commande n'a été trouvée.",
+    'event_not_found'                               => "L'évènement recherché n'a pas été trouvé.",
+    'cart_type_uknown'                              => "Le type de panier indiqué n'est pas reconnu :type",
+    'cart_id_missing'                               => "Le panier recherché n'est pas indiqué.",
+    'cart_not_found'                                => "Le panier indiqué n'a pas été trouvé.",
+    'user_unknown'                                  => "Le compte utilisateur n'a pas été trouvé",
+    'not_authorised_to_cancel'                      => "Vous n'êtes pas autorisé à annuler ce service ou cette réservation.",
+    'not_linked_to_event_cancellation'              => "L'élément de commande que vous tentez d'annuler n'est pas associé à cet évènement",
+    'order_cannot_be_cancelled_because_of_payments' => "La commande ne peut pas être annulée car des paiements ont été effectués dessus.",
+    'mail_not_sent'                                 => "L'email n'a pas pu être envoyer. Veuillez contacter le support au :email",
+    'entity_has_bookings'                           => "Vous ne pouvez pas supprimer :entity car :total réservation a été effectuée dessus|Vous ne pouvez pas supprimer ce contingent car :total réservations ont été effectuées dessus",
+    'event_contact_token' => "Token invalide, veuillez réessayer ou contacter le support",
+    'event_contact_token_already_validated' => "Ce lien de connexion a déjà été utilisé. Vous pouvez vous connecter à votre compte manuellement.",
+    'cant_create_password' => "Une erreur est survenue avec le traitement du mot de passe",
+    'event_contact_is_not_group_manager' =>  "Vous n'êtes pas autorisé à gérer ce groupe.",
+    'event_contact_not_linked_to_group' => "Ce compte n'est pas lié à ce groupe.",
+    'undefinded_locality' => "Localisation non renseignée",
+    'account_not_found' => "Un problème est survenu avec l'identifiaction du compte",
+    'event_group_not_found' => "Un problème est survenu avec l'identifiaction du groupe",
+    'impossible_identify_payment_call' => "Impossible d'identifier l'appel de paiement",
+    'event_transport_not_found' => "Impossible d'identifier le dossier Transport",
+    'event_grant_not_found' => "Impossible d'identifier le GRANT",
+
+];

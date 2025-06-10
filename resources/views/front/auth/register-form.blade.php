@@ -149,7 +149,7 @@
                                                       icon="bi bi-file-earmark-arrow-up-fill"
                                                       :description="false"
                                                       :nomedia="__('mediaclass.no_documents')"
-                                                      :label="__('front/ui.media.add_traveil_documents')"/>
+                                                      :label="__('front/ui.media.add_travel_documents')"/>
                         </div>
                     @else
                         @include ('front.auth.register-form.complete-step-1')

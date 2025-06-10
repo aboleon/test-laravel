@@ -37,9 +37,10 @@
                     <th class="align-top">Limitation à date<br><small class="text-secondary">En
                             front uniquement</small></th>
                     <th class="align-top">Nb Max de résas</th>
-                    <th class="align-top">Position de la famille en front</th>
+                    <th class="align-top">Position de la famille en front et sur page de stats BO</th>
                 </tr>
                 </thead>
+
                 @if ($services->entries->isNotEmpty())
                     @php
                         $affected_services = $data->services->mapWithKeys(fn($item) => [

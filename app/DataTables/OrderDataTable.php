@@ -39,41 +39,55 @@ class OrderDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
-        return (new EloquentDataTable($query))
-            ->addColumn('checkbox', function ($row) {
-                return '<div class="form-check"><input type="checkbox" class="form-check-input row-checkbox" value="'.$row->id.'"></div>';
-            })
-            ->orderColumn('total', function ($query, $order) {
-                return $query->orderByRaw("CAST(REPLACE(`total`, ',', '') AS DECIMAL(10,2)) $order");
-            })
-            ->orderColumn('payments_total', function ($query, $order) {
-                return $query->orderByRaw("CAST(REPLACE(`payments_total`, ',', '') AS DECIMAL(10,2)) $order");
-            })
-            ->orderColumn('total_pec', function ($query, $order) {
-                return $query->orderByRaw("CAST(REPLACE(`total_pec`, ',', '') AS DECIMAL(10,2)) $order");
-            })
-            ->addColumn('order_cancellation', function ($data) {
+        return new EloquentDataTable($query)
+            ->addColumn('checkbox', fn($row)
+                => '<div class="form-check"><input name="row_id[]" type="checkbox" class="form-check-input row-checkbox'.($row->isUnpaid() ? ' order-unpaid' : '').'" value="'.$row->id.'"></div>',
+            )
+            ->addColumn('badge', function ($row) {
                 $html = '';
-                if (($data->order_cancellation or $data->cancellation_status)) {
-                    $html .= view('components.back.order-cancellation-pill', [
+                if ($row->has_pec) {
+                    $html .= '<img width="20" height="20" alt="PEC" src="'.asset('media/icons/pec.png').'" />';
+                }
+                if ($row->external_invoice) {
+                    $html .= '<img width="20" height="20" alt="Facturation externe" src="'.asset('media/icons/factureexterne.png').'" />';
+                }
+                return $html;
+            })
+            ->addColumn('name_display', function ($row) {
+                return '<a href="'. route('panel.manager.event.event_contact.edit', [
+                        'event' => $row->event_id,
+                        'event_contact' => $row->event_contact_id,
+                    ]).'">'.$row->name.'</a>';
+            })
+            ->filterColumn('name_display', function($query, $keyword) {
+                $query->where('name', 'like', "%{$keyword}%");
+            })
+            ->orderColumn('total', fn($query, $order)
+                => $query->orderByRaw("CAST(REPLACE(`total`, ',', '') AS DECIMAL(10,2)) $order"),
+            )
+            ->orderColumn('payments_total', fn($query, $order)
+                => $query->orderByRaw("CAST(REPLACE(`payments_total`, ',', '') AS DECIMAL(10,2)) $order"),
+            )
+            ->orderColumn('total_pec', fn($query, $order)
+                => $query->orderByRaw("CAST(REPLACE(`total_pec`, ',', '') AS DECIMAL(10,2)) $order"),
+            )
+            ->addColumn('order_cancellation', fn($data)
+                => (($data->order_cancellation or $data->cancellation_status)
+                    ? view('components.back.order-cancellation-pill', [
                         'class'   => 'd-inline-block',
                         'bgcolor' => ($data->order_cancellation or $data->cancellation_status == CancellationStatus::FULL->value) ? '#b42757' : 'orange',
                         'text'    => $data->cancellation_status_display,
-                    ])->render();
-                }
-
-                $html .= '<small class="text-secondary fw-bold d-block text-nowrap">'.$data->amended_by_order.'</small>';
-
-                return $html;
-            })
-            ->addColumn('action', function ($data) {
-                $orderAccessor = new OrderAccessor($data->order);
-                return view('orders.datatable.action')->with([
-                    'data' => $data,
-                    'orderAccessor' => $orderAccessor
-                ])->render();
-            })
-            ->rawColumns(['action', 'checkbox', 'order_cancellation', 'payer']);
+                    ])->render()
+                    : '').
+                '<small class="text-secondary fw-bold d-block text-nowrap">'.$data->amended_by_order.'</small>',
+            )
+            ->addColumn('action', fn($data)
+                => view('orders.datatable.action')->with([
+                'data'          => $data,
+                'orderAccessor' => new OrderAccessor($data->order),
+            ])->render(),
+            )
+            ->rawColumns(['action', 'checkbox', 'order_cancellation','badge','name_display']);
     }
 
     /**
@@ -95,7 +109,8 @@ class OrderDataTable extends DataTable
      */
     public function html(): HtmlBuilder
     {
-        return $this->setHtml('order')
+        return $this
+            ->setHtml('order')
             ->drawCallback('function(){bindResendOrderEmail();}');
     }
 
@@ -107,10 +122,11 @@ class OrderDataTable extends DataTable
         return [
             Column::computed('checkbox')->title('<div class="form-check"><input type="checkbox" class="form-check-input" id="datatable-select-all"/></div>')->orderable(false)->searchable(false)->width('50'),
             Column::make('id')->title('ID'),
+            Column::make('badge')->title(''),
             Column::make('invoice_number')->title('Num Fact'),
             Column::make('date_display')->title('Date'),
             Column::make('client_type_display')->title('Type')->addClass('fw-bold small'),
-            Column::make('name')->title('Payeur'),
+            Column::make('name_display')->data('name_display')->name('name')->title('Payeur'),
             Column::make('total')->title('Prix TTC'),
             Column::make('payments_total')->title('Prix Payé'),
             Column::make('total_pec')->title('Total PEC'),

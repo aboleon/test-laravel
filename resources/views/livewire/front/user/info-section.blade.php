@@ -51,6 +51,8 @@
                     <x-mfw::select name="domain_id"
                                    :values="$event ? $event->domains->pluck('name','id')->sort()->toArray() : Dictionnaries::selectValues('domain')"
                                    :affected="old('domain_id', $profile?->domain_id)"/>
+
+                    <small class="text-danger">{{ __('front/account.domain_warning') }}</small>
                 </div>
             </div>
 

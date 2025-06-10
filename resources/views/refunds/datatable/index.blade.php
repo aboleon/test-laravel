@@ -28,7 +28,7 @@
     </div>
 
     @include('lib.datatable')
-    @include('invoices.modal.export-modal', ['action' => 'generateRefundExport'])
+    @include('invoices.modal.export-modal', ['action' => 'generateRefundExport', 'event' => $event])
     @push('js')
         {{ $dataTable->scripts() }}
         <script src="{{ asset('js/orders/send_refund_from_modal.js') }}"></script>

@@ -1,0 +1,42 @@
+<?php
+
+return [
+    "home_title" => "Divine ID - événements étincelants",
+    "home_description" => "Explorez une gamme variée de congrès professionnels et d'événements captivants avec Divine [id]. Des symposiums médicaux aux discussions sur des sujets critiques et ateliers sur les algorithmes, notre sélection soignée répond à un large éventail d'intérêts. Choisissez votre prochaine expérience de conférence et établissez des connexions avec des experts et des pairs dans votre domaine. Rejoignez-nous pour des sessions perspicaces et des opportunités de réseautage dynamiques lors des événements à venir en 2024 et au-delà. Trouvez, inscrivez-vous et participez aux congrès de premier plan du secteur dès aujourd'hui !",
+    "privacy_policy_title" => "Divine ID - Politique de confidentialité",
+    "privacy_policy_description" => "Cette politique de confidentialité expliquera comment notre organisation utilise les données personnelles que nous recueillons à votre sujet lorsque vous utilisez notre site Web.",
+    "login_title" => "Divine ID - Connexion",
+    "login_description" => "Connexion à mon compte",
+    "forgot_password_title" => "Renvoi de mot de passe",
+    "forgot_password_description" => "Page de renvoi de mot de passe",
+    "check_individual_title" => "Inscription individuelle",
+    "check_individual_description" => "Page d'inscription individuelle",
+    "check_speaker_title" => "Inscription d'un intervenant",
+    "check_speaker_description" => "Page d'inscription d'un intervenant",
+    "register_title" => "Créer un compte",
+    "register_description" => "Page de création de compte",
+    "contact_title" => "Contact",
+    "contact_description" => "Page de contact",
+    //--------------------------------------------
+    // logged in pages (description not important)
+    //--------------------------------------------
+    "dashboard_title" => "Divine ID - Dashboard",
+    "remaining_payments_title" => "Divine ID - Paiements restants",
+    "orders_title" => "Divine ID - Mes commandes",
+    "group_dashboard_title" => "Divine ID - Dashboard Groupe",
+    "group_buy_title" => "Divine ID - Achat de groupe",
+    "group_order_title" => "Divine ID - Commande de groupe",
+    "group_members_title" => "Divine ID - Membres du groupe",
+    "account_title" => "Divine ID - Mes informations personnelles",
+    "credentials_title" => "Divine ID - Mes identifiants",
+    "loyalty_card_title" => "Divine ID - Mes cartes de fidélité",
+    "identity_card_title" => "Divine ID - Mes cartes d'identité",
+    "address_title" => "Divine ID - Mes adresses",
+    "documents_title" => "Divine ID - Mes documents",
+    "service_registration_title" => "Divine ID - Prestations et inscriptions",
+    "accommodation" => "Divine ID - Hébergements",
+    "intervention" => "Divine ID - Interventions",
+    "invitation" => "Divine ID - Invitations",
+    "cart" => "Divine ID - Panier",
+    "transport" => "Divine ID - Transports",
+];

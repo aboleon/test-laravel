@@ -75,22 +75,7 @@ class PecOrderDataTable extends DataTable
     {
         return $model
             ->newQuery()
-            ->where('event_id', $this->event->id)
-            // TODO: A voir pourquoi ct nécessaire; ça a corrompu le fonctionnement prévu
-            // introduit par Tony le 22 avril 2025, reverti par A.M le 10 mai 2025
-            // https://github.com/Wagaia13/divine-id/commit/326062ca66950b2f06688890449d6c0303a1954d
-                /*
-            ->orWhere(function($query) {
-                $query->where('event_id', $this->event->id)
-                      ->whereExists(function($subquery) {
-                          $subquery->select(\Illuminate\Support\Facades\DB::raw(1))
-                                  ->from('event_deposits')
-                                  ->whereColumn('event_deposits.event_contact_id', 'pec_order_view.event_contact_id')
-                                  ->where('event_deposits.status', 'paid');
-                      });
-            })*/
-            ;
-            //->orderByDesc('order_id');
+            ->where('event_id', $this->event->id);
     }
 
     /**

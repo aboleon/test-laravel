@@ -6,7 +6,7 @@ use App\Accessors\Accounts;
 use App\Accessors\OrderAccessor;
 use App\Models\Order;
 use App\Traits\EventCommons;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Traits\PdfCacheableTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Response;
 use MetaFramework\Traits\DomPdf;
@@ -15,6 +15,7 @@ class Invoice
 {
     use DomPdf;
     use EventCommons;
+    use PdfCacheableTrait;
 
     private bool $isReceipt = false;
     private array $data = [];
@@ -27,17 +28,159 @@ class Invoice
     protected ?\App\Models\Invoice $invoice = null;
     private bool $proforma = false;
 
+    // Override PDF storage directory for invoices
+    protected string $pdfStorageDirectory = 'invoices';
+
     public function __construct(public string $identifier)
     {
         $this->setData();
-        $this->pdf = Pdf::loadView('pdf.invoice', $this->data);
+        $this->ensurePdfIsCached();
     }
 
+    /**
+     * Get PDF view name
+     */
+    protected function getPdfView(): string
+    {
+        return 'pdf.invoice';
+    }
+
+    /**
+     * Check if PDF can be cached
+     */
+    protected function canBeCached(): bool
+    {
+        return $this->order !== null;
+    }
+
+    /**
+     * Override output method to use cached file when available
+     */
+    public function output(): string
+    {
+        // If we have a cached file, use it
+        if ($this->cachedPath && \Storage::disk($this->getPdfStorageDisk())->exists($this->cachedPath)) {
+            return \Storage::disk($this->getPdfStorageDisk())->get($this->cachedPath);
+        }
+
+        // Otherwise use the PDF instance
+        return $this->pdf->output();
+    }
+
+    /**
+     * Override stream method to use cached file
+     */
+    public function stream(): Response
+    {
+        $content = $this->output();
+
+        return response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="invoice.pdf"',
+        ]);
+    }
+
+    /**
+     * Override download method to use cached file
+     */
+    public function download(string $filename = 'invoice.pdf'): Response
+    {
+        $content = $this->output();
+
+        return response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Get default filename for download
+     */
+    protected function getDefaultFilename(): string
+    {
+        if ($this->isReceipt) {
+            return "Recu_DivineID_N-" . ($this->invoice?->invoice_number ?? $this->order->id) . ".pdf";
+        }
+
+        if ($this->proforma) {
+            return "Facture_proforma_DivineID_N-" . ($this->invoice?->invoice_number ?? $this->order->id) . ".pdf";
+        }
+
+        return "Facture_DivineID_N-" . ($this->invoice?->invoice_number ?? $this->order->id) . ".pdf";
+    }
+
+    /**
+     * Get data for checksum calculation
+     */
+    protected function getChecksumData(): array
+    {
+        $data = [
+            'order_id' => $this->order->id,
+            'order_uuid' => $this->order->uuid,
+            'order_total' => $this->order->total,
+            'order_total_vat' => $this->order->total_vat,
+            'order_status' => $this->order->status,
+            'order_updated_at' => $this->order->updated_at?->toDateTimeString(),
+            'paid_amount' => $this->paid,
+            'is_receipt' => $this->isReceipt,
+            'is_proforma' => $this->proforma,
+        ];
+
+        if ($this->invoice) {
+            $data['invoice_id'] = $this->invoice->id;
+            $data['invoice_number'] = $this->invoice->invoice_number;
+            $data['invoice_updated_at'] = $this->invoice->updated_at?->toDateTimeString();
+        }
+
+        if ($this->order->carts) {
+            $data['carts_checksum'] = md5($this->order->carts->toJson());
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get detailed debug information about the cached PDF
+     */
+    public function getDebugInfo(): array
+    {
+        $checksumData = $this->getChecksumData();
+        $checksum = $this->generateChecksum($checksumData);
+        $expectedPath = $this->getPdfPath($this->identifier, $checksum);
+
+        return [
+            'invoice_details' => [
+                'identifier' => $this->identifier,
+                'order_id' => $this->order?->id,
+                'invoice_id' => $this->invoice?->id,
+                'invoice_number' => $this->invoice?->invoice_number,
+                'is_receipt' => $this->isReceipt,
+                'is_proforma' => $this->proforma,
+            ],
+            'cache_details' => [
+                'checksum' => $checksum,
+                'cached_path' => $this->cachedPath,
+                'expected_path' => $expectedPath,
+                'paths_match' => $this->cachedPath === $expectedPath,
+                'full_path' => $this->cachedPath ? storage_path('app/' . $this->cachedPath) : null,
+                'subdirectory' => $this->getPdfSubdirectory(),
+                'storage_disk' => $this->getPdfStorageDisk(),
+                'storage_directory' => $this->getPdfStorageDirectory(),
+            ],
+            'file_status' => [
+                'exists' => $this->cachedPath ? \Storage::disk($this->getPdfStorageDisk())->exists($this->cachedPath) : false,
+                'size_bytes' => $this->cachedPath && \Storage::disk($this->getPdfStorageDisk())->exists($this->cachedPath)
+                    ? \Storage::disk($this->getPdfStorageDisk())->size($this->cachedPath) : null,
+                'last_modified' => $this->cachedPath && \Storage::disk($this->getPdfStorageDisk())->exists($this->cachedPath)
+                    ? date('Y-m-d H:i:s', \Storage::disk($this->getPdfStorageDisk())->lastModified($this->cachedPath)) : null,
+            ],
+            'checksum_components' => $checksumData,
+        ];
+    }
 
     public function setAsReceipt(): self
     {
         $this->isReceipt = true;
-
         return $this;
     }
 
@@ -61,7 +204,6 @@ class Invoice
         } else {
             abort(404, "Order not found with uuid ".$this->identifier);
         }
-
 
         $documentTtitle = $this->isReceipt ? __('front/order.receipt')
             : (($this->proforma or request()->has('proforma')) ? 'Proforma '.$this->order->id.($this->invoice?->id ? '-'.$this->invoice?->id : '') : __('front/order.invoice'));
@@ -89,11 +231,9 @@ class Invoice
 
         $this->data['invoiceTotals'] = ($this->data['amendedOrder'] or $this->orderAccessor->isFrontGroupOrder()) ? $this->data['totalsFromOrder'] : $this->data['totalsFromCarts'];
 
-        // Amended orders concern only AvailabilityRecap (Accommodation)
         $this->data['invoiceVatTotals'] = $this->data['amendedOrder']
             ? [$this->order->accommodation->first()?->vat_id => $this->order->total_vat]
             : $this->data['vatSubtotalsFromCarts'];
-        //de($this->data);
     }
 
     private function checkProforma(): void

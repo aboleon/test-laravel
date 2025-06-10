@@ -557,6 +557,11 @@ ORDER BY h.name;
         return $this->order->status == OrderStatus::PAID->value;
     }
 
+    public function isUnpaid(): bool
+    {
+        return !$this->isPaid();
+    }
+
     public function hasAccommodationQuota(): Collection
     {
         return $this->accommodationCart()->filter(fn($item) => $item->on_quota == 1);

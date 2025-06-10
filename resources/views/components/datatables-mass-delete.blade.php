@@ -56,7 +56,6 @@
     <script>
 
         function DTManipulations() {
-            document.addEventListener('DOMContentLoaded', function () {
                 let DTModal = new bootstrap.Modal(document.getElementById('DT-DeleteModal'), {
                     backdrop: true
                 });
@@ -108,7 +107,6 @@
                         alert('Aucune ligne n\'a été sélectionnée');
                     }
                 });
-            });
         }
 
         function DTRedraw() {
@@ -128,7 +126,7 @@
 
             let lastCell = $('#{{ $normalized_model }}-table_wrapper .row:first > div:last-of-type');
             lastCell.addClass('d-flex justify-content-end');
-            $($('#template-dt-mass-delete').html()).insertBefore(lastCell);
+            lastCell.prepend($('#template-dt-order-reminder').html());
             $($('#template-dt-mass-delete-messages').html()).insertBefore($('#{{ $normalized_model }}-table_wrapper .dt-row'));
 
             DTManipulations();

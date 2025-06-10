@@ -44,6 +44,9 @@ class EventSellableDataTable extends DataTable
             ->addColumn('published', function ($data) {
                 return '<i class="bi bi-check-circle-fill '.($data->published ? 'text-success' : 'text-secondary opacity-50').'">';
             })
+            ->addColumn('invitation', function ($data) {
+                return '<i class="bi bi-check-circle-fill '.($data->is_invitation ? 'text-success' : 'text-secondary opacity-50').'">';
+            })
             ->addColumn('action', function ($data) {
                 return view('events.manager.sellable.datatable.action')->with([
                     'data' => $data,
@@ -51,7 +54,7 @@ class EventSellableDataTable extends DataTable
             })
             ->orderColumn('published', 'published $1')
             ->orderColumn('pec_eligible', 'pec_eligible $1')
-            ->rawColumns(['action', 'checkbox', 'total_bookings_count', 'published', 'pec_eligible', 'prices']);
+            ->rawColumns(['action', 'checkbox', 'total_bookings_count', 'published', 'pec_eligible', 'prices','invitation']);
     }
 
     /**
@@ -90,10 +93,11 @@ class EventSellableDataTable extends DataTable
             Column::make('title')->title('Intitulé'),
             Column::make('service_date')->title('Date'),
             Column::make('stock_label')->title('Stock'),
-            Column::make('total_bookings_count')->title('Stock commandé'),
+            Column::make('total_bookings_count')->title('Inscrits'),
             Column::make('available_label')->title('Stock restant réel'),
             Column::make('published')->title('En ligne'),
             Column::make('pec_eligible')->title('PEC'),
+            Column::make('invitation')->title('Prestation choix'),
             Column::make('prices')->title('Prix'),
             Column::make('pec_paid_net')->title('Soldé HT PEC'),
             Column::make('pec_unpaid_net')->title('Non-soldé HT PEC'),

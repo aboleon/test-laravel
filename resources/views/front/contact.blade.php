@@ -72,7 +72,7 @@
                         $job = $profile?->job;
                         $phone = $profile?->phone;
                         $mobile = $profile?->mobile;
-                        $photoUrl = \App\Accessors\Accounts::getPhotoByAccount($account, false);
+                        $photoUrl = \App\Accessors\Accounts::getPhotoByAccount($admin, false);
                         if(!$photoUrl){
                             $photoUrl = asset('front/images/user/unknown-divine-user.png');
                         }
