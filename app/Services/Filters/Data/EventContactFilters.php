@@ -127,6 +127,7 @@ class EventContactFilters implements FilterProviderInterface
             [
                 'nested'  => 'establishments',
                 'label'   => 'Etablissement',
+                'related' => 'establishments.id = account_profile.establishment_id',
                 'entries' => [
                     [
                         'id'        => 'type',

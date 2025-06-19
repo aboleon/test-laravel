@@ -41,7 +41,7 @@
             return {!! $searchFiltersProvider->serveAsJsObject() !!};
         };
         // Define operators for filter types
-        const string_operators = ['equal', 'not_equal', 'begins_with', 'not_begins_with', 'contains', 'not_contains', 'ends_with', 'not_ends_with', 'is_empty', 'is_not_empty', 'is_null', 'is_not_null'];
+        const string_operators = ['equal', 'not_equal', 'begins_with', 'not_begins_with', 'contains', 'not_contains', 'ends_with', 'not_ends_with', 'is_null', 'is_not_null'];
         const int_operators = ['equal', 'not_equal', 'is_null', 'is_not_null'];
         const select_operators = ['equal', 'not_equal', 'is_null', 'is_not_null'];
         const non_nullable_select_operators = ['equal', 'not_equal'];

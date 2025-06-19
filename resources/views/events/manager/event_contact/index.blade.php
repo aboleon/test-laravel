@@ -42,15 +42,29 @@
             @endif
         </div>
 
+
         <div class="d-flex align-items-center gap-2" id="topbar-actions">
-            <button type="button"
-                    class="btn btn-warning"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modal_export_panel"
-            >
-                <i class="fa-solid fa-share-square"></i>
-                Exporter
-            </button>
+
+            @if (isset($groupType) && array_key_exists($groupType, $exports))
+                @foreach($exports[$groupType] as $exportables)
+                    @php
+                        $basename = lcfirst(basename(str_replace('\\', '/', $exportables['model'])));
+                    @endphp
+                    <button type="button"
+                            class="btn btn-warning exportable"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal_export_panel"
+                            data-exportable="{{ $basename }}"
+                            data-group="{{ $groupType }}"
+                    >
+                        <i class="fa-solid fa-share-square"></i>
+                        {{ $exportables['label'] }}
+                    </button>
+                    <script>
+                            var fieldMappings{{$basename}} = {!! \Illuminate\Support\Js::from( $exportables['model']::getFieldsMapping() ) !!}
+                    </script>
+                @endforeach
+            @endif
 
             @php
                 $filterParams = (new \App\Services\Filters\FilterParser())
@@ -116,13 +130,8 @@
         </div>
     @endif
 
-    @php
-        $exportAction = "exportAccountProfilesByEventContact";
-        $isParticipant = true;
-    @endphp
-
     @include('accounts.modal.export_panel')
-    @include('accounts.modal.action_panel', ['event_id' => $event->id])
+    @include('accounts.modal.action_panel', ['event_id' => $event->id, 'isParticipant' => true])
     @include('accounts.modal.add_panel')
 
     <div id="event-contact-ajax-container" data-ajax="{{route('ajax')}}">
@@ -142,7 +151,8 @@
             deleted-message="Le contact a été dissocié de cet événement."
         />
         @if (!$withOrder)
-            <x-event-contacts-secondary-filter :secondary_filter="$secondaryFilter" :event_id="$event->id" :group="$groupType" />
+            <x-event-contacts-secondary-filter :secondary_filter="$secondaryFilter" :event_id="$event->id"
+                                               :group="$groupType"/>
         @endif
         {!! $dataTable->table()  !!}
     </div>
@@ -151,7 +161,14 @@
         {{ $dataTable->scripts() }}
 
         <script>
-            $(document).ready(function () {
+            $(function() {
+                /*
+                $('button.exportable').off().click(function() {
+                    let exportModal = $('#modal_export_panel');
+                    if (exportModal.length) {
+                        exportModal.find('form input[name=action]').val($(this).data('exportable'));
+                    }
+                }) */
                 // remove the tab cookie for edit page
                 Cookies.set('mfw_tab_redirect_primary', 'dashboard-tabpane-tab', {expires: 1});
             });

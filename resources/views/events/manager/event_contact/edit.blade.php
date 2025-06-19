@@ -57,7 +57,7 @@
     @endpush
 
     @php
-        $eventGroups = \App\Accessors\EventContactAccessor::getEventGroups($eventContact);
+        $eventGroups = $eventContactAccessor->eventGroups();
         $userEventGroups = \App\DataTables\View\EventGroupContactView::where([
             'event_id' => $event->id,
             'user_id' => $eventContact->user_id

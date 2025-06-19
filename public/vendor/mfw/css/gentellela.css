@@ -1,0 +1,351 @@
+@charset "UTF-8";
+.left_col {
+    background: #0d2033;
+}
+
+.container {
+    width: 100%;
+    padding: 0;
+    max-width: 100%;
+}
+
+.main_menu span.fa {
+    float: right;
+    text-align: center;
+    margin-top: 5px;
+    font-size: 10px;
+    min-width: inherit;
+    color: #C4CFDA;
+}
+
+.active a span.fa {
+    text-align: right !important;
+    margin-right: 4px;
+}
+
+.nav_menu {
+    float: left;
+    background: #EDEDED;
+    border-bottom: 1px solid #D9DEE4;
+    margin-bottom: 10px;
+    width: 100%;
+    position: relative;
+}
+
+@media (min-width: 480px) {
+    .nav_menu {
+        position: static;
+    }
+}
+
+.nav-md .container.body .col-md-3.left_col {
+    min-height: 100%;
+    width: 230px;
+    padding: 0;
+    position: absolute;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    z-index: 1;
+}
+
+.nav-md .container.body .col-md-3.left_col.menu_fixed {
+    height: 100%;
+    position: fixed;
+}
+
+body .container.body .right_col {
+    background: #F7F7F7;
+}
+
+.nav-md .container.body .right_col {
+    padding: 10px 20px 0;
+    margin-left: 230px;
+}
+
+.nav_title {
+    width: 230px;
+    float: left;
+    background: #0d2033;
+    border-radius: 0;
+    height: 57px;
+    padding: 0px;
+}
+
+
+.container {
+    width: 100%;
+    padding: 0;
+    max-width: 100%;
+}
+
+.navbar-nav > li > a, .navbar-brand, .navbar-nav > li > a {
+    color: #fff !important;
+}
+
+body {
+    color: #73879C;
+    background: #0d2033;
+    font-family: Roboto, Arial, "Droid Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.471;
+}
+
+h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+a {
+    color: #5A738E;
+}
+
+a, a:visited, a:focus, a:active, :visited, :focus, :active, .btn:focus, .btn:active:focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn.active.focus {
+    outline: 0;
+}
+
+a:hover, a:focus {
+    text-decoration: none;
+}
+
+.navbar {
+    margin-bottom: 0;
+}
+
+.nav > li {
+    position: relative;
+    display: block;
+}
+
+.nav.side-menu > li {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.nav.side-menu > li > a:hover {
+    color: #F2F5F7 !important;
+}
+
+.nav.side-menu > li > a:hover, .nav > li > a:focus {
+    text-decoration: none;
+    background: transparent;
+}
+
+.nav.child_menu {
+    display: none;
+}
+
+.nav.child_menu li:hover,
+.nav.child_menu li.active {
+    opacity: 0.8;
+}
+
+.nav-md ul.nav.child_menu li:before {
+    background: white;
+    opacity: 0.6;
+    bottom: auto;
+    content: "";
+    height: 8px;
+    left: 18px;
+    margin-top: 18px;
+    position: absolute;
+    right: auto;
+    width: 8px;
+    z-index: 1;
+    border-radius: 50%;
+}
+
+.nav-md ul.nav.child_menu li:after {
+    border-left: 1px solid white;
+    opacity: 0.6;
+    bottom: 0;
+    content: "";
+    left: 22px;
+    position: absolute;
+    top: 0;
+}
+
+.nav-md ul.nav.child_menu li:last-child::after {
+    bottom: 50%;
+}
+
+.nav.child_menu li li:hover,
+.nav.child_menu li li.active {
+    background: none;
+}
+
+.nav.child_menu li li a:hover,
+.nav.child_menu li li a.active {
+    color: #fff;
+}
+
+.nav > li > a {
+    position: relative;
+    display: block;
+    padding: 13px 15px 12px;
+}
+
+.nav li li.current-page a {
+    color: #fff;
+}
+
+.nav.navbar-nav > li > a {
+    color: #515356 !important;
+}
+
+.nav > li > a:hover, .nav > li > a:focus {
+    background-color: transparent;
+}
+
+.nav.child_menu > li > a {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 13px;
+    padding: 9px;
+}
+
+.main_menu_side {
+    padding: 0;
+}
+
+footer {
+    background: #fff;
+    padding: 10px 20px;
+    display: block;
+}
+
+/* *********  custom accordion  **************************** */
+*, *:before, *:after {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+h2 {
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.btn {
+    border-radius: 3px;
+}
+
+a.btn-success, a.btn-primary, a.btn-warning, a.btn-danger {
+    color: #fff;
+}
+
+.btn-success {
+    background: #26B99A;
+    border: 1px solid #169F85;
+}
+
+.btn-success:hover, .btn-success:focus, .btn-success:active, .btn-success.active, .open .dropdown-toggle.btn-success {
+    background: #169F85;
+}
+
+.btn.btn-app {
+    position: relative;
+    padding: 15px 5px;
+    margin: 0 0 10px 10px;
+    min-width: 80px;
+    height: 60px;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    border-radius: 0;
+    text-align: center;
+    color: #666;
+    border: 1px solid #ddd;
+    background-color: #fafafa;
+    font-size: 12px;
+}
+
+.btn.btn-app > .fa, .btn.btn-app > .glyphicon, .btn.btn-app > .ion {
+    font-size: 20px;
+    display: block;
+}
+
+.btn.btn-app:hover {
+    background: #f4f4f4;
+    color: #444;
+    border-color: #aaa;
+}
+
+.btn.btn-app:active, .btn.btn-app:focus {
+    -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+.btn.btn-app > .badge {
+    position: absolute;
+    top: -3px;
+    right: -10px;
+    font-size: 10px;
+    font-weight: 400;
+}
+
+
+/* *********  /widgets  **************************** */
+.divider {
+    border-bottom: 1px solid #ddd;
+    margin: 10px;
+}
+
+.divider-dashed {
+    border-top: 1px dashed #e7eaec;
+    background-color: #ffffff;
+    height: 1px;
+    margin: 10px 0;
+}
+
+.dropdown-menu a {
+    cursor: pointer;
+}
+
+fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.alert-success {
+    color: #ffffff;
+    background-color: #26b979;
+    border-color: rgba(38, 185, 154, 0.88);
+}
+
+.alert-success a {
+    color: white;
+}
+
+.alert-success a:hover {
+    color: white;
+    text-transform: underline;
+}
+
+.alert-info {
+    color: #E9EDEF;
+    background-color: rgba(52, 152, 219, 0.88);
+    border-color: rgba(52, 152, 219, 0.88);
+}
+
+.alert-warning {
+    color: #E9EDEF;
+    background-color: rgba(243, 156, 18, 0.88);
+    border-color: rgba(243, 156, 18, 0.88);
+}
+
+.alert-danger,
+.alert-error {
+    letter-spacing: 0.3px;
+    color: #ffffff;
+    background-color: #607d8b;
+    border-color: transparent;
+    border-left: 20px solid #c63e3e;
+    &.simplified {
+        background-color: var(--base-1) !important;
+        padding: 4px 8px !important;
+        border-left: 0;
+    }
+}

@@ -1,0 +1,77 @@
+body {
+    background-color: #ECF0F1;
+}
+
+.progress-circle {
+    position: relative;
+    height: 200px;
+    width: 200px;
+
+    div {
+        position: absolute;
+        height: 200px;
+        width: 200px;
+        border-radius: 50%;
+    }
+
+    div span {
+        position: absolute;
+        font-size: 25px;
+        line-height: 175px;
+        height: 175px;
+        width: 175px;
+        left: 12.5px;
+        top: 12.5px;
+        text-align: center;
+        border-radius: 50%;
+        background-color: white;
+    }
+
+    .background {
+        background-color: #b3cef6;
+    }
+
+    .rotate {
+        clip: rect(0 100px 200px 0);
+        background-color: #4b86db;
+    }
+
+    .left {
+        clip: rect(0 100px 200px 0);
+        opacity: 1;
+        background-color: #b3cef6;
+    }
+
+    .right {
+        clip: rect(0 100px 200px 0);
+        transform: rotate(180deg);
+        opacity: 0;
+        background-color: #4b86db;
+    }
+    &.small {
+        width: auto;
+        height: auto;
+        transform:scale(0.25);
+        div span {
+            @include set-rem(font-size,46);
+        }
+    }
+}
+
+.badge-right {
+    padding: 15px 0 13px;
+    .progress-circle {
+        position: relative;
+        top: -24px;
+        right: 43px;
+    }
+}
+
+@keyframes toggle {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}

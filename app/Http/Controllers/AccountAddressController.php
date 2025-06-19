@@ -29,6 +29,7 @@ class AccountAddressController extends Controller
     public function store(Account $account, AccountAddressRequest $request): RedirectResponse
     {
         if (!$this->ensureDataIsValid($request)) {
+            return $this->sendResponse();
         }
 
         try {
@@ -61,9 +62,11 @@ class AccountAddressController extends Controller
 
     public function update(Account $account, AccountAddress $address, AccountAddressRequest $request): RedirectResponse
     {
+
         if (!$this->ensureDataIsValid($request)) {
             return $this->sendResponse();
         }
+
         try {
             $this->manageBillingChange($account);
             $address->update($this->validated_data);

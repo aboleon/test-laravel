@@ -1,0 +1,247 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+li {
+  list-style-type: none;
+}
+
+body {
+  color: #67757d;
+}
+
+#site {
+  padding-top: 5px;
+  padding-bottom: 15px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header .top-icons .home-icon {
+  color: #E3328C;
+  font-size: 20px;
+}
+header .logo {
+  top: -20px;
+}
+
+/*------------------------------------
+- utils
+------------------------------------*/
+a {
+  color: #E3328C;
+  text-decoration: none;
+}
+
+.text-tint {
+  color: #E3328C;
+}
+
+.text-secondary-tint {
+  color: #dd5a43;
+}
+
+.text-gray {
+  color: #67757d;
+}
+
+.text-like {
+  display: inline !important;
+  border: none;
+  background-color: transparent;
+}
+
+.border-tint {
+  border-color: #E3328C !important;
+}
+
+.bg-tint {
+  background-color: #E3328C !important;
+  color: white !important;
+}
+
+.bg-gray {
+  background-color: #67757d !important;
+  color: white !important;
+}
+
+.fs-12 {
+  font-size: 12px;
+}
+
+.fs-14 {
+  font-size: 14px !important;
+}
+
+.fs-16 {
+  font-size: 16px;
+}
+
+.fs-18 {
+  font-size: 18px;
+}
+
+.gui-icon {
+  font-size: 14px;
+}
+@media (max-width: 576px) {
+  .gui-icon {
+    font-size: 24px;
+  }
+}
+
+.underline-hover:hover {
+  text-decoration: underline !important;
+}
+
+/*------------------------------------
+- main
+------------------------------------*/
+main {
+  margin-bottom: 50px;
+}
+main .sober-banner {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  margin-top: 10px;
+  /*height: 60px;*/
+  color: white;
+  border-top: 10px solid #E3328C;
+  background: rgb(57, 54, 61);
+  background: linear-gradient(0deg, rgb(97, 113, 120) 0%, rgb(161, 172, 177) 100%);
+}
+main .sober-banner h1 {
+  font-size: 1.5em;
+  margin-bottom: 0 !important;
+  padding: 5px 0;
+}
+@media (max-width: 576px) {
+  main .sober-banner h1 {
+    font-size: 1em;
+  }
+}
+main .sober-banner .backlink {
+  color: white;
+  text-decoration: none;
+  background: #E3328C;
+  font-size: 1em;
+}
+@media (max-width: 576px) {
+  main .sober-banner .backlink {
+    font-size: 0.8em;
+  }
+}
+main .event-banner {
+  border-top: 10px solid #a4acb1;
+  display: block;
+}
+main.home .congress .info {
+  background: url("/front/images/icons/greenstar.png") no-repeat left center;
+}
+main.home .congress .bracket {
+  color: #E3328C;
+}
+main.home .congress h2, main.home .congress h2 a {
+  color: #E3328C;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+}
+main.home .congress .info, main.home .congress h2 {
+  padding-left: 21px;
+}
+main.home .congress .image-link {
+  display: block;
+  border-top: 10px solid #a4acb1;
+}
+main.event .header .date::before, main.event .header .date::after {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: url("/front/images/icons/greenstar.png") no-repeat left center;
+  position: relative;
+  top: 3px;
+}
+main.event .header .date .bracket {
+  color: #E3328C;
+}
+main.event .header .title {
+  color: #E3328C;
+}
+main.event .legal-conditions {
+  font-size: 12px;
+}
+main.event .registration .item {
+  background-color: #E3328C;
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 30px;
+  height: 100px;
+  gap: 20px;
+}
+main.event .registration .item:hover {
+  background-color: #80ba26;
+}
+main.event .registration .item .right {
+  text-align: center;
+}
+main.event .registration .item .right .title {
+  font-weight: bold;
+  font-size: 14px;
+}
+main.event .registration .item .right .subtitle {
+  font-size: 12px;
+  font-style: italic;
+}
+main.event .already-registered {
+  background: #80ba26;
+  color: white;
+  text-decoration: none;
+  font-size: 13px;
+}
+main.event .already-registered:hover {
+  background: #E3328C;
+}
+main.page-404 h1, main.page-404 div {
+  color: black !important;
+}
+main .dashboard ul.dashboard-links {
+  padding-left: 0px !important;
+}
+main .dashboard ul.dashboard-links li {
+  margin-bottom: 10px;
+  padding: 10px;
+  text-transform: uppercase;
+}
+main .dashboard ul.dashboard-links li:hover {
+  background: #E3328C;
+}
+main .dashboard ul.dashboard-links li:hover a {
+  color: white;
+  display: block;
+}
+main .dashboard .order-recap {
+  border: 1px dotted #E3328C;
+  width: 150px;
+}
+
+footer {
+  margin-top: auto;
+  border-top: 10px solid #E3328C;
+  font-size: 0.8em;
+}
+footer a {
+  color: #67757d;
+  text-decoration: none;
+}
+
+/*# sourceMappingURL=main.css.map */

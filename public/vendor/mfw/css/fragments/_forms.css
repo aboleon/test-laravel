@@ -1,0 +1,95 @@
+form, .mfw-form {
+    h4 {
+        font-size: 20px;
+        color: black;
+        position: relative;
+        margin-bottom: 25px;
+
+        &:after {
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            content: '';
+            width: 20px;
+            height: 2px;
+            background: var(--base-1);
+        }
+    }
+
+    strong {
+        display: block;
+        color: black;
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 10px;
+        margin-top: 5px;
+    }
+
+    .form-control {
+        border-radius: 6px;
+        padding: 11px 14px;
+        box-shadow: 0 4px 14px rgb(235 235 235);
+
+        &:focus {
+            border-color: #d5dee1;
+            box-shadow: 0 0 0 0.25rem rgb(220 246 255);
+        }
+    }
+}
+
+
+legend, .legend {
+    color: black;
+    font-size: 21px;
+    padding-bottom: 5px;
+    border-bottom: 5px solid #e6edf1;
+    position: relative;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.form-label, .form-check-label {
+    font-weight: 700;
+    color: black;
+}
+
+.fw-normal {
+    .form-label, .form-check-label {
+        font-weight: normal !important;
+    }
+}
+
+.form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+    margin-top: 0;
+    margin-left: -22px;
+    margin-right: 9px;
+    transition: 300ms all ease;
+    border-color: #b2b2b2;
+
+    &:checked, &:hover {
+        background-color: var(--base-1);
+        border-color: var(--base-1);
+    }
+}
+
+
+[type=checkbox] {
+    color: #424242;
+}
+
+.form-switch {
+    display: flex;
+    align-items: center;
+
+    .form-check-input {
+        width: 3em;
+        height: 1.8em;
+        transition: 300ms all ease;
+
+        &:hover {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e")
+        }
+    }
+}

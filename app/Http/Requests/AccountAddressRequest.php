@@ -20,14 +20,12 @@ class AccountAddressRequest extends FormRequest
         parent::__construct();
         $this->setPrefix('wa_geo');
         $this->address_validation = (new GoogleAddressValidation())->setPrefix('wa_geo')->logic();
-        $this->cleanAddressRules();
     }
 
     public function rebuildWithNoPrefix(): static
     {
         $this->removePrefix();
         $this->address_validation = (new GoogleAddressValidation())->logic();
-        $this->cleanAddressRules();
         return $this;
     }
 
@@ -87,14 +85,5 @@ class AccountAddressRequest extends FormRequest
             ],
             $this->address_validation['messages']
         );
-    }
-
-    //--------------------------------------------
-    //
-    //--------------------------------------------
-    private function cleanAddressRules(){
-        unset($this->address_validation['rules'][ $this->prefix . 'administrative_area_level_1']);
-        unset($this->address_validation['rules'][ $this->prefix . 'administrative_area_level_1_short']);
-        unset($this->address_validation['rules'][ $this->prefix . 'administrative_area_level_2']);
     }
 }

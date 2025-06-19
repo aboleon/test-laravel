@@ -3,6 +3,7 @@
 namespace App\Dashboards\Queries;
 
 use App\Dashboards\Traits\DashboardTrait;
+use App\Enum\OrderType;
 use App\Traits\Models\EventModelTrait;
 use Illuminate\Support\Facades\DB;
 
@@ -23,6 +24,7 @@ class EventContactsWhitoutAnyOrderQuery
         FROM orders o
         WHERE o.client_id = ec.user_id
         AND o.event_id = ec.event_id
+        AND o.type = ?
     )
     AND NOT EXISTS (
         SELECT 1
@@ -32,7 +34,10 @@ class EventContactsWhitoutAnyOrderQuery
         AND o.event_id = ec.event_id
     )
 ",
-            [$this->event->id],
+            [
+                $this->event->id,
+                OrderType::ORDER->value
+            ],
         )->total;
 
         return [

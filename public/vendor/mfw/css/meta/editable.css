@@ -1,0 +1,37 @@
+@import "../fragments/_meta.css";
+@import "../fragments/_forms.css";
+@import "../fragments/_buttons.css";
+@import "../fragments/_editable.css";
+@import "../fragments/publication_status.css";
+
+#meta_bloc_list {
+    li {
+        background-color: rgb(96 125 139 / 12%);
+        border-bottom: 1px solid #ccc;
+        padding: 6px 8px;
+        a {
+            display: block;
+            color: black;
+        }
+        font-weight: 600;
+        code {
+            margin-top: -3px;
+            color: #d63384;
+        }
+        &.active {
+            background-color: #607d8b;
+            a {
+                color: white;
+                code {
+                    color: white;
+                    opacity: 0.75;
+                }
+            }
+        }
+    }
+}
+#topbar_submit {
+    margin-left: 20px;
+    padding-left: 10px;
+    border-left: 2px dotted #bdbdbd;
+}

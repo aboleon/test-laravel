@@ -1,0 +1,42 @@
+.meta-tag {
+    background: #b42757;
+    color: white;
+    font-size: 12px;
+
+    a {
+        color: white;:
+    }
+}
+
+#c-meta {
+    .toggable {
+        display: none;
+    }
+
+    legend {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: 200ms ease all;
+
+        &:hover, &.active {
+            border-color: #6ab9d3;
+        }
+
+        &:before {
+            transition: 200ms ease all;
+            display: block;
+            content: '';
+            width: 15px;
+            height: 15px;
+            background: url(../media/double-right-arrows-angles.svg);
+            background-size: cover;
+        }
+        &.active {
+            &:before {
+                transform: rotate(90deg);
+            }
+        }
+    }
+}

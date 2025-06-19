@@ -1,5 +1,6 @@
 <?php
 namespace App\MailTemplates\Traits\Variables;
+
 use App\Actions\Front\AutoConnectHelper;
 use App\Enum\OrderClientType;
 use App\Enum\OrderType;
@@ -8,7 +9,17 @@ use App\Models\Order;
 use Illuminate\Support\Carbon;
 use MetaFramework\Accessors\Countries;
 
-Trait EventVariables {
+trait EventVariables {
+
+    // Add a property to track if we're in PDF mode
+    protected bool $isPdfMode = false;
+
+    // Add a method to set PDF mode
+    public function setPdfMode(bool $isPdf): self
+    {
+        $this->isPdfMode = $isPdf;
+        return $this;
+    }
 
     public function EVENT_Type(): string
     {
@@ -110,6 +121,7 @@ Trait EventVariables {
 
         return $clientNames->implode(', ');
     }
+
     public function EVENT_BannerLarge(): string
     {
         if (!$this->event) {
@@ -119,7 +131,7 @@ Trait EventVariables {
         $banner = $this->getBanner($this->event, 'banner_large');
 
         if ($banner) {
-            return '<img src="' . $banner . '" alt="'.$this->event->texts->name.'" style="max-width: 100%;" />';
+            return $this->formatImageTag($banner, $this->event->texts?->name ?: config('app.name'));
         }
 
         return '';
@@ -134,7 +146,7 @@ Trait EventVariables {
         $banner = $this->getBanner($this->event, 'banner_medium');
 
         if ($banner) {
-            return '<img src="' . $banner . '" alt="'.$this->event->texts->name.'" style="max-width: 100%;" />';
+            return $this->formatImageTag($banner, $this->event->texts->name);
         }
 
         return '';
@@ -149,7 +161,7 @@ Trait EventVariables {
         $banner = $this->getBanner($this->event, 'thumbnail');
 
         if ($banner) {
-            return '<img src="' . $banner . '" alt="'.$this->event->texts->name.'" style="max-width: 100%;" />';
+            return $this->formatImageTag($banner, $this->event->texts->name);
         }
 
         return '';
@@ -163,5 +175,32 @@ Trait EventVariables {
 
         $token = AutoConnectHelper::generateAutoConnectUrlForEventContact($this->eventContact);
         return '<a href="' . $token . '">' . __('ui.auto_connect_link') . '</a>';
+    }
+
+    /**
+     * Format image tag based on whether we're generating a PDF or HTML
+     */
+    protected function formatImageTag(string $imagePath, string $altText): string
+    {
+        if ($this->isPdfMode) {
+            // For PDF, convert to absolute path
+            $absolutePath = public_path($imagePath);
+
+            // Check if file exists
+            if (file_exists($absolutePath)) {
+                // Option 1: Use absolute file path (works with most PDF generators)
+                return '<img src="' . $absolutePath . '" alt="' . htmlspecialchars($altText) . '" style="max-width: 100%;" />';
+
+                // Option 2: Convert to base64 (more reliable but uses more memory)
+                // $imageData = base64_encode(file_get_contents($absolutePath));
+                // $mimeType = mime_content_type($absolutePath);
+                // return '<img src="data:' . $mimeType . ';base64,' . $imageData . '" alt="' . htmlspecialchars($altText) . '" style="max-width: 100%;" />';
+            }
+
+            return '';
+        }
+
+        // For HTML display, use relative URL
+        return '<img src="' . $imagePath . '" alt="' . htmlspecialchars($altText) . '" style="max-width: 100%;" />';
     }
 }

@@ -42,7 +42,7 @@ class SellableByEvent extends Model
         parent::__construct($attributes);
         $this->defineTranslatables();
     }
-    public function vat(): BelongsTo
+    public function vat(): BelongsToN
     {
         return $this->belongsTo(Vat::class, 'vat_id');
     }

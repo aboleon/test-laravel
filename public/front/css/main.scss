@@ -1,0 +1,321 @@
+$rose: #E3328C;
+$gray: #67757d;
+$grayBorder: #a4acb1;
+$green: #80ba26;
+$orange: #dd5a43;
+$sm: 576px;
+$md: 768px;
+$lg: 992px;
+$xl: 1200px;
+$xxl: 1400px;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+li {
+  list-style-type: none;
+}
+
+
+body {
+  color: $gray;
+}
+
+#site {
+  padding-top: 5px;
+  padding-bottom: 15px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  .top-icons {
+    .home-icon {
+      color: $rose;
+      font-size: 20px;
+    }
+  }
+
+  .logo {
+    top: -20px;
+  }
+}
+
+
+/*------------------------------------
+- utils
+------------------------------------*/
+a {
+  color: $rose;
+  text-decoration: none;
+}
+
+.text-tint {
+  color: $rose;
+}
+
+.text-secondary-tint {
+  color: $orange;
+}
+
+.text-gray {
+  color: $gray;
+}
+
+.text-like {
+  display: inline !important;
+  border: none;
+  background-color: transparent;
+}
+
+.border-tint {
+  border-color: $rose !important;
+}
+
+.bg-tint {
+  background-color: $rose !important;
+  color: white !important;
+}
+
+.bg-gray {
+  background-color: $gray !important;
+  color: white !important;
+}
+
+.fs-12 {
+  font-size: 12px;
+}
+
+.fs-14 {
+  font-size: 14px !important;
+}
+
+.fs-16 {
+  font-size: 16px;
+}
+
+.fs-18 {
+  font-size: 18px;
+}
+
+
+.gui-icon {
+  font-size: 14px;
+  @media (max-width: $sm) {
+    font-size: 24px;
+  }
+}
+
+.underline-hover:hover {
+  text-decoration: underline !important;
+}
+
+/*------------------------------------
+- main
+------------------------------------*/
+main {
+  margin-bottom: 50px;
+
+  .sober-banner {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    margin-top: 10px;
+    /*height: 60px;*/
+    color: white;
+    border-top: 10px solid $rose;
+    background: rgb(57, 54, 61);
+    background: linear-gradient(0deg, rgba(97, 113, 120, 1) 0%, rgba(161, 172, 177, 1) 100%);
+
+    h1 {
+      font-size: 1.5em;
+      margin-bottom: 0 !important;
+      padding: 5px 0;
+      @media (max-width: $sm) {
+        font-size: 1.0em;
+      }
+    }
+
+
+    .backlink {
+      color: white;
+      text-decoration: none;
+      background: $rose;
+      font-size: 1.0em;
+      @media (max-width: $sm) {
+        font-size: 0.8em;
+      }
+    }
+
+  }
+
+  .event-banner {
+    border-top: 10px solid $grayBorder;
+    display: block;
+  }
+
+
+  &.home {
+    .congress {
+
+      .info {
+        background: url('/front/images/icons/greenstar.png') no-repeat left center;
+      }
+
+      .bracket {
+        color: $rose;
+      }
+
+      h2, h2 a {
+        color: $rose;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+
+      }
+
+      .info, h2 {
+        padding-left: 21px;
+      }
+
+      .image-link {
+        display: block;
+        border-top: 10px solid $grayBorder;
+      }
+    }
+  }
+
+
+  &.event {
+
+    .header {
+
+      .date {
+
+        &::before,
+        &::after {
+          content: '';
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          background: url('/front/images/icons/greenstar.png') no-repeat left center;
+          position: relative;
+          top: 3px;
+        }
+
+        .bracket {
+          color: $rose;
+        }
+      }
+
+      .title {
+        color: $rose;
+      }
+    }
+
+    .legal-conditions {
+      font-size: 12px;
+    }
+
+    .registration {
+      .item {
+        background-color: $rose;
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        padding: 30px;
+        height: 100px;
+        gap: 20px;
+
+        &:hover {
+          background-color: $green;
+        }
+
+        .right {
+          text-align: center;
+
+          .title {
+            font-weight: bold;
+            font-size: 14px;
+          }
+
+          .subtitle {
+            font-size: 12px;
+            font-style: italic;
+          }
+        }
+      }
+    }
+
+    .already-registered {
+      background: $green;
+      color: white;
+      text-decoration: none;
+      font-size: 13px;
+
+      &:hover {
+        background: $rose;
+      }
+    }
+
+  }
+
+
+  &.page-404 {
+    h1, div {
+      color: black !important;
+    }
+  }
+
+
+  .dashboard {
+    ul.dashboard-links {
+      padding-left: 0px !important;
+
+      li {
+        margin-bottom: 10px;
+        padding: 10px;
+        text-transform: uppercase;
+
+        &:hover {
+          background: $rose;
+
+          a {
+            color: white;
+            display: block;
+          }
+        }
+      }
+    }
+
+    .order-recap {
+      border: 1px dotted $rose;
+      width: 150px;
+    }
+  }
+
+}
+
+footer {
+  margin-top: auto;
+  border-top: 10px solid $rose;
+  font-size: 0.8em;
+
+  a {
+    color: $gray;
+    text-decoration: none;
+  }
+}
+
+
+
+
+
+

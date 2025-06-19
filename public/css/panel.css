@@ -1,0 +1,391 @@
+@import "../vendor/mfw/css/panel.css";
+@import "../vendor/mfw/css/show.css";
+
+.modal-backdrop  {
+    z-index: 1;
+}
+
+.veil {
+    position: absolute;
+    background: white;
+    width: 100%;
+    height: 100%;
+    opacity: 0.9;
+    top: 0;
+    left: 0;
+    border-radius: 5px;
+    z-index: 9;
+
+    .loading {
+        width: 120px !important;
+        height: 120px !important;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.smaller {
+    font-size: 0.72em;
+}
+
+
+.big-select2-context {
+    .select2-container {
+        width: 100% !important;
+    }
+}
+
+ul.mfw-actions {
+    float: right;
+    align-items: center;
+
+    li .lg-link {
+        padding: 5px 6px 4px;
+        margin-top: -1px;
+        display: block;
+
+        img {
+            border-radius: 2px;
+        }
+
+        a {
+            display: initial;
+            width: auto;
+            height: auto;
+            color: black;
+            font-weight: 700;
+
+            &:first-of-type {
+                margin-left: 5px;
+            }
+
+            &:last-of-type {
+                margin-right: 5px;
+            }
+
+            &:hover {
+                color: var(--base-1);
+                text-decoration: underline;
+            }
+        }
+    }
+
+    li.wg-drop{
+        a{
+            width: auto;
+            height: auto;
+            justify-content: flex-start;
+        }
+    }
+}
+
+.yajra-datatable, .table.index {
+    thead th:last-of-type {
+        text-align: right;
+    }
+}
+
+.add-dynamic {
+    cursor: pointer;
+
+    i {
+        color: #73879C;
+        transition: 200ms all ease;
+
+        &:hover {
+            color: #48a97c;
+        }
+    }
+}
+
+.btn-danger, .mfw-status.offline, .mfw-bg-red {
+    background: var(--base-1) !important;
+}
+
+.mfw-bg-green {
+    background: #48a97c;
+}
+
+
+.mfw-badge {
+    padding: 4px 10px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.mfw-bg-red {
+    background: var(--base-1);
+    color: white !important;
+
+    &:hover {
+        background: #B42757 !important;
+        color: #eee !important;
+    }
+
+    &:active {
+        background: #ab2552 !important;
+        color: white !important;
+    }
+}
+
+
+.mfw-bg-red-dark {
+    background: #7d1c3e !important;
+    color: white !important;
+
+    &:hover {
+        background: #621631 !important;
+        color: white !important;
+    }
+
+    &:active {
+        background: #a2355c !important;
+        color: white !important;
+    }
+}
+
+.mfw-bg-red-dark-items {
+    .dropdown-item {
+        &:active {
+            background: #b42757 !important;
+        }
+    }
+}
+
+
+.mfw-bg-yellow {
+    background: var(--ab-yellow);
+    color: #1A1A1A;
+}
+
+.mfw-bg-default {
+    background: var(--ab-blue-grey);
+    color: white;
+}
+
+b {
+    color: black;
+}
+
+
+.accordion-button {
+    background-color: var(--bs-accordion-active-bg);
+    font-weight: 600;
+
+    &:focus {
+        box-shadow: none;
+    }
+}
+
+.custom-intervention-row {
+    background-color: #ece8d6 !important;
+
+    td {
+        background-color: transparent !important;
+    }
+}
+
+.icon-success {
+    color: #48a97c;
+}
+
+.icon-failure {
+    color: #e74c3c;
+}
+
+
+/*------------------------------------
+- Programme
+------------------------------------*/
+.intervention .date-cell {
+    background-color: #d9e1ee !important;
+    border: 1px solid white !important;
+}
+
+.intervention .session-handle, .intervention .intervention-handle {
+    cursor: grab;
+    padding: 5px;
+    vertical-align: middle;
+    text-align: left;
+    user-select: none;
+}
+
+.intervention .session-handle:hover, .intervention .intervention-handle:hover {
+    background-color: #f5f5f5;
+}
+
+.intervention-container {
+
+
+    #sortable {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    #sortable > li {
+        border: 1px solid #ddd;
+        padding: 8px;
+        margin-bottom: 4px;
+        background-color: #f9f9f9;
+    }
+
+    #sortable > li > ul {
+        padding: 0;
+        margin: 0;
+    }
+
+    #sortable > li > ul > li {
+        border-top: 1px solid #ddd;
+        list-style-type: none;
+        padding: 8px;
+    }
+}
+
+.intervention-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.intervention-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+/* Add fixed widths for each column if needed */
+.intervention-table .intervention-handle {
+    width: 150px;
+}
+
+#program-organizer {
+
+    .intervention {
+        tr, td {
+            /*border: 1px solid red;*/
+        }
+    }
+
+    .session-cell, .intervention-cell {
+        position: relative;
+        background-color: transparent;
+        border: 1px solid #cecece !important;
+    }
+
+
+    .arrow {
+        position: absolute;
+        right: 5px;
+        cursor: pointer;
+        color: #94A9BF;
+
+        &:hover {
+            color: #73879C;
+        }
+    }
+
+    .arrow-up {
+        top: 0;
+    }
+
+    .arrow-down {
+        bottom: 0;
+    }
+}
+
+/*------------------------------------
+- query builder
+------------------------------------*/
+.query-builder .rule-operator-container select,
+.query-builder .rule-value-container select,
+.query-builder .rule-value-container input {
+    padding: 11px 50px 11px 10px !important;
+}
+
+/*------------------------------------
+- css animations
+------------------------------------*/
+@keyframes pulseRedEffect {
+    0% {
+        background-color: white;
+    }
+    50% {
+        background-color: #f4ebeb;
+    }
+    100% {
+        background-color: white;
+    }
+}
+
+.pulseRed {
+    animation: pulseRedEffect 2s infinite;
+}
+
+
+/*------------------------------------
+- buttons
+------------------------------------*/
+.btn-green {
+    background: var(--ab-green) !important;
+    color: white !important;
+}
+
+.btn-yellow {
+    background: var(--ab-yellow) !important;
+    color: #1A1A1A !important;
+}
+
+.btn-blue-gray {
+    background: var(--ab-blue-grey) !important;
+    color: white !important;
+}
+
+.btn-red {
+    background: var(--base-1) !important;
+    color: white !important;
+}
+
+.btn-violet {
+    background: var(--ab-violet) !important;
+    color: white !important;
+}
+
+.btn-black {
+    background: var(--ab-dev) !important;
+    color: white !important;
+}
+
+/*------------------------------------
+- select2
+------------------------------------*/
+.select2-container--open {
+    z-index: 2000; /* show over bs modal, which is around 1000 */
+}
+
+#modal_add_eventcontact_panel .select2 {
+    width: 100% !important;
+}
+
+/*------------------------------------
+- generic
+------------------------------------*/
+.cursor-pointer{
+    cursor: pointer;
+}
+
+.warning-icon {
+    color: #ffcc31;
+    font-size: 20px;
+    background: #212529;
+    padding: 6px 12px;
+    display: inline-block;
+    margin: 0 7px 0 0;
+}
+.event-image {
+    height: 100px;
+    width: auto;
+    background: #1a1a1a;
+    object-fit: cover;
+}
+

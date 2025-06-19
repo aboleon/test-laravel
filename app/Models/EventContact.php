@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use MetaFramework\Casts\BooleanNull;
 
 
@@ -178,7 +179,12 @@ class EventContact extends Model
 
     public function grantDeposit(): HasOne
     {
-        return $this->hasOne(EventDeposit::class, 'event_contact_id');
+        return $this->hasOne(EventDeposit::class, 'event_contact_id')->where('shoppable_type','grantdeposit');
+    }
+
+    public function sellableDeposits(): HasMany
+    {
+        return $this->hasMany(EventDeposit::class, 'event_contact_id')->where('shoppable_type','App\Models\EventManager\Sellable');
     }
 
     public function grantStats(): HasMany
@@ -196,6 +202,23 @@ class EventContact extends Model
             'user_id',
             'event_group_id'
         );
+    }
+
+    public function eventGroup(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            EventGroup::class,
+            EventGroupContact::class,
+            'user_id',
+            'id',
+            'user_id',
+            'event_group_id'
+        )->latest();
+    }
+
+    public function getBaseGroupAttribute(): ?Group
+    {
+        return $this->eventGroup?->group;
     }
 
     public function accommodationAttributionsRelation(): HasMany

@@ -1,0 +1,25 @@
+.mediaclass .preview {
+    min-height: auto;
+}
+.template-upload, .uploaded-image>div, .impFileName {
+    padding: 0;
+}
+.row.infos {
+    align-items: center;
+    padding: 10px;
+}
+.uploaded-image span.unlink {
+    top: 6px;
+}
+.impImg.preview.file {
+    background-position: 5% !important;
+    background-size: 13% !important;
+}
+.uploaded-image .actions {
+    transform: none;
+    top: 0;
+    left: 17%;
+}
+.uploaded .row.params {
+    display: none;
+}

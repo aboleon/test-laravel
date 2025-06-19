@@ -4,6 +4,7 @@ namespace App\DataTables;
 
 use App\Accessors\EventContactAccessor;
 use App\DataTables\View\EventContactView;
+use App\Enum\ParticipantType;
 use App\Enum\SavedSearches;
 use App\Models\AdvancedSearchFilter;
 use App\Models\Event;
@@ -78,16 +79,15 @@ class EventContactDataTable extends DataTable
     {
         $searchFilters = AdvancedSearchFilter::getFilters(SavedSearches::EVENT_CONTACTS->value);
 
-
         $groupId = request("group_id");
         $query   = EventContactView::query()
             ->where('event_id', $this->event->id)
             ->when($this->group !== 'all', function ($q) {
-                if (in_array($this->group, ['industry', 'orator', 'congress'])) {
+                if (in_array($this->group, ParticipantType::values())) {
                     return $q->where('participation_type_group', $this->group);
                 }
 
-                return $q->where('participation_type_group', "not implemented yet");
+                return $q;
             })
             ->when(null !== $groupId, function ($q) use ($groupId) {
                 $groupId = intval($groupId);
@@ -109,7 +109,6 @@ class EventContactDataTable extends DataTable
 
         if ( ! $this->filteredIds) {
             if ($searchFilters) {
-                // Use JOIN with advanced_searches table instead of WHERE IN
                 $query->join('advanced_searches', function ($join) {
                     $join
                         ->on('event_contact_view.id', '=', 'advanced_searches.id')
@@ -118,17 +117,14 @@ class EventContactDataTable extends DataTable
                 });
             }
         } else {
-            // If filteredIds are provided, keep using WHERE IN
             $query->whereIn('id', $this->filteredIds);
         }
 
-        // Make sure we select the columns from the EventContactView table
-        // to avoid column ambiguity with joined tables
         $query->select('event_contact_view.*');
 
         //$query->orderBy('created_at', 'desc');
 
-        return $query->with(['eventContact.account', 'eventContact.eventGroups']);
+        return $query->with(['eventContact.account']);
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Accessors\EventContactAccessor;
 use App\Accessors\Order\Orders;
 use App\Actions\EventManager\GrantActions;
 use App\Dashboards\EventContactsSecondaryDashboardFilter;
+use App\Dashboards\Queries\EventContactsWhitoutAnyOrderQuery;
 use App\DataTables\EventContactDashboardChoosableDataTable;
 use App\DataTables\EventContactDashboardInterventionDataTable;
 use App\DataTables\EventContactDashboardSessionDataTable;
@@ -18,6 +19,7 @@ use App\DataTables\View\EventDepositView;
 use App\Enum\RegistrationType;
 use App\Enum\SavedSearches;
 use App\Events\EventContactPecUpdated;
+use App\Exports\EventContact\ExportConfig;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EventManager\EventContact\EventContactRequest;
@@ -41,18 +43,19 @@ class EventContactController extends Controller
     public function index(Event $event, string $group, ?string $withOrder = null): JsonResponse|View
     {
         $secondaryFilter = (string)request('secondaryFilter');
-        $filteredIds = [];
+        $filteredIds     = [];
 
         $groupInstance = null;
 
         if ((int)request('group_id')) {
             $groupInstance = Group::findOrFail(request('group_id'));
         }
-
-        if ($group == 'industry' && !$secondaryFilter) {
-            $withOrder = 'yes';
-        }
-
+        /* // Incohérent par rapport aux exports et puis on a déjà un sous-menu Avec ou Sans commandes
+            // A.M. 18/06/2025
+                if ($group == ParticipantType::INDUSTRY->value && ! $secondaryFilter) {
+                    $withOrder = 'yes';
+                }
+        */
         # Les Accès rapides
         if ($secondaryFilter) {
             $filteredIds = new EventContactsSecondaryDashboardFilter($secondaryFilter)->setEvent($event)->run()->getIds();
@@ -61,30 +64,30 @@ class EventContactController extends Controller
 
         $dataTable = new EventContactDataTable($event, $group, $withOrder, $filteredIds);
 
-        if($group=='all') {
-            $sessionCount['all'] = EventContactView::where('event_id', $event->id)->count();
+        if ($group == 'all') {
+            $sessionCount['all']            = EventContactView::where('event_id', $event->id)->count();
             $sessionCountWebRegister['all'] = EventContactView::where('event_id', $event->id)->where('registration_type', '!=', '')->count();
-        }
-        else {
-            $sessionCount[$group] = EventContactView::where('event_id', $event->id)->where('participation_type_group', '=', $group)->count();
+        } else {
+            $sessionCount[$group]            = EventContactView::where('event_id', $event->id)->where('participation_type_group', '=', $group)->count();
             $sessionCountWebRegister[$group] = EventContactView::where('event_id', $event->id)->where('participation_type_group', '=', $group)->where('registration_type', '!=', '')->count();
         }
 
-        $sessionCountwithOrder = EventContactView::where('event_id', $event->id)->where('nb_orders', '>', 0)->count();
-        $sessionCountwithoutOrder = EventContactView::where('event_id', $event->id)->where('nb_orders', '=', 0)->count();
+        $sessionCountwithOrder                 = EventContactView::where('event_id', $event->id)->where('nb_orders', '>', 0)->count();
+        $sessionCountwithoutOrderOrAttrubution = new EventContactsWhitoutAnyOrderQuery()->setEvent($event)->run();
 
         return $dataTable->render('events.manager.event_contact.index', [
-            'secondaryFilter' => $secondaryFilter,
-            'searchFilters' => AdvancedSearchFilter::getFilters(SavedSearches::EVENT_CONTACTS->value),
-            'withOrder' => $withOrder,
-            "event"     => $event,
-            "dataTable" => $dataTable,
-            "group"     => $groupInstance,
-            "groupType" => $group,
-            "sessionCount" => $sessionCount,
-            "sessionCountwithOrder" => $sessionCountwithOrder,
-            "sessionCountwithoutOrder" => $sessionCountwithoutOrder,
-            "sessionCountWebRegister" => $sessionCountWebRegister
+            'exports'                  => ExportConfig::getExportablesGroups(),
+            'secondaryFilter'          => $secondaryFilter,
+            'searchFilters'            => AdvancedSearchFilter::getFilters(SavedSearches::EVENT_CONTACTS->value),
+            'withOrder'                => $withOrder,
+            "event"                    => $event,
+            "dataTable"                => $dataTable,
+            "group"                    => $groupInstance,
+            "groupType"                => $group,
+            "sessionCount"             => $sessionCount,
+            "sessionCountwithOrder"    => $sessionCountwithOrder,
+            "sessionCountwithoutOrder" => $sessionCountwithoutOrderOrAttrubution['total'] ?? 0,
+            "sessionCountWebRegister"  => $sessionCountWebRegister,
         ]);
     }
 

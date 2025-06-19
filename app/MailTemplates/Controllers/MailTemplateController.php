@@ -104,7 +104,6 @@ class MailTemplateController extends Controller
     public function show(MailTemplate $mailtemplate)
     {
         $lg = app()->getLocale();
-
         $as = 'mail';
 
         if (in_array(request('lg'), config('mfw.translatable.locales'))) {
@@ -117,8 +116,8 @@ class MailTemplateController extends Controller
             $as = request('as');
         }
 
-        $parsed = $this->getRandomParsed($mailtemplate);
-
+        // Pass the PDF mode flag to getRandomParsed
+        $parsed = $this->getRandomParsed($mailtemplate, $as === 'pdf');
 
         if ($as == 'pdf') {
             return (new PdfPrinter($parsed))->stream();
@@ -251,6 +250,12 @@ class MailTemplateController extends Controller
 
             // Create a Courrier instance with real data
             $courrier = new Courrier($event, $dummyTemplate, $eventContact);
+
+            // Check if we're in PDF mode from request
+            if (request('as') === 'pdf') {
+                $courrier->setPdfMode(true);
+            }
+
             $courrier->highlight()->serve();
 
             // Get computed values with real data
@@ -281,7 +286,6 @@ class MailTemplateController extends Controller
             }
         }
 
-
         return view('mailtemplates.variables', [
             'tables' => $tables,
             'event' => $event,
@@ -291,11 +295,18 @@ class MailTemplateController extends Controller
         ]);
     }
 
-    private function getRandomParsed(MailTemplate $mailtemplate): Template
+    private function getRandomParsed(MailTemplate $mailtemplate, bool $isPdf = false): Template
     {
         $event        = Event::inRandomOrder()->first();
         $eventContact = $event->contacts->isNotEmpty() ? $event->contacts->random() : null;
 
-        return new Courrier($event, $mailtemplate, $eventContact)->highlight()->serve();
+        $courrier = new Courrier($event, $mailtemplate, $eventContact);
+
+        // Set PDF mode if needed
+        if ($isPdf) {
+            $courrier->setPdfMode(true);
+        }
+
+        return $courrier->highlight()->serve();
     }
 }

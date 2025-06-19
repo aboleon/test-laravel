@@ -1,0 +1,17 @@
+:root {
+    --ab-indigo: #183468;
+    --ab-indigo-dark: #0F1D37;
+    --ab-green: #4cb797;
+    --ab-blue:#18abdc;
+    --ab-blue-grey:#456777;
+    --ab-nav-blue:#00adc3;
+    --ab-dev: #3a3a3a;
+    --ab-base:#F5F3EE;
+    --ab-grey: #bfcad8;
+    --ab-text-grey: #919191;
+    --ab-indigo-light:#6c7581;
+    --ab-violet:#981c95;
+    --ab-yellow:#FFC107;
+    --base-1: #b42757;
+    --nav-dashboard: var(--base-1);
+}

@@ -2,37 +2,57 @@
 
 namespace App\Services\Filters\Traits;
 
-trait FiltersTrait {
-
-
+trait FiltersTrait
+{
     /**
-     * Map JS operators to SQL operators
+     * Map frontend operators to SQL operators
      *
-     * @param  string  $operator  The JS operator name
-     *
-     * @return array Returns the SQL operator and any additional parameters
+     * @param string $operator
+     * @return array
      */
     protected function mapOperatorToSql(string $operator): array
     {
-        return match ($operator) {
+        $mapping = [
             'equal' => ['operator' => '=', 'needs_value' => true],
             'not_equal' => ['operator' => '!=', 'needs_value' => true],
-            'begins_with' => ['operator' => 'LIKE', 'format' => '%s%%', 'needs_value' => true],
-            'not_begins_with' => ['operator' => 'NOT LIKE', 'format' => '%s%%', 'needs_value' => true],
-            'contains' => ['operator' => 'LIKE', 'format' => '%%%s%%', 'needs_value' => true],
-            'not_contains' => ['operator' => 'NOT LIKE', 'format' => '%%%s%%', 'needs_value' => true],
-            'ends_with' => ['operator' => 'LIKE', 'format' => '%%%s', 'needs_value' => true],
-            'not_ends_with' => ['operator' => 'NOT LIKE', 'format' => '%%%s', 'needs_value' => true],
-            'is_empty' => ['operator' => '=', 'value' => '', 'needs_value' => false],
-            'is_not_empty' => ['operator' => '!=', 'value' => '', 'needs_value' => false],
-            'is_null' => ['operator' => 'IS NULL', 'needs_value' => false],
-            'is_not_null' => ['operator' => 'IS NOT NULL', 'needs_value' => false],
             'less' => ['operator' => '<', 'needs_value' => true],
             'less_or_equal' => ['operator' => '<=', 'needs_value' => true],
             'greater' => ['operator' => '>', 'needs_value' => true],
             'greater_or_equal' => ['operator' => '>=', 'needs_value' => true],
-            'between' => ['operator' => 'BETWEEN', 'needs_value' => true, 'needs_two_values' => true],
-            default => throw new \InvalidArgumentException("Unsupported operator: {$operator}"),
-        };
+            'between' => ['operator' => 'BETWEEN', 'needs_value' => true],
+            'not_between' => ['operator' => 'NOT BETWEEN', 'needs_value' => true],
+            'in' => ['operator' => 'IN', 'needs_value' => true],
+            'not_in' => ['operator' => 'NOT IN', 'needs_value' => true],
+            'begins_with' => ['operator' => 'LIKE', 'needs_value' => true, 'format' => '%s%%'],
+            'not_begins_with' => ['operator' => 'NOT LIKE', 'needs_value' => true, 'format' => '%s%%'],
+            'contains' => ['operator' => 'LIKE', 'needs_value' => true, 'format' => '%%%s%%'],
+            'not_contains' => ['operator' => 'NOT LIKE', 'needs_value' => true, 'format' => '%%%s%%'],
+            'ends_with' => ['operator' => 'LIKE', 'needs_value' => true, 'format' => '%%%s'],
+            'not_ends_with' => ['operator' => 'NOT LIKE', 'needs_value' => true, 'format' => '%%%s'],
+            'is_null' => ['operator' => 'IS NULL OR', 'needs_value' => false, 'value' => ''],
+            'is_not_null' => ['operator' => 'IS NOT NULL AND', 'needs_value' => false, 'value' => ''],
+        ];
+
+        return $mapping[$operator] ?? ['operator' => '=', 'needs_value' => true];
+    }
+
+    /**
+     * Format SQL condition for null/not null operators on string fields
+     *
+     * @param string $fieldReference
+     * @param string $operator
+     * @return string
+     */
+    protected function formatNullCondition(string $fieldReference, string $operator): string
+    {
+        if ($operator === 'is_null') {
+            // For is_null: field is null OR field is empty string
+            return "({$fieldReference} IS NULL OR {$fieldReference} = '')";
+        } elseif ($operator === 'is_not_null') {
+            // For is_not_null: field is not null AND field is not empty string
+            return "({$fieldReference} IS NOT NULL AND {$fieldReference} != '')";
+        }
+
+        return '';
     }
 }

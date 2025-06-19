@@ -2,13 +2,13 @@
 
 namespace App\Actions\Groups;
 
-use App\Actions\AccountProfile\View\AccountProfileExportView;
-use App\Actions\Export\BaseExportAction;
 use App\Actions\Groups\View\GroupExportView;
+use App\Exports\Traits\ExportTrait;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class ExportGroupsAction extends BaseExportAction
+class ExportGroupsAction
 {
+    use ExportTrait;
     public static $fieldsMapping = [
         'id' => 'ID du groupe',
         'name' => 'Nom',

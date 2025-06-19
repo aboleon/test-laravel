@@ -1,0 +1,88 @@
+.mfw-status {
+    color: white;
+    padding: 4px;
+    border-radius: 3px;
+    &.offline {
+        background: rgba(224, 28, 28, .68);
+        border: 1px solid transparent;
+    }
+    &.online {
+        color: black;
+    }
+}
+
+#publicationStatus {
+
+    label {
+        &:focus,
+        &:active {
+            outline: none !important;
+        }
+    }
+
+    .ui-visual-focus {
+        box-shadow: none;
+    }
+
+    #labelOffline {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+
+        &.ui-state-active {
+            background: rgba(224, 57, 114, .68) !important;
+            border: 1px solid #EA3B3B !important;
+        }
+    }
+
+    .ui-button {
+        border-radius: 4px;
+        padding: 8px;
+    }
+
+    #labelOnline {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+
+        &.ui-state-active {
+            background: rgba(76, 175, 80, .55) !important;
+            border: 1px solid #68C23B !important;
+        }
+    }
+
+    .ui-button:active {
+        border: 1px solid #c5c5c5;
+        background: #f6f6f6;
+        color: #454545;
+    }
+
+    .ui-checkboxradio-icon {
+        display: none;
+    }
+}
+
+#published_status {
+    font-size: 14px;
+    font-weight: 400;
+    padding: 9px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 200ms ease all;
+    color: white;
+
+    &.bg-success {
+        background-color: #2ca731 !important;
+
+        &:hover {
+            background-color: #2ca731 !important;
+        }
+    }
+
+    &.bg-danger {
+        background-color: var(--nav-dashboard) !important;
+
+        &:hover {
+            background-color: var(--nav-dashboard) !important;
+        }
+    }
+}
+

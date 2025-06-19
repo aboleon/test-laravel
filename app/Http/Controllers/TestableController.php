@@ -4,19 +4,14 @@ namespace App\Http\Controllers;
 
 
 use App\Accessors\Accounts;
-use App\Accessors\Dictionnaries;
-use App\Accessors\Establishments;
-use App\Accessors\EventAccessor;
 use App\Accessors\EventContactAccessor;
-use App\Accessors\Users;
 use App\Models\Account;
 use App\Models\Event;
 use App\Models\EventContact;
-use App\Models\Order\Attribution;
-use App\Models\User;
+use App\Models\EventManager\Program\EventProgramSession;
 use App\Services\Filters\EventContactFilter;
 use App\Traits\EventCommons;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\LazyCollection;
 use Mediaclass;
 use MetaFramework\Accessors\Countries;
 use MetaFramework\Services\Validation\ValidationTrait;
@@ -33,16 +28,25 @@ class TestableController extends Controller
         $this->middleware(['auth:sanctum', 'verified']);
     }
 
-    public function index() {
+    public function index()
+    {
+        $ec = EventContact::find(394);
 
-        $a  = EventAccessor::getBannerUrlByEvent(Event::find(46));
-        d($a);
+        d($ec->grantDeposit);
+
+        $a = new EventContactAccessor()->setEventContact($ec);
+        d(
+           $a->isExemptGrantFromDeposit()
+        );
+        d(
+           $a->hasPaidGrantDeposit()
+        );
     }
 
     public function search()
     {
         $searchFilter
-                = [
+            = [
             'rules' => [
                 [
                     'condition' => 'AND',
@@ -79,12 +83,12 @@ class TestableController extends Controller
                         ],
                     ],
                 ],
-            ]
+            ],
         ];
 
         $eventId = 44;
-        $filter = new EventContactFilter();
-        $query  = $filter->buildQuery($searchFilter, $eventId);
+        $filter  = new EventContactFilter();
+        $query   = $filter->buildQuery($searchFilter, $eventId);
 
 
         $data = $filter->getFilteredContactIds($searchFilter, $eventId);

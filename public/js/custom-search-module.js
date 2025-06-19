@@ -14,8 +14,8 @@ $(document).ready(function () {
             filtersProvider: getSavedSearchFilters,
             debug: false,
             operators: {
-                string: ['equal', 'not_equal', 'begins_with', 'not_begins_with', 'contains', 'not_contains', 'ends_with', 'not_ends_with', 'is_empty', 'is_not_empty'],
-                nullable_string: ['equal', 'not_equal', 'begins_with', 'not_begins_with', 'contains', 'not_contains', 'ends_with', 'not_ends_with', 'is_empty', 'is_not_empty', 'is_null', 'is_not_null'],
+                string: ['equal', 'not_equal', 'begins_with', 'not_begins_with', 'contains', 'not_contains', 'ends_with', 'not_ends_with', 'is_null', 'is_not_null'],
+                nullable_string: ['equal', 'not_equal', 'begins_with', 'not_begins_with', 'contains', 'not_contains', 'ends_with', 'not_ends_with', 'is_null', 'is_not_null'],
                 select: ['equal', 'not_equal', 'is_null', 'is_not_null'],
                 date: ['equal', 'not_equal', 'less', 'less_or_equal', 'greater', 'greater_or_equal', 'between', 'is_null', 'is_not_null'],
                 boolean: ['equal', 'not_equal']
@@ -30,10 +30,8 @@ $(document).ready(function () {
                     'not_contains': 'ne contient pas',
                     'ends_with': 'finit par',
                     'not_ends_with': 'ne finit pas par',
-                    'is_empty': 'est vide',
-                    'is_not_empty': 'n\'est pas vide',
-                    'is_null': 'est null',
-                    'is_not_null': 'n\'est pas null',
+                    'is_null': 'est vide',
+                    'is_not_null': 'n\'est pas vide',
                     'less': 'inférieur',
                     'less_or_equal': 'inférieur ou égal',
                     'greater': 'supérieur',
@@ -239,6 +237,10 @@ $(document).ready(function () {
                         option.data('field-config', entry);
                         option.data('nested-parent', filter.nested);
                         option.data('nested-label', filter.label);
+                        // IMPORTANT: Store the related information from the parent filter
+                        if (filter.related) {
+                            option.data('nested-related', filter.related);
+                        }
                         optgroup.append(option);
                     });
 
@@ -298,6 +300,7 @@ $(document).ready(function () {
             const fieldConfig = fieldOption.data('field-config');
             const nestedParent = fieldOption.data('nested-parent');
             const nestedLabel = fieldOption.data('nested-label');
+            const nestedRelated = fieldOption.data('nested-related'); // Get the related information
 
             if (!fieldConfig) return;
 
@@ -309,6 +312,7 @@ $(document).ready(function () {
                 ruleState.value = null;
                 ruleState.nested = nestedParent; // Store nested parent if applicable
                 ruleState.nestedLabel = nestedLabel; // Store nested label for UI
+                ruleState.nestedRelated = nestedRelated; // Store related information
             }
 
             // If this is a nested field, check if we need to create/update nested UI
@@ -424,7 +428,7 @@ $(document).ready(function () {
         /**
          * Handle operator selection change
          */
-        handleOperatorChange: function (ruleId, operatorValue) {
+        handleOperatorChange: function (ruleId, operatorValue, isLoading = false) {
             const rule = $(`#${ruleId}`);
             const valueContainer = rule.find('.value-container');
             const valueInputContainer = valueContainer.find('.value-input-container');
@@ -433,13 +437,24 @@ $(document).ready(function () {
             const ruleState = this.findRuleInState(ruleId);
             if (ruleState) {
                 ruleState.operator = operatorValue;
-                ruleState.value = null;
+                // Don't reset value if we're loading
+                if (!isLoading) {
+                    ruleState.value = null;
+                }
             }
 
             // Clear existing value input
             valueInputContainer.empty();
 
             if (!operatorValue) return;
+
+            // Check if this operator requires a value
+            const noValueOperators = ['is_null', 'is_not_null'];
+            if (noValueOperators.includes(operatorValue)) {
+                // Hide the value container for operators that don't need values
+                valueContainer.hide();
+                return;
+            }
 
             // Get field configuration
             const fieldOption = rule.find('.field-selector option:selected');
@@ -448,7 +463,8 @@ $(document).ready(function () {
             if (!fieldConfig) return;
 
             // Create appropriate input based on field type and operator
-            this.createValueInput(valueInputContainer, fieldConfig, operatorValue);
+            // Pass isLoading flag to skip auto-selection
+            this.createValueInput(valueInputContainer, fieldConfig, operatorValue, isLoading);
 
             // Show value container
             valueContainer.show();
@@ -457,7 +473,7 @@ $(document).ready(function () {
         /**
          * Create an appropriate value input based on filter configuration
          */
-        createValueInput: function (container, filter, operator) {
+        createValueInput: function (container, filter, operator, skipAutoSelect = false) {
             // Extract ruleId from container's parent rule element
             const ruleElement = container.closest('.search-rule');
             const ruleId = ruleElement.data('rule-id');
@@ -572,18 +588,29 @@ $(document).ready(function () {
             // Initialize flatpickr if needed
             this.initializeFlatpickr(container);
 
-            // IMPORTANT: Trigger change event for select inputs to set initial value
-            if (input && input.is('select') && input.find('option').length > 0) {
-                // Set the first option as selected and trigger change
-                input.val(input.find('option:first').val());
-                input.trigger('change');
-            }
+            // ONLY auto-select if we're not loading from saved data
+            if (!skipAutoSelect) {
+                // Trigger change event for select inputs to set initial value
+                if (input && input.is('select') && input.find('option').length > 0) {
+                    // Set the first option as selected but DON'T trigger change yet
+                    input.val(input.find('option:first').val());
+                    // Manually update the state without triggering change event
+                    const ruleState = this.findRuleInState(ruleId);
+                    if (ruleState) {
+                        ruleState.value = input.val();
+                    }
+                }
 
-            // Also handle radio buttons - select first one by default
-            if (input && input.hasClass('btn-group') && input.find('input[type="radio"]').length > 0) {
-                const firstRadio = input.find('input[type="radio"]:first');
-                firstRadio.prop('checked', true);
-                firstRadio.trigger('change');
+                // Also handle radio buttons - select first one by default
+                if (input && input.hasClass('btn-group') && input.find('input[type="radio"]').length > 0) {
+                    const firstRadio = input.find('input[type="radio"]:first');
+                    firstRadio.prop('checked', true);
+                    // Manually update the state
+                    const ruleState = this.findRuleInState(ruleId);
+                    if (ruleState) {
+                        ruleState.value = firstRadio.val();
+                    }
+                }
             }
         },
 
@@ -660,12 +687,12 @@ $(document).ready(function () {
         /**
          * Handle value input change
          */
-        handleValueChange: function (ruleId, value) {
+        handleValueChange: function (ruleId, value, event) {
             const ruleState = this.findRuleInState(ruleId);
             if (!ruleState) return;
 
-            const $input = $(event.target);
-            const inputName = $input.attr('name');
+            const $input = event ? $(event.target) : null;
+            const inputName = $input ? $input.attr('name') : '';
 
             // Check if this is a "between" operator with two values
             if (inputName && inputName.endsWith('_end')) {
@@ -805,7 +832,7 @@ $(document).ready(function () {
             $container.on('change', '.value-input-container input, .value-input-container select', (e) => {
                 const ruleId = $(e.target).closest('.search-rule').data('rule-id');
                 const value = $(e.target).val();
-                this.handleValueChange.call(this, ruleId, value, e);
+                this.handleValueChange(ruleId, value, e);
             });
 
             // Group operator change
@@ -942,7 +969,7 @@ $(document).ready(function () {
                     };
 
                     // Add value only if operator requires it
-                    const noValueOperators = ['is_empty', 'is_not_empty', 'is_null', 'is_not_null'];
+                    const noValueOperators = ['is_null', 'is_not_null'];
                     if (!noValueOperators.includes(rule.operator)) {
                         // Special handling for "between" operator
                         if (rule.operator === 'between' && rule.value && typeof rule.value === 'object') {
@@ -976,6 +1003,10 @@ $(document).ready(function () {
                                 condition: 'AND',
                                 rules: []
                             };
+                            // Store the related information for this nested group
+                            if (rule.nestedRelated) {
+                                nestedGroups[rule.nested].related = rule.nestedRelated;
+                            }
                         }
                         nestedGroups[rule.nested].rules.push(formattedRule);
                     } else {
@@ -989,10 +1020,20 @@ $(document).ready(function () {
 
             // Add nested groups
             Object.keys(nestedGroups).forEach(nestedKey => {
-                result.rules.push({
+                const nestedGroup = {
                     nested: nestedKey,
-                    query: nestedGroups[nestedKey]
-                });
+                    query: {
+                        condition: nestedGroups[nestedKey].condition,
+                        rules: nestedGroups[nestedKey].rules
+                    }
+                };
+
+                // Include the related field if it exists
+                if (nestedGroups[nestedKey].related) {
+                    nestedGroup.related = nestedGroups[nestedKey].related;
+                }
+
+                result.rules.push(nestedGroup);
             });
 
             return result;
@@ -1002,38 +1043,51 @@ $(document).ready(function () {
          * Set rules from saved filters
          */
         setRules: function (savedRules) {
+            console.log('SearchModule: Loading saved rules:', savedRules);
+
             // Clear existing groups
             $(this.config.container).find('.groups-container').empty();
             this.state.groups = [];
 
-            // If it's a single group or has no condition
-            if (!savedRules.condition || !savedRules.rules || !savedRules.rules.length) {
-                // Add an empty group
+            // Handle empty or invalid rules
+            if (!savedRules) {
+                console.log('SearchModule: No saved rules to load');
                 this.addGroup();
                 return;
             }
 
-            // Check if it's a root group with subgroups
-            const hasSubgroups = savedRules.rules.some(rule => rule.condition);
+            // If it's a direct rules array (from the new format)
+            if (savedRules.rules && Array.isArray(savedRules.rules)) {
+                // Check if it's multiple groups
+                const hasMultipleGroups = savedRules.rules.some(rule => rule.condition && rule.rules);
 
-            if (hasSubgroups) {
-                // Add each subgroup
-                savedRules.rules.forEach(rule => {
-                    if (rule.condition) {
-                        const groupId = this.addGroup(false); // Don't add initial rule
-                        const group = this.findGroupInState(groupId);
-                        group.operator = rule.condition;
+                if (hasMultipleGroups) {
+                    // Multiple groups
+                    savedRules.rules.forEach(groupData => {
+                        if (groupData.condition && groupData.rules) {
+                            const groupId = this.addGroup(false);
+                            const group = this.findGroupInState(groupId);
+                            group.operator = groupData.condition;
 
-                        // Set operator in UI
-                        $(`#${groupId}-${rule.condition.toLowerCase()}`).prop('checked', true);
+                            // Set operator in UI
+                            $(`#${groupId}-${groupData.condition.toLowerCase()}`).prop('checked', true);
 
-                        // Set rules
-                        this.setGroupRules(groupId, rule);
-                    }
-                });
-            } else {
-                // Single group
-                const groupId = this.addGroup(false); // Don't add initial rule
+                            // Set rules for this group
+                            this.setGroupRules(groupId, groupData);
+                        }
+                    });
+                } else {
+                    // Single group with rules array - treat as single group
+                    const groupId = this.addGroup(false);
+                    const group = this.findGroupInState(groupId);
+                    group.operator = 'AND'; // Default operator
+
+                    // Set rules
+                    this.setGroupRules(groupId, savedRules);
+                }
+            } else if (savedRules.condition && savedRules.rules) {
+                // Old format - single group
+                const groupId = this.addGroup(false);
                 const group = this.findGroupInState(groupId);
                 group.operator = savedRules.condition;
 
@@ -1042,6 +1096,10 @@ $(document).ready(function () {
 
                 // Set rules
                 this.setGroupRules(groupId, savedRules);
+            } else {
+                // No valid structure found
+                console.log('SearchModule: Invalid saved rules structure');
+                this.addGroup();
             }
         },
 // Add a helper function to format dates
@@ -1064,12 +1122,22 @@ $(document).ready(function () {
 
             groupData.rules.forEach(ruleData => {
                 if (ruleData.nested && ruleData.query) {
-                    // Handle nested rule
+                    // Handle nested rule - store the related field for later use
+                    const nestedRelated = ruleData.related || null;
+
                     ruleData.query.rules.forEach(nestedRule => {
                         const ruleId = this.addRule(groupId);
 
                         setTimeout(() => {
-                            $(`#${ruleId} .field-selector`).val(nestedRule.id).trigger('change');
+                            // When setting the field, we need to ensure the related data is preserved
+                            const $fieldSelector = $(`#${ruleId} .field-selector`);
+                            $fieldSelector.val(nestedRule.id).trigger('change');
+
+                            // After setting the field, update the rule state with the related info
+                            const ruleState = this.findRuleInState(ruleId);
+                            if (ruleState && nestedRelated) {
+                                ruleState.nestedRelated = nestedRelated;
+                            }
 
                             setTimeout(() => {
                                 $(`#${ruleId} .operator-selector`).val(nestedRule.operator).trigger('change');
@@ -1283,5 +1351,5 @@ $(document).ready(function () {
 
 // Initialize the search module
     SearchModule.init();
-   // SearchModule.enableDebug();
+    // SearchModule.enableDebug();
 });

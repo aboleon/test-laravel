@@ -25,7 +25,7 @@ class ServiceCarts
 
     public static function getServiceCartsByEventContact(EventContact $eventContact): Collection
     {
-        $ecOrders = EventContactAccessor::getOrdersWithServices($eventContact);
+        $ecOrders = new EventContactAccessor()->setEventContact($eventContact)->getOrdersWithServices();
 
         return $ecOrders->map(function ($order) {
             return $order->services;

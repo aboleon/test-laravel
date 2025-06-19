@@ -1,0 +1,33 @@
+.date-btns {
+    display: flex;
+    justify-content: space-between;
+
+    > div:first-of-type {
+        a {
+            display: inline-flex;
+            justify-content: space-between;
+            padding: 0;
+            border: 0;
+
+            span {
+                padding: 5px 10px;
+            }
+
+            &:first-of-type {
+                margin-right: 20px;
+
+                span:first-of-type {
+                    background-color: var(--ab-indigo);
+                    border-bottom-left-radius: 5px;
+                    border-top-left-radius: 5px;
+                }
+            }
+
+            &:last-of-type span:last-of-type {
+                background-color: var(--ab-indigo);
+                border-bottom-right-radius: 5px;
+                border-top-right-radius: 5px;
+            }
+        }
+    }
+}

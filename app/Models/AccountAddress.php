@@ -23,6 +23,8 @@ class AccountAddress extends Model implements GooglePlacesInterface
         'country_code',
         'street_number',
         'locality',
+        'administrative_area_level_2',
+        'administrative_area_level_1',
         'cedex',
         'route',
         'lat',

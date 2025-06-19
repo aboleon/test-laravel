@@ -6,7 +6,7 @@
             <div class="col-md-12 mb-4 ps-0">
                 {!! csscrush_inline(public_path('css/mediaclass_docs.css')) !!}
                 <x-mediaclass::uploadable :model="$account"
-                                          group="transport_user_docs"
+                                          group="user_docs"
                                           size="small"
                                           icon="bi bi-file-earmark-arrow-up-fill"
                                           :description="false"

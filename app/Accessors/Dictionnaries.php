@@ -4,6 +4,7 @@ namespace App\Accessors;
 
 use App\Enum\DictionnaryType;
 use App\Models\Dictionnary;
+use App\Models\DictionnaryEntry;
 use App\Models\ParticipationType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
@@ -76,8 +77,12 @@ class Dictionnaries
         return self::dictionnary($key)->type ?? 'simple';
     }
 
-    public static function entry(string $dictionnary, int $entry_key)
+    public static function entry(string $dictionnary, ?int $entry_key=null): ?DictionnaryEntry
     {
+        if (!$entry_key) {
+            return null;
+        }
+
         return self::dictionnary($dictionnary)->entries->filter(fn($item) => $item->id == $entry_key)->first();
     }
 

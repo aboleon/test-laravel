@@ -1,0 +1,86 @@
+
+#messages, .messages {
+    clear: both;
+    color: white !important;
+
+    div[class^=alert] {
+        padding: 8px;
+        margin-bottom: 2px;
+
+        &:last-of-type {
+            margin-bottom: 10px;
+        }
+
+        &:first-of-type {
+            margin-top: 10px;
+        }
+    }
+
+    .alert-success {
+        background-color: rgba(26, 156, 54, 0.78);
+        border-color: rgb(76, 177, 98);
+        color: inherit !important;
+    }
+
+    .alert-danger {
+        background-color: var(--base-1);
+        border-color: var(--base-1);
+        color: inherit !important;
+    }
+
+    .alert-dismissible .close {
+        right: 0;
+        padding: 4px;
+    }
+}
+
+.alert-danger {
+    a {
+        color: white;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+}
+
+
+.color-success {
+    color: #7cb342;
+}
+
+.color-danger {
+    color: #da6060;
+}
+
+.btn-danger {
+    background: rgba(224, 28, 28, 0.68);
+    border: 1px solid transparent;
+}
+
+
+.alert-warning {
+    background-color: #FFF9C4;
+    border: 1px solid #ddd;
+    color: #535454;
+
+    &.stronger {
+        background-color: #FFC107;
+        border: none;
+        color: black;
+        font-weight: 600;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: underline;
+    }
+}
+
+.alert-info {
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+    color: #31708f;
+}
+
+.alert-dismissible .btn-close {
+    padding: 11px;
+}

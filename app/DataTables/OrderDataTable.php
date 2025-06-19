@@ -54,10 +54,14 @@ class OrderDataTable extends DataTable
                 return $html;
             })
             ->addColumn('name_display', function ($row) {
-                return '<a href="'. route('panel.manager.event.event_contact.edit', [
-                        'event' => $row->event_id,
-                        'event_contact' => $row->event_contact_id,
-                    ]).'">'.$row->name.'</a>';
+                if($row->event_contact_id) {
+                    return '<a href="'.route('panel.manager.event.event_contact.edit', [
+                            'event'         => $row->event_id,
+                            'event_contact' => $row->event_contact_id,
+                        ]).'">'.$row->name.'</a>';
+                } else {
+                    return $row->name;
+                }
             })
             ->filterColumn('name_display', function($query, $keyword) {
                 $query->where('name', 'like', "%{$keyword}%");

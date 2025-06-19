@@ -15,6 +15,7 @@ use App\Mail\MailerMail;
 use App\Models\CustomPaymentCall;
 use App\Models\Event;
 use App\Models\EventContact;
+use App\Models\EventManager\Grant\Grant;
 use App\Models\EventManager\Sellable;
 use App\Models\Order;
 use App\Models\PayboxReimbursementRequest;
@@ -219,5 +220,14 @@ class EventDeposit extends Model implements CustomPaymentInterface
     {
         return $this->morphMany(PayboxReimbursementRequest::class, 'shoppable');
     }
+
+    public function shoppable(): BelongsTo
+    {
+        return match($this->shoppable_type) {
+            'grantdeposit' => $this->belongsTo(Grant::class, 'shoppable_id', 'id'),
+            default => $this->belongsTo(Sellable::class, 'shoppable_id', 'id'),
+        };
+    }
+
 
 }

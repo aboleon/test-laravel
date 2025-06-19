@@ -8,7 +8,6 @@ use App\Actions\{Account\AssociateUsersToEventAction,
     Account\AssociateUsersToGroupAction,
     Account\EventClientActions,
     Account\EventContactActions,
-    Account\ExportAccountProfilesWrapperAction,
     Account\SendConnexionMailAction,
     Account\UpdateAccountProfileAction,
     Dictionnary\AddEntryInSimpleDictionnary,
@@ -39,13 +38,19 @@ use App\Actions\Account\Order\OrderPaymentAction;
 use App\Actions\Account\Search\SavedSearchAction;
 use App\Actions\Account\Search\Select2Accounts;
 use App\Actions\Account\Search\Select2ParticipantsAction;
-use App\Actions\EventManager\{Accommodation, Accommodation\BlockGroupRooms, EventAssociator, EventContact\GetUserInfo, EventGroup\AssociateEventContactToEventGroupAction, EventGroup\AssociateUserToEventGroupAction, EventGroup\DissociateUserFromEventGroupAction, GrantActions, HotelAssociate, HotelSearch, Invitation\CreateInvitationAction, Program\GetSessionInfoAction, Program\MoveProgramThingAction, Program\ProgramDayRoomsAction, SellableService};
+use App\Actions\EventManager\{Accommodation, Accommodation\BlockGroupRooms, EventAssociator, EventContact\GetUserInfo, EventGroup\AssociateEventContactToEventGroupAction, EventGroup\AssociateUserToEventGroupAction, EventGroup\DissociateUserFromEventGroupAction, GrantActions, HotelAssociate, HotelSearch, Invitation\CreateInvitationAction, Program\ExportProgramInterventionsAction, Program\GetSessionInfoAction, Program\MoveProgramThingAction, Program\ProgramDayRoomsAction, SellableService};
 use App\Actions\Front\Cart\FrontCartActions;
 use App\Actions\Front\Grant\AddGrantWaiverFeesToCart;
 use App\Actions\Front\Group\CreateGroupMemberFromEmailAction;
 use App\Actions\Front\Group\DissociateUserFromMyEventGroupAction;
 use App\Actions\Front\Paybox\PayboxActions;
 use App\Actions\Groups\Search\Select2Groups;
+use App\Exports\EventContact\AllGlobalExport;
+use App\Exports\EventContact\CongressExport;
+use App\Exports\EventContact\CongressGlobalExport;
+use App\Exports\EventContact\IndustryExport;
+use App\Exports\EventContact\IndustryGlobalExport;
+use App\Exports\EventContact\OratorGlobalExport;
 use App\Http\Controllers\Dev\ArtisanController;
 use App\MailTemplates\Models\MailTemplate;
 use App\Models\{AdvancedSearchFilter, CustomPaymentCall, Establishment, EventContact, Order\Accompanying, Order\RoomNote, Setting};
@@ -76,7 +81,7 @@ class AjaxController extends Controller
      */
     public function updateModelAttribute(): array
     {
-        $model = (new ModelActions())
+        $model = new ModelActions()
             ->ajaxMode()
             ->setModel((string)request('model'))
             ->setColumn((string)request('column'))
@@ -89,7 +94,7 @@ class AjaxController extends Controller
 
     public function reassignPecDistribution(): array
     {
-        return (new PecActions())
+        return new PecActions()
             ->ajaxMode()
             ->reassignPecDistribution(
                 grant_id: (int)request('grant_id'),
@@ -99,7 +104,7 @@ class AjaxController extends Controller
 
     public function fetchAlternativesForPecDistributionRecord(): array
     {
-        return (new PecActions())->ajaxMode()->fetchAlternativesForPecDistributionRecord((int)request('pec_distribution_id'));
+        return new PecActions()->ajaxMode()->fetchAlternativesForPecDistributionRecord((int)request('pec_distribution_id'));
     }
 
     public function updateAdminAdressSettings(): array
@@ -121,7 +126,7 @@ class AjaxController extends Controller
      */
     protected function addAccountToGroup(): array
     {
-        return (new GroupContactActions(account_id: (int)request('id'), group_id: (int)request('object_id')))
+        return new GroupContactActions(account_id: (int)request('id'), group_id: (int)request('object_id'))
             ->enableAjaxMode()
             ->associate()
             ->fetchResponse();
@@ -134,7 +139,7 @@ class AjaxController extends Controller
      */
     protected function removeAccountFromGroup(): array
     {
-        return (new GroupContactActions(account_id: (int)request('id'), group_id: (int)request('object_id')))
+        return new GroupContactActions(account_id: (int)request('id'), group_id: (int)request('object_id'))
             ->enableAjaxMode()
             ->dissociate()
             ->fetchResponse();
@@ -142,43 +147,43 @@ class AjaxController extends Controller
 
     protected function associateUsersToGroupByEventContact(): array
     {
-        return (new AssociateUsersToGroupAction())->associateUsersToGroupByEventContact();
+        return new AssociateUsersToGroupAction()->associateUsersToGroupByEventContact();
     }
 
 
     protected function associateEventContactToEventGroup(): array
     {
-        return (new AssociateEventContactToEventGroupAction())->associateEventContactToEventGroup();
+        return new AssociateEventContactToEventGroupAction()->associateEventContactToEventGroup();
     }
 
     protected function associateEventContactsToEventGroup(): array
     {
-        return (new AssociateEventContactToEventGroupAction())->associateEventContactsToEventGroup(explode(',', request('ids')));
+        return new AssociateEventContactToEventGroupAction()->associateEventContactsToEventGroup(explode(',', request('ids')));
     }
 
     protected function associateUserToEventGroup(): array
     {
-        return (new AssociateUserToEventGroupAction())->associateUserToEventGroup();
+        return new AssociateUserToEventGroupAction()->associateUserToEventGroup();
     }
 
     protected function dissociateUserFromMyEventGroup(): array
     {
-        return (new DissociateUserFromMyEventGroupAction())->dissociate();
+        return new DissociateUserFromMyEventGroupAction()->dissociate();
     }
 
     protected function dissociateUserFromEventGroup(): array
     {
-        return (new DissociateUserFromEventGroupAction())->dissociate();
+        return new DissociateUserFromEventGroupAction()->dissociate();
     }
 
     public function makeMainContactOfTheEventGroup(): array
     {
-        return (new MakeMainContactAction())->makeMainContactOfEventGroup();
+        return new MakeMainContactAction()->makeMainContactOfEventGroup();
     }
 
     public function sendConnexionMailToEventGroupMainContact()
     {
-        return (new SendConnexionMailAction())->sendToEventGroupMainContact();
+        return new SendConnexionMailAction()->sendToEventGroupMainContact();
     }
 
 
@@ -189,7 +194,7 @@ class AjaxController extends Controller
      */
     protected function addAccountToEvent(): array
     {
-        return (new EventClientActions(account_id: (int)request('id'), event_id: (int)request('object_id')))
+        return new EventClientActions(account_id: (int)request('id'), event_id: (int)request('object_id'))
             ->ajaxMode()
             ->associateToEvent()
             ->fetchResponse();
@@ -197,7 +202,7 @@ class AjaxController extends Controller
 
     protected function associateUserToEvent(): array
     {
-        $action = (new EventContactActions())
+        $action = new EventContactActions()
             ->enableAjaxMode()
             ->setAccount((int)request('user_id'))
             ->setEvent((int)request('event_id'))
@@ -207,7 +212,7 @@ class AjaxController extends Controller
 
         if ($action->getEventContact()) {
             $action->pushMessages(
-                (new GrantActions())->enableAjaxMode()->updateEligibleStatusForSingleContact($action->getEventContact()->event, $action->getEventContact()),
+                new GrantActions()->enableAjaxMode()->updateEligibleStatusForSingleContact($action->getEventContact()->event, $action->getEventContact()),
             );
         }
 
@@ -221,7 +226,7 @@ class AjaxController extends Controller
      */
     protected function removeAccountFromEvent(): array
     {
-        return (new EventClientActions(account_id: (int)request('id'), event_id: (int)request('object_id')))
+        return new EventClientActions(account_id: (int)request('id'), event_id: (int)request('object_id'))
             ->ajaxMode()
             ->dissociate()
             ->fetchResponse();
@@ -308,7 +313,7 @@ class AjaxController extends Controller
      */
     protected function addDictionnaryEntry(): array
     {
-        return (new AddEntryInSimpleDictionnary())();
+        return new AddEntryInSimpleDictionnary()();
     }
 
     /**
@@ -318,7 +323,7 @@ class AjaxController extends Controller
      */
     public function createAccountEmail(): array
     {
-        return (new CreateAccountEmail())();
+        return new CreateAccountEmail()();
     }
 
 
@@ -345,7 +350,7 @@ class AjaxController extends Controller
      */
     public function createEstablishment(): array
     {
-        return (new EstablishmentActions())->create();
+        return new EstablishmentActions()->create();
     }
 
     /**
@@ -355,7 +360,7 @@ class AjaxController extends Controller
      */
     public function createPlace(): array
     {
-        return (new PlaceActions())->create();
+        return new PlaceActions()->create();
     }
 
     /**
@@ -365,7 +370,7 @@ class AjaxController extends Controller
      */
     public function createPlaceRoom(): array
     {
-        return (new PlaceActions())->createRoomFroModal();
+        return new PlaceActions()->createRoomFroModal();
     }
 
     /**
@@ -375,7 +380,7 @@ class AjaxController extends Controller
      */
     public function sellableByEvent(): array
     {
-        return (new SellableActions())->attachToEvent(event_id: request('event_id'), sellable_id: request('sellable_id'));
+        return new SellableActions()->attachToEvent(event_id: request('event_id'), sellable_id: request('sellable_id'));
     }
 
     /**
@@ -385,7 +390,7 @@ class AjaxController extends Controller
      */
     public function removeSellableCustomization(): array
     {
-        return (new SellableActions())->removeCustomization(event_id: request('event_id'), sellable_id: request('sellable_id'));
+        return new SellableActions()->removeCustomization(event_id: request('event_id'), sellable_id: request('sellable_id'));
     }
 
     /**
@@ -397,7 +402,7 @@ class AjaxController extends Controller
         $controllerPath = $request->get('controller_path', $request->get('model').'Controller');
 
         try {
-            $class = (new ReflectionClass('\App\Http\Controllers\\'.$controllerPath))->newInstance();
+            $class = new ReflectionClass('\App\Http\Controllers\\'.$controllerPath)->newInstance();
             if (method_exists($class, 'massDelete')) {
                 $response = $class->massDelete($request, name: ($request->get('name') ?: 'name'));
             } else {
@@ -417,17 +422,17 @@ class AjaxController extends Controller
      */
     public function eventHotelSearch(): array
     {
-        return (new HotelSearch(request('keyword'), (int)request('event_id')))->find();
+        return new HotelSearch(request('keyword'), (int)request('event_id'))->find();
     }
 
     public function hotelSearch(): array
     {
-        return (new \App\Actions\Hotels\HotelSearch(request('keyword')))->find();
+        return new \App\Actions\Hotels\HotelSearch(request('keyword'))->find();
     }
 
     public function placeSearch(): array
     {
-        return (new PlaceActions(request('keyword')))->find();
+        return new PlaceActions(request('keyword'))->find();
     }
 
     /**
@@ -435,32 +440,32 @@ class AjaxController extends Controller
      */
     public function eventHotelAssociate(): array
     {
-        return (new HotelAssociate((int)request('hotel_id'), (int)request('event_id')))->associate();
+        return new HotelAssociate((int)request('hotel_id'), (int)request('event_id'))->associate();
     }
 
     public function removeAccommodationRoom(): array
     {
-        return (new Accommodation())->deleteRoom((int)request('id'));
+        return new Accommodation()->deleteRoom((int)request('id'));
     }
 
     public function removeRoomGroup(): array
     {
-        return (new Accommodation())->deleteGroup((int)request('id'));
+        return new Accommodation()->deleteGroup((int)request('id'));
     }
 
     public function removeContingentRow(): array
     {
-        return (new Accommodation())->deleteContingentRow((int)request('id'));
+        return new Accommodation()->deleteContingentRow((int)request('id'));
     }
 
     public function removeBlockedRow(): array
     {
-        return (new Accommodation())->deleteBLocked((int)request('id'));
+        return new Accommodation()->deleteBLocked((int)request('id'));
     }
 
     public function removeBlockedGroupRow(): array
     {
-        return (new Accommodation())->deleteBLockedGroupRoom((int)request('id'));
+        return new Accommodation()->deleteBLockedGroupRoom((int)request('id'));
     }
 
     public function getAccommodationAvailabilityForEventGroup(): array
@@ -468,7 +473,7 @@ class AjaxController extends Controller
         $this
             ->responseElement(
                 'availability',
-                (new Availability())
+                new Availability()
                     ->setEventAccommodation((int)request('event_accommodation_id'))
                     ->setDate(request('date'))
                     ->setRoomGroupId((int)request('roomgroup'))
@@ -481,31 +486,31 @@ class AjaxController extends Controller
 
     public function removeGrantRow(): array
     {
-        return (new Accommodation())->deleteGrant((int)request('id'));
+        return new Accommodation()->deleteGrant((int)request('id'));
     }
 
     public function eventAssociator(): array
     {
-        return (new EventAssociator(
+        return new EventAssociator(
             type: request('type'),
             event_id: (int)request('event_id'),
             ids: explode(',', request('ids')),
-        ))->associate();
+        )->associate();
     }
 
     public function removeTimeBindedPriceRow(): array
     {
-        return (new SellableService())->deletePrice((int)request('id'));
+        return new SellableService()->deletePrice((int)request('id'));
     }
 
     public function removePlaceRoomSetup(): array
     {
-        return (new PlaceActions())->removePlaceRoomSetup((int)request('id'));
+        return new PlaceActions()->removePlaceRoomSetup((int)request('id'));
     }
 
     public function removeSellableServiceOptionRow(): array
     {
-        return (new SellableService())->deleteOption((int)request('id'));
+        return new SellableService()->deleteOption((int)request('id'));
     }
 
     public function removeGrantBindedLocationRow(): array
@@ -529,13 +534,13 @@ class AjaxController extends Controller
 
     public function getProgramDayRooms(): array
     {
-        return (new ProgramDayRoomsAction())->getProgramDayRooms();
+        return new ProgramDayRoomsAction()->getProgramDayRooms();
     }
 
     public function getEstablishments(): array
     {
         try {
-            return (new EstablishmentActions())->getEstablishments();
+            return new EstablishmentActions()->getEstablishments();
         } catch (Throwable $e) {
             $this->responseException($e);
 
@@ -546,7 +551,7 @@ class AjaxController extends Controller
     public function getEstablishmentsForCountry(): array
     {
         try {
-            return (new EstablishmentActions())->getEstablishmentsForCountry(country_code: (string)request('country'));
+            return new EstablishmentActions()->getEstablishmentsForCountry(country_code: (string)request('country'));
         } catch (Throwable $e) {
             $this->responseException($e);
 
@@ -557,7 +562,7 @@ class AjaxController extends Controller
     public function getEstablishmentsForLocality(): array
     {
         try {
-            return (new EstablishmentActions())->getEstablishmentsForLocality(country_code: request('country'), locality: request('locality'));
+            return new EstablishmentActions()->getEstablishmentsForLocality(country_code: request('country'), locality: request('locality'));
         } catch (Throwable $e) {
             $this->responseException($e);
 
@@ -567,12 +572,12 @@ class AjaxController extends Controller
 
     public function moveProgramThing()
     {
-        return (new MoveProgramThingAction())->moveByArrow();
+        return new MoveProgramThingAction()->moveByArrow();
     }
 
     public function moveProgramThingBySwap()
     {
-        return (new MoveProgramThingAction())->moveBySwap();
+        return new MoveProgramThingAction()->moveBySwap();
     }
 
     public function searchParticipants(): array
@@ -586,7 +591,7 @@ class AjaxController extends Controller
 
     public function select2InterventionParticipantsInfo(): array
     {
-        return (new Select2ParticipantsAction())->getParticipantsByEventIdInterventionId(
+        return new Select2ParticipantsAction()->getParticipantsByEventIdInterventionId(
             request('q'),
             request('event_id'),
             request('intervention_id'),
@@ -597,7 +602,7 @@ class AjaxController extends Controller
 
     public function select2InterventionModeratorsInfo(): array
     {
-        return (new Select2ParticipantsAction())->getParticipantsByEventIdInterventionId(
+        return new Select2ParticipantsAction()->getParticipantsByEventIdInterventionId(
             request('q'),
             request('event_id'),
             request('intervention_id'),
@@ -608,18 +613,18 @@ class AjaxController extends Controller
 
     public function select2Accounts(): array
     {
-        return (new Select2Accounts())->filterAccounts();
+        return new Select2Accounts()->filterAccounts();
     }
 
     public function select2Groups(): array
     {
-        return (new Select2Groups())->filter(request('q'));
+        return new Select2Groups()->filter(request('q'));
     }
 
 
     public function select2Hotels(): array
     {
-        return (new HotelSearch(request('q', ''), (int)request('event_id')))->find([
+        return new HotelSearch(request('q', ''), (int)request('event_id'))->find([
             'select'      => ['hotels.id', 'hotels.name as text'],
             'useCallback' => false,
             'itemsKey'    => "results",
@@ -660,27 +665,27 @@ class AjaxController extends Controller
 
     public function getPlaceIdRoomIdPlaceRoomsSelectableByEventProgramDayRoomId(): array
     {
-        return (new ProgramDayRoomsAction())->getPlaceIdRoomIdPlaceRoomsSelectableByEventProgramDayRoomId();
+        return new ProgramDayRoomsAction()->getPlaceIdRoomIdPlaceRoomsSelectableByEventProgramDayRoomId();
     }
 
     public function associateUsersToEvent(): array
     {
-        return (new AssociateUsersToEventAction())->associateUsersToEvent();
+        return new AssociateUsersToEventAction()->associateUsersToEvent();
     }
 
     public function associateUsersToEventByEventContact(): array
     {
-        return (new AssociateUsersToEventAction())->associateUsersToEventByEventContact();
+        return new AssociateUsersToEventAction()->associateUsersToEventByEventContact();
     }
 
     public function associateGroupsToEvent(): array
     {
-        return (new AssociateGroupsToEventAction())->associateGroupsToEvent();
+        return new AssociateGroupsToEventAction()->associateGroupsToEvent();
     }
 
     public function getSessionInfo(): array
     {
-        return (new GetSessionInfoAction())->getSessionInfo((int)request('session_id'));
+        return new GetSessionInfoAction()->getSessionInfo((int)request('session_id'));
     }
 
     //--------------------------------------------
@@ -689,33 +694,60 @@ class AjaxController extends Controller
 
     public function updateAccountProfiles(): array
     {
-        return (new UpdateAccountProfileAction())->updateAccountProfiles();
+        return new UpdateAccountProfileAction()->updateAccountProfiles();
     }
 
     public function updateAccountProfilesByEventContacts(): array
     {
-        return (new UpdateAccountProfileAction())->updateAccountProfilesByEventContacts();
+        return new UpdateAccountProfileAction()->updateAccountProfilesByEventContacts();
     }
 
-    public function exportAccountProfiles(): array
+    // Exports Event Contacts
+    public function congressGlobalExport(): array
     {
-        return (new ExportAccountProfilesWrapperAction())->exportAccountProfiles();
+        return new CongressGlobalExport()->run();
     }
+    public function congressExport(): array
+    {
+        return new CongressExport()->run();
+    }
+    public function industryGlobalExport(): array
+    {
+        return new IndustryGlobalExport()->run();
+    }
+    public function industryExport(): array
+    {
+        return new IndustryExport()->run();
+    }
+    public function allGlobalExport(): array
+    {
+        return new AllGlobalExport()->run();
+    }
+    public function oratorGlobalExport(): array
+    {
+        return new OratorGlobalExport()->run();
+    }
+    // end of Exports Event Contacts
 
     public function exportAccountProfilesByEventContact(): array
     {
-        return (new ExportAccountProfilesWrapperAction())->exportAccountProfilesByEventContacts();
+        return new CongressGlobalExport()->ajaxMode()->run();
+    }
+
+    public function exportProgramInterventionForEvent(): array
+    {
+        return new ExportProgramInterventionsAction()->ajaxMode()->run();
     }
 
     public function exportGroups(): array
     {
-        return (new ExportGroupsWrapperAction())->exportGroups();
+        return new ExportGroupsWrapperAction()->exportGroups();
     }
 
 
     public function storeSavedSearchInSession()
     {
-        return (new SavedSearchAction())->storeCurrentSearchInSession(request('type'), request('search_filters'));
+        return new SavedSearchAction()->storeCurrentSearchInSession(request('type'), request('search_filters'));
     }
 
 
@@ -723,80 +755,80 @@ class AjaxController extends Controller
     {
         $filters = (string)AdvancedSearchFilter::getFilters(request('type'));
 
-        return (new SavedSearchAction())->storeSavedSearch(request('name'), request('type'), $filters, request('id'));
+        return new SavedSearchAction()->storeSavedSearch(request('name'), request('type'), $filters, request('id'));
     }
 
     public function loadSavedSearch(): array
     {
-        return (new SavedSearchAction())->loadSavedSearch(request('id'), request('type'));
+        return new SavedSearchAction()->loadSavedSearch(request('id'), request('type'));
     }
 
     public function deleteSavedSearch(): array
     {
-        return (new SavedSearchAction())->deleteSavedSearch(request('type'), request('id'));
+        return new SavedSearchAction()->deleteSavedSearch(request('type'), request('id'));
     }
 
 
     public function saveOrderPayment(): array
     {
-        return (new OrderPaymentAction())->savePayment(request()->all(), (int)request("id"));
+        return new OrderPaymentAction()->savePayment(request()->all(), (int)request("id"));
     }
 
     public function deleteOrderPayment(): array
     {
-        return (new OrderPaymentAction())->deletePayment(request('id'));
+        return new OrderPaymentAction()->deletePayment(request('id'));
     }
 
     public function saveOrderInvoiceCancel(): array
     {
-        return (new OrderInvoiceCancelAction())->save(request()->all(), request("id"));
+        return new OrderInvoiceCancelAction()->save(request()->all(), request("id"));
     }
 
     public function makeInvoice(): array
     {
-        return (new InvoiceController())->enableAjaxMode()->fetchCallback()->store()->fetchResponse();
+        return new InvoiceController()->enableAjaxMode()->fetchCallback()->store()->fetchResponse();
     }
 
     public function deleteOrderInvoice(): array
     {
-        return (new OrderInvoiceCancelAction())->delete(request('id'));
+        return new OrderInvoiceCancelAction()->delete(request('id'));
     }
 
 
     # Panel > EventManager > Order > Accommodation selector
     public function fetchAccommodationForEvent(): array
     {
-        return (new OrderAccommodationActions())->fetchAccommodationForEvent();
+        return new OrderAccommodationActions()->fetchAccommodationForEvent();
     }
 
     # Panel > EventManager > Order Edit > Accommodation Cart > Remove
     public function removeAccommodationCartRow(): array
     {
-        return (new OrderAccommodationActions())->removeAccommodationCartRow();
+        return new OrderAccommodationActions()->removeAccommodationCartRow();
     }
 
     # Panel > EventManager > Order Edit > Accommodation Cart > Remove
     public function clearAccommodationTempStock(): array
     {
-        return (new ContingentActions())->clearTempStock();
+        return new ContingentActions()->clearTempStock();
     }
 
     # Panel > EventManager > Order Edit > ServiceCart Cart > Remove
     public function removeServicePriceRow(): array
     {
-        return (new ServiceCartActions())->enableAjaxMode()->removeServicePriceRow();
+        return new ServiceCartActions()->enableAjaxMode()->removeServicePriceRow();
     }
 
 
     public function cancelServicePriceRow(): array
     {
-        return (new ServiceCartActions())->ajaxMode()->cancelServicePriceRow();
+        return new ServiceCartActions()->ajaxMode()->cancelServicePriceRow();
     }
 
     public function orderSelectAccountForAssignment(): array
     {
         $this->pushMessages(
-            (new OrderInvoiceableActions())->fetchPayerFromDatabase(),
+            new OrderInvoiceableActions()->fetchPayerFromDatabase(),
         );
 
         return $this->fetchResponse();
@@ -804,72 +836,72 @@ class AjaxController extends Controller
 
     public function decreaseShoppableStock(): array
     {
-        return (new StockActions())->decreaseShoppableStock();
+        return new StockActions()->decreaseShoppableStock();
     }
 
     public function increaseShoppableStock(): array
     {
-        return (new StockActions())->increaseShoppableStock();
+        return new StockActions()->increaseShoppableStock();
     }
 
     public function decreaseAccommodationStock(): array
     {
-        return (new ContingentActions())->decreaseStock();
+        return new ContingentActions()->decreaseStock();
     }
 
     public function increaseAccommodationStock(): array
     {
-        return (new ContingentActions())->increaseStock();
+        return new ContingentActions()->increaseStock();
     }
 
     public function addOrderNote(): array
     {
-        return (new OrderNoteActions())->addNote();
+        return new OrderNoteActions()->addNote();
     }
 
     public function removeOrderNote(): array
     {
-        return (new OrderNoteActions())->removeNote();
+        return new OrderNoteActions()->removeNote();
     }
 
     public function update_serviceOrderAttributions(): array
     {
-        return (new OrderServiceActions())->updateServiceAttributions();
+        return new OrderServiceActions()->updateServiceAttributions();
     }
 
     public function removeServiceAttribution(): array
     {
-        return (new OrderServiceActions())->removeServiceAttribution();
+        return new OrderServiceActions()->removeServiceAttribution();
     }
 
     public function removeAccommodationAttribution(): array
     {
-        return (new OrderAccommodationActions())->removeAccommodationAttribution();
+        return new OrderAccommodationActions()->removeAccommodationAttribution();
     }
 
     public function removeFrontAccommodationAttribution(): array
     {
-        return (new OrderAccommodationActions())->removeFrontAccommodationAttribution();
+        return new OrderAccommodationActions()->removeFrontAccommodationAttribution();
     }
 
     public function removeFrontServiceAttribution(): array
     {
-        return (new OrderServiceActions())->removeFrontServiceAttribution();
+        return new OrderServiceActions()->removeFrontServiceAttribution();
     }
 
     public function update_accommodationOrderAttributions(): array
     {
-        return (new OrderAccommodationActions())->updateRoomAttributions();
+        return new OrderAccommodationActions()->updateRoomAttributions();
     }
 
     public function saveBlockedGroupRoomsForEvent(): array
     {
-        return (new BlockGroupRooms((int)request('event_group_id')))->enableAjaxMode()->process();
+        return new BlockGroupRooms((int)request('event_group_id'))->enableAjaxMode()->process();
     }
 
     public function fetchEventAccommodationRecapForGroup(): array
     {
-        $availability = (new \App\Accessors\EventManager\Availability())
+        $availability = new \App\Accessors\EventManager\Availability()
             ->setEventAccommodation((int)request('event_accommodation_id'))
             ->setEventGroupId((int)request('group_id'));
 
@@ -900,7 +932,7 @@ class AjaxController extends Controller
 
     public function frontCartAddService(): array
     {
-        return (new FrontCartActions())
+        return new FrontCartActions()
             ->addService(
                 (int)request('service_id'),
                 (int)request('quantity'),
@@ -910,7 +942,7 @@ class AjaxController extends Controller
 
     public function frontCartUpdateServiceQuantity(): array
     {
-        return (new FrontCartActions(request('event_id')))
+        return new FrontCartActions(request('event_id'))
             ->updateServiceQuantity(
                 request('service_id'),
                 request('quantity'),
@@ -921,7 +953,7 @@ class AjaxController extends Controller
 
     public function createInvitation(): array
     {
-        return (new CreateInvitationAction())->createInvitation();
+        return new CreateInvitationAction()->createInvitation();
     }
 
     /**
@@ -929,17 +961,17 @@ class AjaxController extends Controller
      */
     public function sendOrderCartCancellationRequest(): array
     {
-        return (new OrderActions())->ajaxMode()->cancelCartItem();
+        return new OrderActions()->ajaxMode()->cancelCartItem();
     }
 
     public function sendDeclinetVenutRequest(): array
     {
-        return (new OrderActions())->ajaxMode()->declineVenue();
+        return new OrderActions()->ajaxMode()->declineVenue();
     }
 
     public function sendOrderCancellationRequest(): array
     {
-        return (new OrderActions())->ajaxMode()->cancelOrder();
+        return new OrderActions()->ajaxMode()->cancelOrder();
     }
 
     public function removeAccompanyingRow(): array
@@ -968,12 +1000,12 @@ class AjaxController extends Controller
 
     public function removeTaxRoomRow(): array
     {
-        return (new OrderAccommodationActions())->removeTaxRoomCartRow();
+        return new OrderAccommodationActions()->removeTaxRoomCartRow();
     }
 
     public function getUserInfoByEventEmail(): array
     {
-        return (new GetUserInfo())->getUserInfoByEventEmail();
+        return new GetUserInfo()->getUserInfoByEventEmail();
     }
 
     public function testableAvailabilityHotels(): array
@@ -986,22 +1018,22 @@ class AjaxController extends Controller
 
     public function testableAvailabilityFetch(): array
     {
-        return (new Availability())->ajaxMode()->fetch((int)request('hotel'));
+        return new Availability()->ajaxMode()->fetch((int)request('hotel'));
     }
 
     public function loadPecWaiverInCart()
     {
-        return (new AddGrantWaiverFeesToCart())->addGrantWaiverFeesToCart();
+        return new AddGrantWaiverFeesToCart()->addGrantWaiverFeesToCart();
     }
 
     public function sendInvoiceFromModal(): array
     {
-        return (new MailController())->ajaxMode()->distribute('invoice', (string)request('uuid'))->fetchResponse();
+        return new MailController()->ajaxMode()->distribute('invoice', (string)request('uuid'))->fetchResponse();
     }
 
     public function sendRefundFromModal(): array
     {
-        return (new MailController())->ajaxMode()->distribute('refundable', (string)request('uuid'))->fetchResponse();
+        return new MailController()->ajaxMode()->distribute('refundable', (string)request('uuid'))->fetchResponse();
     }
 
     /**
@@ -1010,7 +1042,7 @@ class AjaxController extends Controller
      */
     public function sendResendOrderFromModal(): array
     {
-        return (new MailController())->ajaxMode()->distribute('resendOrder', (int)request('id'))->fetchResponse();
+        return new MailController()->ajaxMode()->distribute('resendOrder', (int)request('id'))->fetchResponse();
     }
 
     /**
@@ -1031,17 +1063,17 @@ class AjaxController extends Controller
 
     public function sendEventContactConfirmationFromModal(): array
     {
-        return (new MailController())->ajaxMode()->distribute('sendEventContactConfirmation', (string)request('uuid'))->fetchResponse();
+        return new MailController()->ajaxMode()->distribute('sendEventContactConfirmation', (string)request('uuid'))->fetchResponse();
     }
 
     public function sendEventGroupConfirmationFromModal(): array
     {
-        return (new MailController())->ajaxMode()->distribute('sendEventGroupConfirmation', (string)request('uuid'))->fetchResponse();
+        return new MailController()->ajaxMode()->distribute('sendEventGroupConfirmation', (string)request('uuid'))->fetchResponse();
     }
 
     public function SendMultipleConfirmation(): array
     {
-        return (new EventContactActions())
+        return new EventContactActions()
             ->enableAjaxMode()
             ->sendMultipleConfirmation()
             ->fetchResponse();
@@ -1049,27 +1081,27 @@ class AjaxController extends Controller
 
     public function reimburseEventDeposit()
     {
-        return (new ReimburseEventDepositAction())->reimburseEventDeposit();
+        return new ReimburseEventDepositAction()->reimburseEventDeposit();
     }
 
     public function reimburseFrontTransaction()
     {
-        return (new RefundFrontTransactionAction())->ajaxMode()->reimburseFrontPayment();
+        return new RefundFrontTransactionAction()->ajaxMode()->reimburseFrontPayment();
     }
 
     public function makeInvoiceForEventDeposit()
     {
-        return (new MakeInvoiceForEventDepositAction())->makeInvoiceForEventDeposit();
+        return new MakeInvoiceForEventDepositAction()->makeInvoiceForEventDeposit();
     }
 
     public function createGroupMemberFromMail()
     {
-        return (new CreateGroupMemberFromEmailAction())->create();
+        return new CreateGroupMemberFromEmailAction()->create();
     }
 
     public function getPayboxForm()
     {
-        return (new PayboxActions())->getPayboxFormByOrder();
+        return new PayboxActions()->getPayboxFormByOrder();
     }
 
     public function getContinentCodeByCountryCode(): array
@@ -1081,17 +1113,17 @@ class AjaxController extends Controller
 
     public function artisanOptimize(): array
     {
-        return (new ArtisanController())->ajaxMode()->optimizeClear();
+        return new ArtisanController()->ajaxMode()->optimizeClear();
     }
 
     public function artisanMigrate(): array
     {
-        return (new ArtisanController())->ajaxMode()->migrate((bool)request('rollback'));
+        return new ArtisanController()->ajaxMode()->migrate((bool)request('rollback'));
     }
 
     public function composerUpdate(): array
     {
-        return (new ArtisanController())->ajaxMode()->composerUpdate();
+        return new ArtisanController()->ajaxMode()->composerUpdate();
     }
 
     # Envoi le mail pour demander le paiment d'une caution Grant
@@ -1105,7 +1137,7 @@ class AjaxController extends Controller
      */
     public function fetchTransportableGrant(): array
     {
-        return (new GrantActions())->ajaxMode()->fetchTransportableGrant((int)request('event_transport_id'))->fetchResponse();
+        return new GrantActions()->ajaxMode()->fetchTransportableGrant((int)request('event_transport_id'))->fetchResponse();
     }
 
     /**
@@ -1113,17 +1145,17 @@ class AjaxController extends Controller
      */
     public function saveTransportableGrant(): array
     {
-        return (new GrantActions())->ajaxMode()->saveTransportableGrant()->fetchResponse();
+        return new GrantActions()->ajaxMode()->saveTransportableGrant()->fetchResponse();
     }
 
     public function removeTransportableGrant(): array
     {
-        return (new GrantActions())->ajaxMode()->removeTransportableGrant((int)request('distribution_id'))->fetchResponse();
+        return new GrantActions()->ajaxMode()->removeTransportableGrant((int)request('distribution_id'))->fetchResponse();
     }
 
     public function sendTransportManagementChangeFromModal(): array
     {
-        return (new MailController())->ajaxMode()->distribute('TransportManagement', (int)request('event_transport_id'))->fetchResponse();
+        return new MailController()->ajaxMode()->distribute('TransportManagement', (int)request('event_transport_id'))->fetchResponse();
     }
 
     public function SendMailTemplate(): array
@@ -1140,7 +1172,7 @@ class AjaxController extends Controller
 
     public function sendMailTemplateFromModal(): array
     {
-        return (new EventContactActions())
+        return new EventContactActions()
             ->enableAjaxMode()
             ->sendMultipleMailTemplate()
             ->fetchResponse();
@@ -1148,7 +1180,7 @@ class AjaxController extends Controller
 
     public function sendPdf(): array
     {
-        return (new EventContactActions())
+        return new EventContactActions()
             ->enableAjaxMode()
             ->sendPdf()
             ->fetchResponse();

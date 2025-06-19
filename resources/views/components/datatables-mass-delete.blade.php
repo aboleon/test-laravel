@@ -56,37 +56,45 @@
     <script>
 
         function DTManipulations() {
-                let DTModal = new bootstrap.Modal(document.getElementById('DT-DeleteModal'), {
-                    backdrop: true
+            let DTModal = new bootstrap.Modal(document.getElementById('DT-DeleteModal'), {
+                backdrop: true
+            });
+
+            let DTSelectAll = $('#datatable-select-all'),
+                DTC = $('#DT-container'),
+                table = $('.dt').DataTable();
+
+            // Individual checkbox handler
+            table.on('click', '.row-checkbox', function () {
+                $('.row-checkbox:checked').length ? DTC.removeClass('d-none') : DTC.addClass('d-none');
+
+                // Update select-all checkbox state
+                let allChecked = table.rows().nodes().to$().find('.row-checkbox:not(:checked)').length === 0;
+                DTSelectAll.prop('checked', allChecked);
+            });
+
+            // Select all handler
+            DTSelectAll.off().on('click', function () {
+                let checked = $(this).is(':checked');
+                checked ? DTC.removeClass('d-none') : DTC.addClass('d-none');
+
+                // Check all checkboxes across all pages
+                table.rows().nodes().to$().find('.row-checkbox').prop('checked', checked);
+            });
+
+            // Delete button handler
+            let DTDeleteBtn = $('#datatable-delete-selected');
+            DTDeleteBtn.off().on('click', function () {
+                let ids = [];
+
+                // Get IDs from all pages
+                table.rows().nodes().to$().find('.row-checkbox:checked').each(function () {
+                    ids.push($(this).val());
                 });
 
-                let DTSelectAll = $('#datatable-select-all'),
-                    DTC = $('#DT-container');
-
-                $('.row-checkbox').off().on('click', function () {
-                    console.log('row-checkbox');
-                    $('.row-checkbox:checked').length ? DTC.removeClass('d-none') : DTC.addClass('d-none');
-                });
-                let DTDeleteBtn = $('#datatable-delete-selected');
-                DTDeleteBtn.off();
-
-                DTSelectAll.off().on('click', function () {
-                    let checked = $(this).is(':checked');
-                    checked ? DTC.removeClass('d-none') : DTC.addClass('d-none');
-                    $('.row-checkbox').prop('checked', checked);
-                });
-
-                // Handle the "Delete Selected" button click
-                DTDeleteBtn.off().on('click', function () {
-                    let ids = [];
-
-                    $('.row-checkbox:checked').each(function () {
-                        ids.push($(this).val());
-                    });
-
-                    if (ids.length > 0) {
-                        DTModal.show();
-                        $('#DT-DeleteModalSave').off().on('click', function () {
+                if (ids.length > 0) {
+                    DTModal.show();
+                    $('#DT-DeleteModalSave').off().on('click', function () {
                             let paramString = 'action=datatableMassDelete&model=' + DTDeleteBtn.data('model') + '&name=' + DTDeleteBtn.data('name') + '&ids=' + ids + '&callback=DTRedraw';
                             let controllerPath = DTDeleteBtn.data('controllerPath');
                             if ('' !== controllerPath) {
@@ -126,7 +134,7 @@
 
             let lastCell = $('#{{ $normalized_model }}-table_wrapper .row:first > div:last-of-type');
             lastCell.addClass('d-flex justify-content-end');
-            lastCell.prepend($('#template-dt-order-reminder').html());
+            lastCell.prepend($('#template-dt-mass-delete').html());
             $($('#template-dt-mass-delete-messages').html()).insertBefore($('#{{ $normalized_model }}-table_wrapper .dt-row'));
 
             DTManipulations();

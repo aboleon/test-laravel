@@ -1,0 +1,17 @@
+.phpdebugbar-widgets-sql-duplicate {
+    background-color: #ffedb6 !important;
+}
+
+dl.phpdebugbar-widgets-kvlist dt {
+    width: 400px !important;
+}
+
+em.test {
+    display: block;
+    padding: 40px 0;
+}
+div.phpdebugbar.phpdebugbar-closed {
+    right: 6px;
+    left: unset;
+    bottom: 15px;
+}

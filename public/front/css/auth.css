@@ -1,0 +1,14 @@
+.auth.logo {
+    margin: 0 auto;
+    width: 50%;
+}
+
+form {
+    width: 500px;
+}
+
+@media (max-width: 500px) {
+    form {
+        width: 90%;
+    }
+}

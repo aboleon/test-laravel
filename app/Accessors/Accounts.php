@@ -16,6 +16,8 @@ use Throwable;
 
 class Accounts
 {
+    private ?array $phonesCache = null;
+
     public function __construct(public Account $account) {}
 
     public static function searchByKeyword(string $keyword, array $options = []): array
@@ -119,18 +121,65 @@ class Accounts
         return $i->billingAddress();
     }
 
-    public function defaultPhone(?string $data = null, $nullable = false): array|string|null
+    private function getPhones(): array
     {
-        $defaultPhone = $this->account->phones->where('default', 1)->first();
+        if ($this->phonesCache === null) {
+            $defaultPhone = $this->account->phones->where('default', 1)->first();
 
-        if ($defaultPhone === null) {
-            $defaultPhone = $this->account->phones->first();
+            if ( ! $defaultPhone) {
+                $defaultPhone = $this->account->phones->first();
+            }
+
+            $secondaryPhone = null;
+            if ($defaultPhone) {
+                $secondaryPhone = $this->account->phones
+                    ->where('id', '!=', $defaultPhone->id)
+                    ->first();
+            }
+
+            $this->phonesCache = [
+                'default'   => $defaultPhone,
+                'secondary' => $secondaryPhone,
+            ];
         }
 
-        $phonedata = [
-            'phone' => $defaultPhone?->phone?->formatInternational() ?: ($nullable ? null : 'NC'),
-            'country_code' => $defaultPhone?->country_code ?? 'FR',
-        ];
+        return $this->phonesCache;
+    }
+
+    public function defaultPhone(?string $data = null, $nullable = false): array|string|null
+    {
+        $phones       = $this->getPhones();
+        $defaultPhone = $phones['default'];
+        $nullValue    = ($nullable ? null : 'NC');
+
+        $phonedata = ! $defaultPhone
+            ? ['phone' => $nullValue, 'country_code' => $nullValue]
+            : [
+                'phone'        => $defaultPhone?->phone?->formatInternational() ?: ($nullable ? null : 'NC'),
+                'country_code' => $defaultPhone?->country_code ?? 'FR',
+            ];
+
+        if ($data && array_key_exists($data, $phonedata)) {
+            return $phonedata[$data];
+        }
+
+        return $phonedata;
+    }
+
+    public function secondaryPhone(?string $data = null, $nullable = false): array|string|null
+    {
+        $phones         = $this->getPhones();
+        $secondaryPhone = $phones['secondary'];
+
+        $nullValue = ($nullable ? null : 'NC');
+
+        $phonedata = ! $secondaryPhone
+            ? ['phone' => $nullValue, 'country_code' => $nullValue]
+            : [
+                'phone'        => $secondaryPhone->phone?->formatInternational() ?: $nullValue,
+                'country_code' => $secondaryPhone->country_code ?? 'FR',
+            ];
+
 
         if ($data && array_key_exists($data, $phonedata)) {
             return $phonedata[$data];
@@ -141,9 +190,11 @@ class Accounts
 
     public static function getDefaultPhoneModelByAccount(Account $account): AccountPhone|null
     {
-        return $account->phones->sortByDesc('default')->first();
-    }
+        $accessor = new self($account);
+        $phones   = $accessor->getPhones();
 
+        return $phones['default'];
+    }
 
     /**
      * @param  Account  $account
@@ -157,7 +208,10 @@ class Accounts
      */
     public static function getDefaultPhoneNumberByAccount(Account $account): PhoneNumber|null
     {
-        $defaultPhone = $account->phones->where('default', 1)->first();
+        $accessor     = new self($account);
+        $phones       = $accessor->getPhones();
+        $defaultPhone = $phones['default'];
+
         if ($defaultPhone) {
             // note: the country code is guessed automatically as long as the phone is in E.164.
             // However, since the database might contain other formats recorded before,
@@ -167,6 +221,7 @@ class Accounts
 
         return null;
     }
+
 
     public function companyName(string $notfound = 'NC'): string
     {

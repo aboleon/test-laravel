@@ -1,0 +1,11 @@
+.mfw-notice {
+    font-size: 14px;
+    background-color: #D0DBE0;
+    a {
+        color: initial;
+        font-weight: 700!important;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}

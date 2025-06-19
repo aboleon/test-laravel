@@ -328,7 +328,7 @@ class FrontCartActions
                 return $service->service_group_combined === $item->shoppable->service_group;
             });
             if ( ! $hasGroupCombined) {
-                $orders = EventContactAccessor::getOrdersWithServices($this->eventContact);
+                $orders = $this->eventContactAccessor->getOrdersWithServices();
                 foreach ($orders as $order) {
                     if (Orders::orderContainsServiceOfFamily($order, $combinedService->id)) {
                         $hasGroupCombined = true;

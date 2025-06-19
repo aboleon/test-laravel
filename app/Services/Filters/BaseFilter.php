@@ -4,6 +4,7 @@ namespace App\Services\Filters;
 
 use App\Services\Filters\Traits\FiltersTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 abstract class BaseFilter
 {
@@ -98,35 +99,53 @@ abstract class BaseFilter
                     // Process nested rules - they are always combined with AND internally
                     $nestedRules = $rule['query']['rules'];
                     $nestedConditions = [];
+                    $nestedTable = $rule['nested'];
+
+                    // Check if there's a related field for this nested rule
+                    $nestedRelated = isset($rule['related']) ? $rule['related'] : null;
+
+                    // Track whether we've joined this nested table
+                    $nestedTableJoined = false;
 
                     foreach ($nestedRules as $nestedRule) {
-                        // Skip rules with empty values (but 0 is considered valid)
-                        if (!isset($nestedRule['value']) ||
-                            ($nestedRule['value'] === '' ||
-                                $nestedRule['value'] === null ||
-                                (is_array($nestedRule['value']) && empty($nestedRule['value'])))) {
-                            continue;
+                        // Skip rules with empty values EXCEPT for operators that don't need values
+                        $noValueOperators = ['is_null', 'is_not_null'];
+                        if (!in_array($nestedRule['operator'], $noValueOperators)) {
+                            if (!isset($nestedRule['value']) ||
+                                ($nestedRule['value'] === '' ||
+                                    $nestedRule['value'] === null ||
+                                    (is_array($nestedRule['value']) && empty($nestedRule['value'])))) {
+                                continue;
+                            }
                         }
 
                         // Parse the column reference (table.column)
                         [$table, $column] = explode('.', $nestedRule['id']);
 
                         // Track necessary joins for nested table
-                        if (!isset($joinedTables[$table])) {
+                        if (!isset($joinedTables[$table]) && !$nestedTableJoined) {
                             $joinedTables[$table] = true;
+                            $nestedTableJoined = true;
 
-                            // Add relation if specified
-                            if (isset($nestedRule['related'])) {
-                                // Check if any tables in the relation need user joins
-                                if (preg_match('/(\w+)\./', $nestedRule['related'], $matches)) {
-                                    $relatedTable = $matches[1];
-                                    $ensureUserJoin($relatedTable);
-                                }
-                                $addJoin("JOIN {$table} ON {$nestedRule['related']}");
+                            // Use the related field from the nested rule if available
+                            if ($nestedRelated) {
+                                $addJoin("JOIN {$table} ON {$nestedRelated}");
                             } else {
-                                // Default join to users if not specified
-                                if ($table !== 'users') {
-                                    $addJoin("JOIN {$table} ON {$table}.user_id = users.id");
+                                // Check for relation in the individual nested rule
+                                if (isset($nestedRule['related'])) {
+                                    $addJoin("JOIN {$table} ON {$nestedRule['related']}");
+                                } else {
+                                    // Default join to users if not specified
+                                    if ($table !== 'users') {
+                                        // Check if this is a user-linked table
+                                        if (in_array($table, $userLinkedTables)) {
+                                            $addJoin("JOIN {$table} ON {$table}.user_id = users.id");
+                                        } else {
+                                            // For other tables without specified relation, don't join automatically
+                                            // You might want to throw an exception here or handle it differently
+                                            continue;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -141,7 +160,7 @@ abstract class BaseFilter
                         }
 
                         // Check for custom function values in nested rules
-                        if (is_string($nestedRule['value']) && str_starts_with($nestedRule['value'], 'function_')) {
+                        if (isset($nestedRule['value']) && is_string($nestedRule['value']) && str_starts_with($nestedRule['value'], 'function_')) {
                             $customResult = $this->handleCustomFunction($nestedRule['value'], $nestedRule['operator'], $fieldReference);
                             if ($customResult) {
                                 if ($customResult['type'] === 'where') {
@@ -155,10 +174,15 @@ abstract class BaseFilter
 
                         // Format nested condition
                         if (!$sqlOp['needs_value']) {
-                            if (isset($sqlOp['value'])) {
-                                $nestedConditions[] = "{$fieldReference} {$sqlOp['operator']} '{$sqlOp['value']}'";
+                            // Special handling for is_null/is_not_null on string fields
+                            if (in_array($nestedRule['operator'], ['is_null', 'is_not_null'])) {
+                                $nestedConditions[] = $this->formatNullCondition($fieldReference, $nestedRule['operator']);
                             } else {
-                                $nestedConditions[] = "{$fieldReference} {$sqlOp['operator']}";
+                                if (isset($sqlOp['value'])) {
+                                    $nestedConditions[] = "{$fieldReference} {$sqlOp['operator']} '{$sqlOp['value']}'";
+                                } else {
+                                    $nestedConditions[] = "{$fieldReference} {$sqlOp['operator']}";
+                                }
                             }
                         } else {
                             // Format the value
@@ -208,12 +232,15 @@ abstract class BaseFilter
                     }
 
                 } else {
-                    // Skip rules with empty values (but 0 is considered valid)
-                    if (!isset($rule['value']) ||
-                        ($rule['value'] === '' ||
-                            $rule['value'] === null ||
-                            (is_array($rule['value']) && empty($rule['value'])))) {
-                        continue;
+                    // Skip rules with empty values EXCEPT for operators that don't need values
+                    $noValueOperators = ['is_null', 'is_not_null'];
+                    if (!in_array($rule['operator'], $noValueOperators)) {
+                        if (!isset($rule['value']) ||
+                            ($rule['value'] === '' ||
+                                $rule['value'] === null ||
+                                (is_array($rule['value']) && empty($rule['value'])))) {
+                            continue;
+                        }
                     }
 
                     // Regular rule (non-nested)
@@ -226,16 +253,18 @@ abstract class BaseFilter
 
                         // Add relation if specified
                         if (isset($rule['related'])) {
-                            // Check if any tables in the relation need user joins
-                            if (preg_match('/(\w+)\./', $rule['related'], $matches)) {
-                                $relatedTable = $matches[1];
-                                $ensureUserJoin($relatedTable);
-                            }
                             $addJoin("JOIN {$table} ON {$rule['related']}");
                         } else {
                             // Default join to users if not specified
                             if ($table !== 'users') {
-                                $addJoin("JOIN {$table} ON {$table}.user_id = users.id");
+                                // Check if this is a user-linked table
+                                if (in_array($table, $userLinkedTables)) {
+                                    $addJoin("JOIN {$table} ON {$table}.user_id = users.id");
+                                } else {
+                                    // For other tables without specified relation, don't join automatically
+                                    // You might want to throw an exception here or handle it differently
+                                    continue;
+                                }
                             }
                         }
                     }
@@ -250,7 +279,7 @@ abstract class BaseFilter
                     }
 
                     // Check for custom function values
-                    if (is_string($rule['value']) && str_starts_with($rule['value'], 'function_')) {
+                    if (isset($rule['value']) && is_string($rule['value']) && str_starts_with($rule['value'], 'function_')) {
                         $customResult = $this->handleCustomFunction($rule['value'], $rule['operator'], $fieldReference);
                         if ($customResult) {
                             if ($customResult['type'] === 'where') {
@@ -264,10 +293,15 @@ abstract class BaseFilter
 
                     // Format condition based on operator type
                     if (!$sqlOp['needs_value']) {
-                        if (isset($sqlOp['value'])) {
-                            $setConditions[] = "{$fieldReference} {$sqlOp['operator']} '{$sqlOp['value']}'";
+                        // Special handling for is_null/is_not_null on string fields
+                        if (in_array($rule['operator'], ['is_null', 'is_not_null'])) {
+                            $setConditions[] = $this->formatNullCondition($fieldReference, $rule['operator']);
                         } else {
-                            $setConditions[] = "{$fieldReference} {$sqlOp['operator']}";
+                            if (isset($sqlOp['value'])) {
+                                $setConditions[] = "{$fieldReference} {$sqlOp['operator']} '{$sqlOp['value']}'";
+                            } else {
+                                $setConditions[] = "{$fieldReference} {$sqlOp['operator']}";
+                            }
                         }
                     } else {
                         // Format the value
@@ -335,9 +369,13 @@ abstract class BaseFilter
         // Build the final query
         $query = $this->getBaseQuery();
 
-        // Add other joins after base query is established
-        if (!empty($joins)) {
-            $query .= ' ' . implode(' ', $joins);
+        // Sort joins to ensure dependencies are met
+        // First, we need to identify join dependencies
+        $sortedJoins = $this->sortJoinsByDependencies($joins);
+
+        // Add sorted joins after base query is established
+        if (!empty($sortedJoins)) {
+            $query .= ' ' . implode(' ', $sortedJoins);
         }
 
         // Add base WHERE conditions
@@ -346,24 +384,27 @@ abstract class BaseFilter
             $query .= " WHERE {$baseWhere}";
         }
 
-        // Create a single combined condition that properly respects all operators
-        $allConditions = [];
+        // Create combined conditions that properly respect the grouping
+        $whereConditions = [];
 
-        // First add all AND conditions (which must all be true)
+        // Process AND conditions
         if (!empty($andConditions)) {
-            $allConditions[] = implode(" AND ", $andConditions);
+            $whereConditions = array_merge($whereConditions, $andConditions);
         }
 
-        // Then add all OR conditions (where any can be true)
+        // Process OR conditions - they should be grouped together
         if (!empty($orConditions)) {
-            $allConditions[] = implode(" OR ", $orConditions);
+            // If we have OR conditions, group them together
+            $whereConditions[] = '(' . implode(' OR ', $orConditions) . ')';
         }
 
-        // Combine all conditions with proper grouping
-        if (!empty($allConditions)) {
+        // Combine all conditions with AND (since top-level groups should be ANDed)
+        if (!empty($whereConditions)) {
             $connector = $baseWhere ? " AND " : " WHERE ";
-            $query .= $connector . "(" . implode(" OR ", $allConditions) . ")";
+            $query .= $connector . implode(" AND ", $whereConditions);
         }
+
+        Log::info('MultiSearch', ['query' => $query, 'filters' => $filterData]);
 
         return $query;
     }
@@ -381,6 +422,40 @@ abstract class BaseFilter
             DB::select($this->buildQuery($searchFilter)),
             'id',
         );
+    }
+
+    /**
+     * Sort joins by their dependencies to ensure proper order
+     *
+     * @param array $joins Array of JOIN statements
+     * @return array Sorted array of JOIN statements
+     */
+    protected function sortJoinsByDependencies(array $joins): array
+    {
+        // Define the base tables that need to be joined first
+        $baseTables = ['account_profile', 'account_address', 'account_phones'];
+        $sortedJoins = [];
+        $remainingJoins = [];
+
+        // First, separate base table joins from dependent joins
+        foreach ($joins as $join) {
+            $isBaseJoin = false;
+            foreach ($baseTables as $baseTable) {
+                if (preg_match("/JOIN\s+{$baseTable}\s+ON\s+{$baseTable}\.user_id/", $join)) {
+                    $isBaseJoin = true;
+                    break;
+                }
+            }
+
+            if ($isBaseJoin) {
+                $sortedJoins[] = $join;
+            } else {
+                $remainingJoins[] = $join;
+            }
+        }
+
+        // Add remaining joins after base joins
+        return array_merge($sortedJoins, $remainingJoins);
     }
 
     /**
@@ -402,5 +477,25 @@ abstract class BaseFilter
         }
 
         return null;
+    }
+
+    /**
+     * Format SQL condition for null/not null operators on string fields
+     *
+     * @param string $fieldReference
+     * @param string $operator
+     * @return string
+     */
+    protected function formatNullCondition(string $fieldReference, string $operator): string
+    {
+        if ($operator === 'is_null') {
+            // For is_null: field is null OR field is empty string
+            return "({$fieldReference} IS NULL OR {$fieldReference} = '')";
+        } elseif ($operator === 'is_not_null') {
+            // For is_not_null: field is not null AND field is not empty string
+            return "({$fieldReference} IS NOT NULL AND {$fieldReference} != '')";
+        }
+
+        return '';
     }
 }

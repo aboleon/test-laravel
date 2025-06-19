@@ -7,11 +7,12 @@
         <tr style="height:360px;">
             <td class="logo-container">
                 <img
-                    src="{{  \App\Helpers\PdfHelper::imageToBase64('assets/pdf/logonew.jpg') }}"
+                    src="{{  public_path('assets/pdf/logonew.jpg') }}"
                     alt="divine logo">
             </td>
         </tr>
     </table>
 
     {!! $parsed->content()['content'] !!}
+
 </x-pdf-layout>

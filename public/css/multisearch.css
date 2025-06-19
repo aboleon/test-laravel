@@ -1,0 +1,161 @@
+/* Group styling */
+.search-group {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease-in-out;
+}
+
+.search-group .search-group {
+    margin-left: 1rem;
+    background-color: #fff;
+}
+
+.search-group:hover {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Operator selector styling */
+.operator-selector .btn {
+    padding: 0.375rem 1rem;
+}
+
+.btn-check:checked + .btn-outline-primary {
+    background-color: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+}
+
+.btn-check:not(:checked) + .btn-outline-primary {
+    background-color: #fff;
+    color: #6c757d;
+    border-color: #dee2e6;
+}
+
+/* Rule styling */
+.search-rule {
+    background-color: white;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.search-rule:hover {
+    background-color: #f0f8ff;
+}
+
+/* Input styling */
+.value-input-container input[data-type="flatpickr"] {
+    background-color: #fff;
+}
+
+/* Button styling */
+.add-rule, .add-group {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.delete-rule, .delete-group {
+    height: 38px;
+    margin-bottom: 0.5rem;
+}
+
+/* When no value is needed */
+.value-input-container .text-muted {
+    padding: 0.375rem 0;
+    font-style: italic;
+}
+
+/* Autocomplete styling */
+.query-builder-autocomplete {
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Improve between operator layout */
+.value-input-container .mx-2 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .search-rule {
+        margin-bottom: 1rem;
+    }
+
+    .search-rule > div {
+        margin-bottom: 0.5rem;
+    }
+
+    .delete-rule {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Custom search styles */
+.search-group {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease-in-out;
+}
+
+.search-group .search-group {
+    margin-left: 1rem;
+    background-color: #fff;
+}
+
+.operator-selector .btn {
+    padding: 0.375rem 1rem;
+}
+
+.btn-check:checked + .btn-outline-primary {
+    background-color: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+}
+
+.btn-check:not(:checked) + .btn-outline-primary {
+    background-color: #fff;
+    color: #6c757d;
+    border-color: #dee2e6;
+}
+
+.search-rule {
+    background-color: white;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+.nested-field-container {
+    background-color: #f8f9fa;
+    border-left: 4px solid #007bff !important;
+}
+
+.nested-field-container .nested-header h6 {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.nested-rule {
+    background-color: white;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.nested-rule:last-child {
+    margin-bottom: 0;
+}

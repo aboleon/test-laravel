@@ -25,14 +25,14 @@ class Select2Accounts
 
         $query = UserView::query()
             ->select('id as '.$key)
-            ->addSelect(DB::raw('CONCAT( first_name, " ", last_name, " (", COALESCE(locality, ""), " - ", COALESCE(country, ""), ")" ) as '.$value))
+            ->addSelect(DB::raw('CONCAT( first_name, " ", last_name, " (", COALESCE(locality, ""), " - ", COALESCE(country, ""), ")", " ", email ) as '.$value))
             ->searchByName($keyword)
             ->showTrashed(! empty($options['showTrashed']));
 
         if ( ! empty($options['exclude_event'])) {
             $this->setEvent((int)$options['exclude_event']);
             if ($this->event) {
-               $query->excludeEvent($this->event->id);
+                $query->excludeEvent($this->event->id);
             }
         }
 

@@ -8,15 +8,15 @@ use App\Accessors\Front\Sellable\Service;
 use App\Actions\EventManager\GrantActions;
 use App\DataTables\View\EventContactView;
 use App\Enum\{ApprovalResponseStatus, EventDepositStatus, OrderCartType, OrderClientType, OrderMarker, OrderSource, OrderStatus, ParticipantType};
-use App\Helpers\DateHelper;
-use App\Models\{Account, Event, EventContact, EventManager\EventGroup\EventGroupContact, Order, Order\EventDeposit};
+use App\Models\{Account, Event, EventContact, Order, Order\EventDeposit};
+use App\Models\EventManager\EventGroup\EventGroupContact;
+use App\Models\EventManager\Grant\Grant;
 use App\Services\Grants\ParsedGrant;
 use App\Services\Pec\PecParser;
 use App\Services\Pec\PecType;
 use App\Traits\Models\AccountModelTrait;
 use App\Traits\Models\EventContactModelTrait;
 use App\Traits\Models\EventModelTrait;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -37,10 +37,18 @@ class EventContactAccessor
     private array $bookedServices = [];
     private ?bool $hasAnyTransportPec = null;
     private ?bool $isPecAuthorized = null;
+    private ?bool $hasPaidGrantDepositCache = null;
+    private ?Collection $accommodationItemsCache = null;
+    private ?Collection $serviceItemsCache = null;
     private EloquentCollection|null $transportPec = null;
     private ?bool $hasOrdersOrGroupOrders = null;
     private ?int $hasAnyOrders = null;
-    private ?Collection $eventGroups = null;
+    private ?EventGroup $eventGroup = null;
+    private ?bool $eventGroupLoaded = false;
+
+    // Order singleton cache
+    private ?EloquentCollection $ordersCache = null;
+    private ?EloquentCollection $assignedOrdersCache = null;
 
     public function __construct(null|int|Event $event = null, null|int|Account $account = null)
     {
@@ -92,18 +100,30 @@ class EventContactAccessor
     }
 
     # PEC methods
-
     public function hasPaidGrantDeposit(): bool
     {
+        if ($this->hasPaidGrantDepositCache !== null) {
+            return $this->hasPaidGrantDepositCache;
+        }
+
         if ($this->isExemptGrantFromDeposit()) {
+            $this->hasPaidGrantDepositCache = true;
+
             return true;
         }
 
         if ( ! $this->eventContact->grantDeposit) {
+            $this->hasPaidGrantDepositCache = false;
+
             return false;
         }
 
-        return in_array($this->eventContact->grantDeposit->status, EventDepositStatus::paid());
+        $this->hasPaidGrantDepositCache = in_array(
+            $this->eventContact->grantDeposit->status,
+            EventDepositStatus::paid(),
+        );
+
+        return $this->hasPaidGrantDepositCache;
     }
 
     public function isPecAuthorized(): bool
@@ -155,6 +175,20 @@ class EventContactAccessor
 
                 return null;
             }
+        }
+
+        return null;
+    }
+
+    public function getDepositedGrant(): ?Grant
+    {
+        try {
+            if (!$this->isExemptGrantFromDeposit() && $this->hasPaidGrantDeposit()) {
+                return $this->eventContact->grantDeposit->shoppable;
+            }
+        } catch (Throwable $e) {
+            Log::error("hasPaidGrantDeposit PROBLEM - " . $this->eventContact->id);
+            return null;
         }
 
         return null;
@@ -506,93 +540,45 @@ class EventContactAccessor
         return $this->eventContact->transport()->exists();
     }
 
-    public static function getOrdersWithServices(EventContact $ec): EloquentCollection
+    /**
+     * Get orders with services for this EventContact
+     * Uses the singleton pattern to avoid multiple queries
+     */
+    public function getOrdersWithServices(): EloquentCollection
     {
-        return Order::with("services")
-            ->where([
-                'event_id'    => $ec->event_id,
-                'client_type' => OrderClientType::CONTACT->value,
-                'client_id'   => $ec->user_id,
-            ])
-            ->whereHas('services')
-            ->get();
+        return $this
+            ->getOrders()
+            ->filter(fn($order) => $order->services->isNotEmpty())
+            ->load('services');
     }
 
-    public static function getOrdersWithAccommodations(EventContact $ec): EloquentCollection
+    /**
+     * Get orders with accommodations for this EventContact
+     * Uses the singleton pattern to avoid multiple queries
+     */
+    public function getOrdersWithAccommodations(): EloquentCollection
     {
-        return Order::with("accommodation")
-            ->where(['event_id' => $ec->event_id, 'client_id' => $ec->user_id])
-            ->whereHas('accommodation')
-            ->get();
+        return $this
+            ->getOrders()
+            ->filter(fn($order) => $order->accommodation->isNotEmpty())
+            ->load([
+                "accommodation.eventHotel.hotel",
+                "accommodation.roomGroup",
+                "accommodation.room.room",
+            ]);
     }
 
     public function getAccommodationCarts(): Collection
     {
-        $ecOrders = self::getOrdersWithAccommodations($this->eventContact);
-
-        return $ecOrders->load([
-            "accommodation.eventHotel.hotel",
-            "accommodation.roomGroup",
-            "accommodation.room.room",
-        ]);
+        return $this->getOrdersWithAccommodations();
     }
-
-    public function getAccommodationItems(): Collection
+    public function getServiceItems(): Collection
     {
-        $carts = $this->getAccommodationCarts();
+        if ($this->serviceItemsCache === null) {
+            $this->serviceItemsCache = Service::getServiceItems($this);
+        }
 
-        $ret = [];
-
-        $carts->each(function (Order $orderCart) use (&$ret) {
-            $accommodations = $orderCart->accommodation;
-            if ($accommodations->isEmpty()) {
-                return null;
-            }
-            foreach ($accommodations as $cartAcc) {
-                $dateFormatted        = DateHelper::getFrontDate(Carbon::create($cartAcc->date));
-                $hotelName            = $cartAcc->eventHotel->hotel->name;
-                $roomGroupName        = strtoupper($cartAcc->roomGroup->name);
-                $roomName             = $cartAcc->room->room->name;
-                $price                = $cartAcc->total_net + $cartAcc->total_vat;
-                $nbPersons            = $cartAcc->quantity;
-                $accompanying_details = $cartAcc->accompanying_details;
-                $comment              = $cartAcc->comment;
-                $processing_fee_ttc   = $cartAcc->processing_fee_ttc / 100;
-
-
-                $sTitle  = "1 nuit à l'hôtel $hotelName";
-                $texts   = [];
-                $texts[] = "Le $dateFormatted";
-                $texts[] = "Chambre $roomGroupName - $roomName";
-                $texts[] = "Prix : $price €";
-                $texts[] = "Nombre de personnes : $nbPersons";
-                if ($accompanying_details) {
-                    $texts[] = "Détails accompagnants : $accompanying_details";
-                }
-                if ($comment) {
-                    $texts[] = "Commentaire : $comment";
-                }
-                if ($processing_fee_ttc) {
-                    $texts[] = "Frais de dossier : $processing_fee_ttc €";
-                }
-
-
-                $ret[] = [
-                    'title'       => $sTitle,
-                    'text'        => implode('<br>', $texts),
-                    'roomgroup'   => $cartAcc->room_group_id,
-                    'price'       => $price,
-                    'date'        => $cartAcc->date->toDateString(),
-                    'has_amended' => $orderCart->amended_order_id,
-                    'amend_type'  => $orderCart->amend_type,
-                    'was_amended' => $orderCart->amended_by_order_id,
-                    'order_id'    => $cartAcc->order_id,
-
-                ];
-            }
-        });
-
-        return collect($ret);
+        return $this->serviceItemsCache;
     }
 
     public function isOrator(): bool
@@ -610,53 +596,74 @@ class EventContactAccessor
         return $this->eventContact->participationType?->group;
     }
 
-    public static function getEventGroups(EventContact $ec): EloquentCollection
+    /**
+     * Get the single event group for this contact
+     * Changed from static method returning collection to instance method returning single model
+     */
+    public function getEventGroup(): ?EventGroup
     {
-        return $ec->event
-            ->eventGroups()
-            ->whereHas("eventGroupContacts", function ($query) use ($ec) {
-                $query->where('user_id', $ec->user_id);
-            })
-            ->get();
+        if (!$this->eventGroupLoaded) {
+            $this->eventGroup = $this->eventContact->eventGroup;
+            $this->eventGroupLoaded = true;
+        }
+
+        return $this->eventGroup;
+    }
+
+    public static function getEventGroupForContact(EventContact $ec): ?EventGroup
+    {
+        return $ec->eventGroup;
     }
 
     # ORDERS
+
+    /**
+     * Main method to get orders - singleton pattern
+     */
     public function getOrders(): EloquentCollection
     {
-        return Order::query()
-            ->where([
-                'client_type' => OrderClientType::CONTACT->value,
-                'client_id'   => $this->eventContact->user_id,
-                'event_id'    => $this->getEvent()->id,
-            ])
-            ->get();
+        if ($this->ordersCache === null) {
+            $this->ordersCache = Order::query()
+                ->with(['services', 'accommodation', 'payments'])
+                ->where([
+                    'client_type' => OrderClientType::CONTACT->value,
+                    'client_id'   => $this->eventContact->user_id,
+                    'event_id'    => $this->getEvent()->id,
+                ])
+                ->get();
+        }
+
+        return $this->ordersCache;
     }
 
     /**
      * Ordres pour lesquels le compte est payeur mais pas bénéficiaire
-     *
-     * @return EloquentCollection
      */
     public function getAssignedOrders(): EloquentCollection
     {
-        return Order::query()
-            ->select('orders.*')
-            ->where(
-                fn($where)
-                    => $where->where('event_id', $this->getEvent()->id)->where(
-                    'client_id',
-                    '!=',
-                    $this->eventContact->user_id,
-                ),
-            )
-            ->join(
-                'order_invoiceable as oi',
-                fn($join) => $join->on('orders.id', '=', 'oi.order_id')->where([
-                    'oi.account_id'   => $this->eventContact->user_id,
-                    'oi.account_type' => OrderClientType::CONTACT->value,
-                ]),
-            )
-            ->get();
+        if ($this->assignedOrdersCache === null) {
+            $this->assignedOrdersCache = Order::query()
+                ->select('orders.*')
+                ->with(['services', 'accommodation', 'payments'])
+                ->where(
+                    fn($where)
+                        => $where->where('event_id', $this->getEvent()->id)->where(
+                        'client_id',
+                        '!=',
+                        $this->eventContact->user_id,
+                    ),
+                )
+                ->join(
+                    'order_invoiceable as oi',
+                    fn($join) => $join->on('orders.id', '=', 'oi.order_id')->where([
+                        'oi.account_id'   => $this->eventContact->user_id,
+                        'oi.account_type' => OrderClientType::CONTACT->value,
+                    ]),
+                )
+                ->get();
+        }
+
+        return $this->assignedOrdersCache;
     }
 
     public function getOrdersWithRemainingPayments(): EloquentCollection
@@ -667,7 +674,7 @@ class EventContactAccessor
                 &&
                 ! $order->external_invoice
                 && $order->status == OrderStatus::UNPAID->value,
-        )->load('payments');
+        );
     }
 
     /**
@@ -679,7 +686,7 @@ class EventContactAccessor
     {
         return $this->getAssignedOrders()->filter(
             fn($order) => ! $order->external_invoice && $order->status == OrderStatus::UNPAID->value,
-        )->load('payments');
+        );
     }
 
     public function getAllRemainingPayments(): int|float
@@ -745,7 +752,7 @@ class EventContactAccessor
                 'paid_by'    => $item['paid_by'],
             ]);
 
-        $attributedAccommodation = Accommodation::getAccommodationItems($this->eventContact)
+        $attributedAccommodation = $this->getAccommodationItems()
             ->filter(fn($item) => $item['source'] == OrderSource::ATTRIBUTION->value)
             ->map(fn($item)
                 => [
@@ -762,11 +769,25 @@ class EventContactAccessor
         return $attributedServices->merge($attributedAccommodation);
     }
 
+    public function getAccommodationItems(): Collection
+    {
+        if ($this->accommodationItemsCache === null) {
+            $this->accommodationItemsCache = Accommodation::getAccommodationItems($this);
+        }
+
+        return $this->accommodationItemsCache;
+    }
+
+    public function getAccommodationCheckIns(): Collection
+    {
+        return Accommodation::getAccommodationCheckIns($this);
+    }
+
     public function hasOrdersOrGroupOrders(): bool
     {
         if ($this->hasOrdersOrGroupOrders === null) {
             $groupOrder = 0;
-            if ($this->eventGroups()->count()) {
+            if ($this->getEventGroup()) {
                 $groupOrder = $this->accommodationAttributions()->count() || $this->serviceAttributions()->count();
             }
             $this->hasOrdersOrGroupOrders = $groupOrder || $this->hasAnyOrders();
@@ -775,12 +796,14 @@ class EventContactAccessor
         return $this->hasOrdersOrGroupOrders;
     }
 
+    /**
+     * Get the single event group for this contact
+     * @deprecated Use getEventGroup() instead
+     */
     public function eventGroups(): Collection
     {
-        if ($this->eventGroups === null) {
-            $this->eventGroups = $this->eventContact->eventGroups;
-        }
-
-        return $this->eventGroups;
+        // For backward compatibility, return a collection with single item
+        $eventGroup = $this->getEventGroup();
+        return $eventGroup ? collect([$eventGroup]) : collect();
     }
 }

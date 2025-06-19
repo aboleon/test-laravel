@@ -3,38 +3,74 @@
 namespace App\Accessors\Front\Sellable;
 
 use App\Accessors\EventContactAccessor;
-use App\Accessors\Order\Cart\ServiceCarts;
+use App\Enum\EventDepositStatus;
 use App\Models\EventContact;
 use App\Models\Order\Cart\ServiceCart;
 use Illuminate\Support\Collection;
 
 class Service
 {
-
-    public static function getServiceItems(EventContact $eventContact): Collection
+    /**
+     * Get service items for an EventContact
+     */
+    public static function getServiceItems(EventContactAccessor|EventContact $accessor): Collection
     {
-        // Fetch service carts for the event contact
-        $cartServices = ServiceCarts::getServiceCartsByEventContact($eventContact);
+        if ($accessor instanceof EventContact) {
+            $eventContactAccessor = new EventContactAccessor();
+            $eventContactAccessor->setEventContact($accessor);
+            $eventContact = $accessor;
+        } else {
+            $eventContactAccessor = $accessor;
+            $eventContact = $eventContactAccessor->getEventContact();
+        }
 
-        // Initialize EventContactAccessor to handle attributions
-        $eventContactAccessor = (new EventContactAccessor())->setEventContact($eventContact);
+        // Use the accessor's method to get orders with services
+        $ordersWithServices = $eventContactAccessor->getOrdersWithServices();
+
+        // Extract service carts from orders
+        $cartServices = $ordersWithServices->map(function ($order) {
+            return $order->services;
+        })->flatten();
 
         // Fetch attributed services with serviceCart relationship
         $attributedServices = $eventContactAccessor->serviceAttributions()->load('order');
 
+        // Get sellable deposits for the event contact
+        $sellableDeposits = $eventContact->sellableDeposits()
+            ->whereIn('status', EventDepositStatus::paid())
+            ->get()
+            ->keyBy('shoppable_id');
+
         // Map original service carts
-        $mappedServices = $cartServices->map(function (ServiceCart $cartService) use ($eventContact) {
-            return self::formatServiceItem($cartService, $eventContact, 'order');
+        $mappedServices = $cartServices->map(function (ServiceCart $cartService) use ($eventContact, $sellableDeposits) {
+            return self::formatServiceItem($cartService, $eventContact, 'order', $sellableDeposits);
         });
 
         // Map attributed services
-        $mappedAttributions = $attributedServices->map(function ($attribution) use ($eventContact) {
+        $mappedAttributions = $attributedServices->map(function ($attribution) use ($eventContact, $sellableDeposits) {
             $service  = $attribution->shoppable;
             $quantity = $attribution->quantity ?? 1;
 
             // Get the unit price from the related service cart
             $unitPrice  = $attribution->cart?->unit_price ?: 0;
             $totalPrice = $unitPrice * $quantity;
+
+            // Check for deposit
+            $deposit = $sellableDeposits->get($service->id);
+            $depositAmount = $service->deposit?->amount ?? 0;
+            $depositPaid = $deposit ? 1 : 0;
+
+            // Get service group information
+            $serviceGroup = $service->group;
+            $serviceGroupId = $serviceGroup?->id ?? null;
+            $servicePosition = null;
+
+            if ($serviceGroup && $attribution->order->event) {
+                $eventService = $attribution->order->event->services()
+                    ->where('event_service.service_id', $serviceGroupId)
+                    ->first();
+                $servicePosition = $eventService?->fo_family_position ?? null;
+            }
 
             return [
                 'title'        => $service->title ?? __('front/services.dashboard_no_title'),
@@ -56,19 +92,40 @@ class Service
                 'total_pec'    => $attribution->cart?->total_pec ?: 0,
                 'unit_price'   => $unitPrice,
                 'total_price'  => $totalPrice,
+                'deposit_amount' => $depositAmount,
+                'deposit_paid'   => $depositPaid,
+                'service_group'  => $serviceGroupId,
+                'service_position' => $servicePosition,
             ];
         });
 
         // Combine original and attributed services
-        return $mappedServices->merge($mappedAttributions);
+        return $mappedServices->merge($mappedAttributions)->sortBy('service_position')->values();
     }
 
-// Helper method to format service items
-    private static function formatServiceItem(ServiceCart $cartService, EventContact $eventContact, string $source): array
+    // Helper method updated to include deposit information
+    private static function formatServiceItem(ServiceCart $cartService, EventContact $eventContact, string $source, Collection $sellableDeposits): array
     {
         $service     = $cartService->service;
         $badge       = [];
         $extraBadges = [];
+
+        // Check for deposit
+        $deposit = $sellableDeposits->get($service->id);
+        $depositAmount = $service->deposit?->amount ?? 0;
+        $depositPaid = $deposit ? 1 : 0;
+
+        // Get service group information
+        $serviceGroup = $service->group;
+        $serviceGroupId = $serviceGroup?->id ?? null;
+        $servicePosition = null;
+
+        if ($serviceGroup && $cartService->order->event) {
+            $eventService = $cartService->order->event->services()
+                ->where('event_service.service_id', $serviceGroupId)
+                ->first();
+            $servicePosition = $eventService?->fo_family_position ?? null;
+        }
 
         if ($cartService->order->client_id !== $eventContact->user_id) {
             $payerName = $cartService->order->client()->names();
@@ -124,14 +181,20 @@ class Service
             );
 
         return array_merge([
-            'title'        => $service->title,
-            'text'         => implode('<br>', $texts),
-            'extra_badges' => $extraBadges,
-            'source'       => $source,
-            'total_pec'    => $cartService->total_pec,
-            'unit_price'   => $cartService->unit_price,
+            'title'          => $service->title,
+            'text'           => implode('<br>', $texts),
+            'extra_badges'   => $extraBadges,
+            'source'         => $source,
+            'paid_by'        => $cartService->order->client()->names(),
+            'order_id'       => $cartService->order->id,
+            'event_id'       => $cartService->order->event_id,
+            'total_pec'      => $cartService->total_pec,
+            'unit_price'     => $cartService->unit_price,
+            'total_price'    => $totalTtc,
+            'deposit_amount' => $depositAmount,
+            'deposit_paid'   => $depositPaid,
+            'service_group'  => $serviceGroupId,
+            'service_position' => $servicePosition,
         ], $badge);
     }
-
-
 }

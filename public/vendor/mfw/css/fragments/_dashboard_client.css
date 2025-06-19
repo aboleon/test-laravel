@@ -1,0 +1,40 @@
+.client-dashboard {
+
+    .wg-card-bloc {
+        padding-right: 0;
+    }
+
+    table {
+        th {
+            white-space: nowrap;
+
+            &:last-of-type {
+                width: 13%;
+            }
+        }
+
+        caption {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            background: var(--ab-green);
+        }
+
+        thead {
+            background: #f5f4f0;
+        }
+
+        tr {
+            td {
+                &:first-of-type {
+                    width: 15%;
+                }
+
+                &:last-of-type {
+                    width: 13%;
+                }
+            }
+        }
+    }
+}

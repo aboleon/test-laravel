@@ -1,0 +1,43 @@
+td.status {
+    text-align: center;
+    vertical-align: middle !important;
+}
+
+.table {
+
+    caption {
+        caption-side: initial;
+
+        h3 {
+            font-size: 20px !important;
+        }
+    }
+
+}
+.table > :not(:first-child) {
+    border-top-color: transparent;
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #f6faff;
+}
+
+th {
+    vertical-align: baseline;
+}
+
+
+td {
+    &.bg-success {
+        background-color: #dff0d8 !important;
+    }
+
+    &.bg-danger {
+        background-color: #f2dede !important;
+    }
+
+    a {
+        &.label-danger, &.btn-success, &.btn-danger, &.btn-warning, &.btn-info {
+            color: #fff !important;
+        }
+    }
+}

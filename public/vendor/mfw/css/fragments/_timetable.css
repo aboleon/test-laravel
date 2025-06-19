@@ -1,0 +1,119 @@
+
+h3 {
+    color: black;
+    font-size: 28px;
+    padding-bottom: 10px;
+    position: relative;
+}
+
+#when {
+    input {
+        border-top: 5px solid var(--ab-green);
+
+        &:focus {
+            border-color: var(--ab-green);
+            box-shadow: none;
+        }
+    }
+
+    .notice {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        margin-left: 12px;
+
+        span {
+            background: #deafaf;
+            width: 130px;
+            height: 30px;
+            display: inline-block;
+            margin-right: 20px;
+        }
+    }
+}
+
+#date-selector input {
+    background: beige;
+}
+
+#wg-presta {
+    border: 1px dashed #ccc;
+    padding: 20px 10px;
+    margin-bottom: 30px;
+    border-radius: 6px;
+}
+
+#wg-presta p {
+    margin-bottom: 0;
+}
+
+.show-timetable {
+    display: flex;
+    justify-content: space-between;
+
+    .days-7 {
+        padding: 0 1%;
+        width: 100%;
+        position: relative;
+    }
+
+    strong, span {
+        display: block;
+        text-align: center;
+    }
+
+    strong {
+        margin-bottom: 10px;
+
+        em {
+            display: block;
+            background: var(--ab-green);
+            color: var(--ab-indigo);
+            font-weight: 400;
+            border-radius: 3px;
+            font-style: normal;
+            padding: 7px;
+            margin-bottom: 10px;
+        }
+    }
+
+    span {
+        padding: 5px;
+
+        &.taken {
+            color: #c7c7c7;
+            cursor: not-allowed;
+        }
+
+        &.booked {
+            background: #deafaf;
+            color: white;
+            border-bottom: 1px solid white;
+            cursor: default;
+
+            &:hover {
+                background: var(--ab-green);
+            }
+        }
+
+        &.available {
+            font-weight: 600;
+            transition: 200ms all ease;
+            cursor: default;
+
+            &:hover {
+                background: var(--ab-green);
+            }
+        }
+
+        &.closed {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #9d8200;
+            font-weight: 600;
+            font-size: 24px;
+        }
+    }
+}
