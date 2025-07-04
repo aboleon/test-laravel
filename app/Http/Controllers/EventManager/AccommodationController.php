@@ -15,6 +15,7 @@ use App\Models\EventManager\Accommodation;
 use App\Models\EventManager\Accommodation\Deposit;
 use App\Traits\DataTables\MassDelete;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -75,7 +76,7 @@ class AccommodationController extends Controller
             $accommodation->update($data);
 
             // Update Event
-            $service_prefix = (new AccommodationServiceRequest())->getPrefix();
+            $service_prefix = new AccommodationServiceRequest()->getPrefix();
             $service = $request->validated('service');
             $service['participation_types'] = request()->filled($service_prefix . 'participation_types')
                 ? implode(',', request($service_prefix . 'participation_types'))
@@ -101,6 +102,8 @@ class AccommodationController extends Controller
                 $this->responseException($e, "Un problème est survenu lors de l'enregistrement des acomoptes");
             }
 
+            $accommodation->syncSageData();
+
             $this->responseSuccess(__('ui.record_updated'));
             $this->saveAndRedirect(route('panel.manager.event.accommodation.index', $event));
 
@@ -111,6 +114,9 @@ class AccommodationController extends Controller
         return $this->sendResponse();
     }
 
+    /**
+     * @throws Exception
+     */
     public function destroy(Event $event, Accommodation $accommodation): RedirectResponse
     {
         if ($accommodation->bookings->count()) {
@@ -118,7 +124,7 @@ class AccommodationController extends Controller
             return $this->sendResponse();
         }
 
-        return (new Suppressor($accommodation))
+        return new Suppressor($accommodation)
             ->remove()
             ->whitout('object')
             ->responseSuccess(__("L'hôtel est bien dissocié de l'événement."))

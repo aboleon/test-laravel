@@ -87,7 +87,7 @@
     </div>
     <div class="col-xl-6 mb-3 {{ $accessor->isMedical() ? '' : 'd-none' }}"
          id="rpps-access">
-        <x-mfw::textarea name="profile[rpps]"
+        <x-mfw::input name="profile[rpps]"
                       label="RPPS"
                       :params="['placeholder'=>__('front/account.labels.rpps_notice')]"
                       :value="$error ? old('profile.rpps') : ($account?->profile?->rpps ?? '')"/>

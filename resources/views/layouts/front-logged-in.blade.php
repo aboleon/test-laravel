@@ -3,7 +3,7 @@
     use App\Services\Pec\PecParser;
     use App\Accessors\Front\FrontCache;
 @endphp
-<x-front-layout>
+<x-front-layout :event="FrontCache::getEvent()">
     @php
         $eventName = $event->texts->name;
         $avatarSrc = \App\Accessors\Accounts::getPhotoByAccount($account);
@@ -178,7 +178,6 @@
 
 
     <x-front.session-notifs prefix="user."/>
-
     @if(!$groupView)
         <div class="container mt-5">
             <div class="row">
@@ -229,7 +228,6 @@
             </div>
         </div>
     </section>
-
     @yield("after_content")
     @include('front.shared.confirm_modal')
     @include('front.shared.modal.ajax-notif-modal')

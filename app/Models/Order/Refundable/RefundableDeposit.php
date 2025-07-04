@@ -3,6 +3,7 @@
 namespace App\Models\Order\Refundable;
 
 use App\Interfaces\RefundableInterface;
+use App\Models\EventManager\Sellable;
 use App\Models\FrontTransaction;
 use App\Models\Order;
 use App\Models\Order\EventDeposit;
@@ -42,7 +43,10 @@ class RefundableDeposit implements RefundableInterface
 
     public function transaction(): FrontTransaction|PaymentTransaction
     {
-        return $this->deposit->order->transaction;
+        return match ($this->deposit->shoppable_type) {
+            Sellable::class => $this->deposit->order->transaction,
+            default => $this->deposit->paymentCall->transaction,
+        };
     }
 
     public function model(): string

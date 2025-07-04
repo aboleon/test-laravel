@@ -2,11 +2,7 @@
 namespace App\MailTemplates\Traits\Variables;
 
 use App\Actions\Front\AutoConnectHelper;
-use App\Enum\OrderClientType;
-use App\Enum\OrderType;
 use App\Models\EventClient;
-use App\Models\Order;
-use Illuminate\Support\Carbon;
 use MetaFramework\Accessors\Countries;
 
 trait EventVariables {

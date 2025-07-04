@@ -1,5 +1,13 @@
 <form id="export-global-form" method="POST" class="modal-form" data-ajax="{{route('ajax')}}">
     @csrf
+    @php
+        $defaultExportFormats = [
+           'formats' => ['pdf' => 'PDF', 'zip' => 'PDFs en zip', 'csv' => 'CSV'],
+           'default' => 'zip'
+           ];
+           $exportsFormats = $export_formats ?? $defaultExportFormats;
+
+    @endphp
     <input type="hidden" class="filterdata" name="action" value="{{$action}}"/>
     <input type="hidden" class="filterdata" name="event_id" value="{{$event?->id}}"/>
     <div class="modal-content">
@@ -22,16 +30,19 @@
                                        name="end"
                                        value=""/>
                 </div>
+
                 <div class="col-12">
-                    <x-mfw::radio label="Exporter en:" name="export_format" :values="['pdf' => 'PDF', 'zip' => 'PDFs en zip', 'csv' => 'CSV']" default="zip" />
+                    <x-mfw::radio label="Exporter en:" name="export_format"
+                                  :values="$exportsFormats['formats']" :default="$exportsFormats['default'] ?? array_key_first($exportsFormats['formats']) "/>
                 </div>
+
             </div>
 
             <div class="messages"></div>
         </div>
         <div class="row p-3 pt-0 align-items-center">
             <div class="col-6">
-                <x-mfw::spinner text="Traitement..." />
+                <x-mfw::spinner text="Traitement..."/>
             </div>
             <div class="col-6 text-end">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">

@@ -91,10 +91,11 @@ class ExportProgramInterventionsAction
                     $oratorStrings = [];
                     foreach ($value as $orator) {
                         $oratorStrings[] = sprintf(
-                            "%s %s (%s) - %s, %s - %s",
+                            "%s %s (%s) %s - %s, %s - %s",
                             $orator['last_name'],
                             $orator['first_name'],
                             $orator['email'],
+                            $orator['phone'],
                             $orator['locality'] ?? '',
                             $orator['country'] ?? '',
                             $orator['participation_type']
@@ -205,7 +206,7 @@ class ExportProgramInterventionsAction
                     'email'              => $orator->account->email,
                     'phone'              => $accountAccessor->defaultPhone('phone'),
                     'locality'           => $address?->locality,
-                    'country'            => Countries::getCountryNameByCodeAndLocale($address->country_code) ?? '',
+                    'country'            => Countries::getCountryNameByCodeAndLocale($address?->country_code) ?? '',
                     'participation_type' => $orator->participationType?->name ?? '',
                 ];
             })->toArray();

@@ -38,7 +38,7 @@ class EventController extends Controller
      */
     public function create(): Renderable
     {
-        $event = new Event;
+        $event = new Event();
 
         return view('events.edit')->with(
             array_merge(
@@ -111,7 +111,7 @@ class EventController extends Controller
         $this->event->texts()->update(request('event.texts'));
         $this->event->pec()->update($pec_data);
         $shop_data = request('event.shop');
-        if (!request()->has('event.shop.is_active')) {
+        if ( ! request()->has('event.shop.is_active')) {
             $shop_data['is_active'] = 0;
         }
         $this->event->shop()->update($shop_data);
@@ -222,12 +222,14 @@ class EventController extends Controller
                 return isset($service['service_id']);
             })
             ->mapWithKeys(function ($service, $serviceId) {
-                return [$serviceId => [
-                    'max' => $service['max'] ?? 1,
-                    'unlimited' => isset($service['unlimited']) && $service['unlimited'] ? 1 : null,
-                    'service_date_doesnt_count' => isset($service['service_date_doesnt_count']) && $service['service_date_doesnt_count'] ? 1 : null,
-                    'fo_family_position' => $service['fo_family_position'] ?? 0,
-                ]];
+                return [
+                    $serviceId => [
+                        'max'                       => $service['max'] ?? 1,
+                        'unlimited'                 => isset($service['unlimited']) && $service['unlimited'] ? 1 : null,
+                        'service_date_doesnt_count' => isset($service['service_date_doesnt_count']) && $service['service_date_doesnt_count'] ? 1 : null,
+                        'fo_family_position'        => $service['fo_family_position'] ?? 0,
+                    ],
+                ];
             })
             ->toArray();
 
@@ -260,6 +262,9 @@ class EventController extends Controller
                 }
             }
         });
+
+        // Sync Sage Data
+        $this->event->syncSageData();
     }
 
     private function syncShopRanges(): void

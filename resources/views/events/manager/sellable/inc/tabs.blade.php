@@ -4,6 +4,7 @@
         <x-mfw::tab tag="texts-tabpane" label="Descriptifs"/>
         <x-mfw::tab tag="ptypes-tabpane" label="Participations & Professions"/>
         <x-mfw::tab tag="inscriptions-tabpane" label="Inscriptions"/>
+        <x-mfw::tab tag="sage-tabpane" label="SAGE"/>
     </div>
 </nav>
 @push('js')

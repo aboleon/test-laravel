@@ -71,7 +71,7 @@ class SellableController extends Controller
             $this->syncRelations();
 
             // Caution
-            (new SellableDeposit(sellable: $this->sellable, request: $request, store: true))();
+            new SellableDeposit(sellable: $this->sellable, request: $request, store: true)();
 
             $this->redirect_to = route('panel.manager.event.sellable.edit', ['event' => $event, 'sellable' => $this->sellable]);
             $this->responseSuccess("La prestation a été ajoutée.");
@@ -198,9 +198,11 @@ class SellableController extends Controller
     private function syncRelations(): void
     {
         // Options
-        (new SellableOption(sellable: $this->sellable))();
+        new SellableOption(sellable: $this->sellable)();
         // Prix
-        (new SellablePrice(sellable: $this->sellable))();
+        new SellablePrice(sellable: $this->sellable)();
+
+        $this->sellable->syncSageData();
     }
 
     public function salesRecapDatatableData(Event $event, Sellable $sellable)

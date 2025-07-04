@@ -86,7 +86,7 @@ class ContingentController extends Controller
                     if ($row_key == 'undefined' or $row_key == 'nullable') {
                         $row_key = null;
                     }
-                    ContingentConfig::updateOrCreate(
+                    $model = ContingentConfig::updateOrCreate(
                         ['contingent_id' => $contingent->id, 'room_id' => $row_key],
                         [
                             'published'      => isset($room['published']) ? 1 : null,
@@ -97,6 +97,8 @@ class ContingentController extends Controller
                             'buy'            => $room['buy'] ?: 0,
                         ],
                     );
+
+                    $model->syncFromPlural('code_article', $model->id);
                 }
             }
             DB::commit();

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enum\OrderOrigin;
+use App\Traits\PaymentTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PaymentTransaction extends Model
 {
+
+    use PaymentTrait;
 
     public $timestamps = false;
     protected $table = 'payment_transaction';

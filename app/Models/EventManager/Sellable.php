@@ -3,6 +3,7 @@
 namespace App\Models\EventManager;
 
 use App\Enum\OrderCartType;
+use App\Interfaces\SageInterface;
 use App\Interfaces\Stockable;
 use App\Models\DictionnaryEntry;
 use App\Models\Event;
@@ -17,12 +18,14 @@ use App\Models\ParticipationType;
 use App\Models\Place;
 use App\Models\PlaceRoom;
 use App\Models\Vat;
+use App\Traits\SageTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOne};
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use MetaFramework\Casts\Datepicker;
 use MetaFramework\Casts\PriceInteger;
 use MetaFramework\Polyglote\Traits\Translation;
@@ -35,13 +38,14 @@ use MetaFramework\Traits\OnlineStatus;
  * @property int        $pec_max_pax
  * @property null|int   $stock_unlimited
  * @property int        $stock
- * @property int      $id
+ * @property int        $id
  */
-class Sellable extends Model implements Stockable
+class Sellable extends Model implements Stockable, SageInterface
 {
     use HasFactory;
     use OnlineStatus;
     use Translation;
+    use SageTrait;
     use SoftDeletes;
 
     protected $table = 'event_sellable_service';
@@ -174,7 +178,8 @@ class Sellable extends Model implements Stockable
 
     public function frontBookings(): HasMany
     {
-        return $this->hasMany(FrontCartLine::class, 'shoppable_id')
+        return $this
+            ->hasMany(FrontCartLine::class, 'shoppable_id')
             ->where('shoppable_type', Sellable::class)
             ->whereHas('cart', function ($query) {
                 $query->whereNull('order_id');
@@ -209,7 +214,24 @@ class Sellable extends Model implements Stockable
 
     public function attributions(): HasMany
     {
-        return $this->hasMany(ServiceAttribution::class,'shoppable_id')->where('shoppable_type', OrderCartType::SERVICE->value);
+        return $this->hasMany(ServiceAttribution::class, 'shoppable_id')->where('shoppable_type', OrderCartType::SERVICE->value);
+    }
+
+    public function sageFields(): array
+    {
+        return [
+            'code_article' => 'Référence article',
+        ];
+    }
+
+    public function getSageEvent(): ?Event
+    {
+        return $this->event;
+    }
+
+    public function defaultSageReferenceValue(): string
+    {
+        return Str::upper(Str::substr(Str::slug($this->title, ''), 0, 5));
     }
 
 }

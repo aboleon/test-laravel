@@ -116,7 +116,7 @@ trait OrderTrait
 
     protected function updateInvoiceableAddress(): void
     {
-        $invoiceableAddress = (new UpdateAccountAddressAction($this->payerData))->update();
+        $invoiceableAddress = new UpdateAccountAddressAction($this->payerData)->update();
 
         $this->order->invoiceable->address_id = $invoiceableAddress->getAddressId();
         $this->order->invoiceable->save();

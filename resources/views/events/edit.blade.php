@@ -77,6 +77,7 @@
                                 <x-mfw::tab tag="shop-tabpane" label="Exposants"/>
                                 <x-mfw::tab tag="transport-tabpane" label="Transport"/>
                                 <x-mfw::tab tag="front-tabpane" label="Front"/>
+                                <x-mfw::tab tag="sage-tabpane" label="SAGE"/>
                             </div>
                         </nav>
                         <div class="tab-content mt-3" id="nav-tabContent">
@@ -89,6 +90,7 @@
                             @include('events.tabs.shop')
                             @include('events.tabs.transport')
                             @include('events.tabs.front')
+                            {!! \App\Helpers\Sage::renderTab($data) !!}
                         </div>
                     </fieldset>
                 </form>

@@ -6,7 +6,7 @@
         </h2>
         <x-back.topbar.list-combo
             :event="$event"
-            :create-route="route('panel.manager.event.transport.create', $event)"
+            :create-route="route('panel.manager.event.transport.create', $event->id)"
         />
     </x-slot>
 

@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use App\Interfaces\SageInterface;
+use App\Traits\SageTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * @method static create(array $bank)
  */
-class BankAccount extends Model
+class BankAccount extends Model implements SageInterface
 {
     use HasFactory;
+    use SageTrait;
 
     protected $fillable = [
         'name',
@@ -53,4 +56,11 @@ class BankAccount extends Model
             'label' => 'SWIFT *',
         ],
     ];
+
+    public function sageFields(): array
+    {
+        return [
+            'compte_comptable' => 'Compte Comptable Sage',
+        ];
+    }
 }

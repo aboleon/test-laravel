@@ -28,13 +28,13 @@
                         <p class="mb-3">Exporter:</p>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="mode" id="modeSelection"
-                                   value="selection" checked>
+                                   value="selection">
                             <label class="form-check-label" for="modeSelection">
                                 Sélection
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="mode" id="modeAll" value="all">
+                            <input class="form-check-input" type="radio" name="mode" id="modeAll" value="all" checked>
                             <label class="form-check-label" for="modeAll">
                                 Tout
                             </label>

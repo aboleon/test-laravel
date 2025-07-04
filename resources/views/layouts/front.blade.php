@@ -45,7 +45,6 @@
     <meta name="ajax-route" content="{{route('ajax')}}"/>
 
 
-
     <style>
         body {
             /* outer background*/
@@ -141,6 +140,7 @@
         }
 
         @php
+
             if (isset($event) && $event):
                 $frontConfig = $event->frontConfig;
 
@@ -235,7 +235,7 @@
             @yield('slot')
         @endif
     </main>
-    @include ('front.shared.footer')
+    @include ('front.shared.footer', ['event' => $event ?? null])
 </div>
 
 @include('shared.simple-modal')

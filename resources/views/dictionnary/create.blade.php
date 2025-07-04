@@ -14,15 +14,15 @@
         </h2>
 
         <x-back.topbar.edit-combo
-                :index-route="$route_index"
-                :create-route="$route_create"
-                :delete-route="$route_destroy"
-                :item-name="fn($m) => $m->name"
-                :model="$data"
+            :index-route="$route_index"
+            :create-route="$route_create"
+            :delete-route="$route_destroy"
+            :item-name="fn($m) => $m->name"
+            :model="$data"
         />
     </x-slot>
 
-    <x-mfw::validation-errors />
+    <x-mfw::validation-errors/>
 
     <div class="shadow p-4 bg-body-tertiary rounded">
 
@@ -34,7 +34,7 @@
             @endif
 
             @if(isset($subentry))
-                <input type="hidden" name="subentry" value="{{ $subentry->id }}" />
+                <input type="hidden" name="subentry" value="{{ $subentry->id }}"/>
             @endif
 
             @php
@@ -42,7 +42,26 @@
                 $custom_fillables = $data instanceof \App\Models\DictionnaryEntry && $subclass && $subclass->customData();
             @endphp
 
-            <x-mfw::language-tabs />
+            <ul id="tab_translatable_tabs" class="nav nav-tabs admintabs" role="tablist">
+                @foreach(config('mfw.translatable.locales') as $locale)
+                    <li class="nav-item " role="presentation">
+                        <button class="nav-link {!! $locale == app()->getLocale() ? 'active': null !!}"
+                                id="tab_translatable_btn_{{ $locale }}"
+                                data-bs-toggle="tab"
+                                data-bs-target="#tab_translatable_{{ $locale }}"
+                                type="button" role="tab"
+                                aria-controls="tab_translatable_{{ $locale }}"
+                                aria-selected="true">
+                            <img src="{!! asset('vendor/flags/4x3/'.$locale.'.svg') !!}"
+                                 alt="{{ trans('lang.'.$locale.'.label') }}" class="d-inline-block"/>
+                            {!! trans('lang.'.$locale.'.label') !!}
+                        </button>
+                    </li>
+                @endforeach
+                    @if (isset($dictionnary) && $dictionnary->slug == 'service_family')
+                    <x-mfw::tab tag="sage-tabpane" label="SAGE"/>
+                @endif
+            </ul>
             <div class="row my-4">
                 <div class="col-xxl-8">
                     <div class="tab-content base">
@@ -61,14 +80,14 @@
                                                         <x-mfw::textarea name="{{$key}}[{{$locale}}]"
                                                                          :className="$value['type'] .' '.($value['class']??'') "
                                                                          value="{!! $data->translation($key, $locale) !!}"
-                                                                         label="{{$value['label'] . ($value['required']? ' *':'')}}" />
+                                                                         label="{{$value['label'] . ($value['required']? ' *':'')}}"/>
                                                     </div>
                                                     @break
                                                 @default
                                                     <div class="{{ $value['class'] ?? 'col-12' }} mb-4">
                                                         <x-mfw::input name="{{$key}}[{{$locale}}]"
                                                                       value="{!! $data->translation($key, $locale) !!}"
-                                                                      label="{{$value['label'] . ($value['required']? ' *':'')}}" />
+                                                                      label="{{$value['label'] . ($value['required']? ' *':'')}}"/>
                                                     </div>
 
                                             @endswitch
@@ -77,17 +96,21 @@
                                         @if ($custom_translatables)
                                             <x-mfw::custom-translatables :values="$subclass->translatables()"
                                                                          :model="$data"
-                                                                         :locale="$locale" />
+                                                                         :locale="$locale"/>
                                         @endif
 
                                     </div>
                                 </fieldset>
                             </div>
                         @endforeach
+
+                        @if (isset($dictionnary) && $dictionnary->slug == 'service_family')
+                            {!! \App\Helpers\Sage::renderTab($data) !!}
+                        @endif
                     </div>
 
                     @if ($custom_fillables)
-                        <x-mfw::custom-fillables :values="$subclass->customData()" :model="$data" />
+                        <x-mfw::custom-fillables :values="$subclass->customData()" :model="$data"/>
                     @endif
 
                     @if ($data instanceof \App\Models\Dictionnary)
@@ -99,10 +122,10 @@
                                                    label="Type"
                                                    :values="\App\Enum\DictionnaryType::translations()"
                                                    :affected="$data->type ?: \App\Enum\DictionnaryType::default()"
-                                                   :nullable="false" />
+                                                   :nullable="false"/>
                                 </div>
                                 <div class="col-6">
-                                    <x-mfw::input name="slug" :value="$data->slug" label="Slug" />
+                                    <x-mfw::input name="slug" :value="$data->slug" label="Slug"/>
                                 </div>
                             </div>
                         </fieldset>
@@ -113,7 +136,7 @@
                             @foreach($subclass->mediaSettings() as $media)
                                 <x-mediaclass::uploadable :model="$data"
                                                           :settings="$media"
-                                                          description="" />
+                                                          description=""/>
                             @endforeach
                         @endif
                     @endif

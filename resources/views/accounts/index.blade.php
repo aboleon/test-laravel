@@ -5,6 +5,7 @@
         </h2>
 
         <div class="d-flex align-items-center gap-2" id="topbar-actions">
+            {{-- Les exports se font par évènement
             <button type="button"
                     class="btn btn-warning"
                     data-bs-toggle="modal"
@@ -13,6 +14,7 @@
                 <i class="fa-solid fa-share-square"></i>
                 Exporter
             </button>
+            --}}
 
             @php
                 $filterParams = (new \App\Services\Filters\FilterParser())
@@ -47,7 +49,9 @@
     </x-slot>
 
     @include('accounts.modal.action_panel')
-    @include('accounts.modal.export_panel')
+    {{-- Les exports se font par évènement
+    @include('accounts.modal.export_panel', ['event' => null])
+    --}}
 
     <div class="wg-tabs nav nav-tabs">
         <a href="{{route('panel.accounts.index', $role)}}"

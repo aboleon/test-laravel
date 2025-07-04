@@ -32,7 +32,14 @@
                                       :label="$value['label']" />
                     </div>
                 @endforeach
+                    @foreach ($data->sageFields() as $code => $label)
+                    <div class="col-lg-6 mb-3">
+                        <x-mfw::input name="sage.{{ $code }}" :value="$data->sageData()->where('name', $code)->first()?->value"
+                                      :label="$label"/>
+                    </div>
+                    @endforeach
             </div>
+
 
         </form>
     </div>

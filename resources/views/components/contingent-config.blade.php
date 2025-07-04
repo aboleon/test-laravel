@@ -1,8 +1,12 @@
 @php
-$room_id = $config->room_id ?: 'nullable';
+    $room_id = $config->room_id ?: 'nullable';
 @endphp
-<td class="room-{{ $room_id }} type">{{ $room ? \App\Accessors\Dictionnaries::entry('type_chambres',  $room->room_id)->name . ' x ' . $room->capacity : 'NC' }}
-    <x-front.debugmark title="id={{$room_id}}" />
+<td class="room-{{ $room_id }} type">
+    {{ $room ? \App\Accessors\Dictionnaries::entry('type_chambres',  $room->room_id)->name . ' x ' . $room->capacity : 'NC' }}
+    {{-- <x-front.debugmark title="room-id={{$room_id}}"/> --}}
+    <div class="sage-container mt-1">
+        {!! \App\Helpers\Sage::renderSageInput(code:'code_article', model: $config, label: '', prefix: true, plural: true, maxlength: 4) !!}
+    </div>
 </td>
 <td class="room-{{ $room_id }} sell" style="max-width: 120px">
     <div class="input-group">
@@ -18,19 +22,23 @@ $room_id = $config->room_id ?: 'nullable';
     </div>
 </td>
 <td class="room-{{ $room_id }} pec">
-    <x-mfw::checkbox :switch="true" name="{{ $row }}[rooms][{{ $room_id }}][pec]" value="1" :affected="collect($config->pec)"/>
+    <x-mfw::checkbox :switch="true" name="{{ $row }}[rooms][{{ $room_id }}][pec]" value="1"
+                     :affected="collect($config->pec)"/>
 </td>
 <td class="room-{{ $room_id }} pec-allocation" style="max-width: 120px">
     <div class="input-group">
-        <x-mfw::number name="{{ $row }}[rooms][{{ $room_id }}][pec-allocation]" :value="$config->pec_allocation ?: 0" step="0.1"/>
+        <x-mfw::number name="{{ $row }}[rooms][{{ $room_id }}][pec-allocation]" :value="$config->pec_allocation ?: 0"
+                       step="0.1"/>
         <span class="input-group-text">€</span>
     </div>
 </td>
 <td class="room-{{ $room_id }} service" style="width: 15%">
-    <x-mfw::select :values="$services" :affected="$config->service_id" defaultselecttext="Aucune" name="{{ $row }}[rooms][{{ $room_id }}][service]"/>
+    <x-mfw::select :values="$services" :affected="$config->service_id" defaultselecttext="Aucune"
+                   name="{{ $row }}[rooms][{{ $room_id }}][service]"/>
 </td>
 <td class="room-{{ $room_id }} published">
-    <x-mfw::checkbox :switch="true" name="{{ $row }}[rooms][{{ $room_id }}][published]" value="1" :affected="collect($config->published)"/>
+    <x-mfw::checkbox :switch="true" name="{{ $row }}[rooms][{{ $room_id }}][published]" value="1"
+                     :affected="collect($config->published)"/>
 </td>
 @if ($deletable)
     <td class="rowspan deletable align-top" rowspan="{{ $rowspan }}" style="width: 50px">
@@ -46,3 +54,20 @@ $room_id = $config->room_id ?: 'nullable';
     </td>
 
 @endif
+
+@pushonce('css')
+    <style>
+        .sage-container * {
+            font-size: 13px;
+            padding: 4px !important;
+        }
+        .sage-container small {
+            font-size: 11px;
+            margin-top: -4px;
+        }
+    </style>
+@endpushonce
+
+@pushonce('js')
+    {!! \App\Helpers\Sage::limitSageInput() !!}
+@endpushonce

@@ -430,14 +430,15 @@ class Order extends Model implements CustomPaymentInterface
 
         # Payment
         $this->payments()->save(
-            (new Payment([
+            new Payment([
                 'order_id'           => $this->id,
                 'date'               => now(),
                 'payment_method'     => PaymentMethod::CB_PAYBOX->value,
                 'transaction_id'     => $this->customPaymentCall->transaction->id,
                 'amount'             => $this->customPaymentCall->total,
+                'card_number'        => $this->customPaymentCall->transaction->getCardNumber(),
                 'transaction_origin' => OrderOrigin::BACK->value,
-            ])),
+            ]),
         );
         $this->responseSuccess("Payment stored");
 

@@ -18,7 +18,7 @@ function postMakeInvoiceFromOrder(result) {
         $('#service-cart, #accommodation-cart').find('input.qty').prop('readonly', true);
         $('#invoice_files').removeClass('d-none').find('.invoice-date').text(result.invoice_date);
 
-        ajax('action=sendInvoiceFromModal&uuid=' + result.order_uuid, $('#payment-ajax-container'), {'keepMessages':true});
+        ajax('action=sendInvoiceFromModal&sageCode=&uuid=' + result.order_uuid, $('#payment-ajax-container'), {'keepMessages':true});
     }
 }
 

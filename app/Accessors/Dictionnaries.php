@@ -77,13 +77,22 @@ class Dictionnaries
         return self::dictionnary($key)->type ?? 'simple';
     }
 
-    public static function entry(string $dictionnary, ?int $entry_key=null): ?DictionnaryEntry
+    public static function entry(string $dictionnary, ?int $entry_key = null): ?DictionnaryEntry
     {
         if (!$entry_key) {
             return null;
         }
 
-        return self::dictionnary($dictionnary)->entries->filter(fn($item) => $item->id == $entry_key)->first();
+        $getAllEntries = function($entries) use (&$getAllEntries): \Illuminate\Support\Collection {
+            return collect($entries)->flatMap(fn($entry) =>
+            collect([$entry])->merge(
+                isset($entry->entries) ? $getAllEntries($entry->entries) : []
+            )
+            );
+        };
+
+        return $getAllEntries(self::dictionnary($dictionnary)->entries)
+            ->firstWhere('id', $entry_key);
     }
 
     public static function filterAgainstMetaType($collection, $array): Collection

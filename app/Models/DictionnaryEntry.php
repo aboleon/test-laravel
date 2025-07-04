@@ -2,25 +2,28 @@
 
 namespace App\Models;
 
+use App\Interfaces\SageInterface;
+use App\Traits\SageTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use MetaFramework\Mediaclass\Interfaces\MediaclassInterface;
 use MetaFramework\Mediaclass\Traits\Mediaclass;
 use MetaFramework\Polyglote\Traits\Translation;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int|null $parent
  * @property int $dictionnary_id
  */
-class DictionnaryEntry extends Model implements MediaclassInterface
+class DictionnaryEntry extends Model implements MediaclassInterface, SageInterface
 {
     use HasFactory;
     use Mediaclass;
     use Translation;
+    use SageTrait;
     use SoftDeletes;
 
     public $timestamps = false;
@@ -59,5 +62,13 @@ class DictionnaryEntry extends Model implements MediaclassInterface
     public function entries(): hasMany
     {
         return $this->hasMany(self::class, 'parent');
+    }
+
+    public function sageFields(): array
+    {
+        return [
+            'compte_comptable' => 'Compte Comptable',
+            'compte_tva' => 'Compte TVA',
+        ];
     }
 }

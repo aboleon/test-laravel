@@ -105,7 +105,7 @@
                                         <table class="table-compact text-dark">
                                             <tr style="border-top: 1px solid #ccc">
                                                 <td class="invoice-date"><b>Date
-                                                        :</b> {{ $order->invoice()?->created_at?->format('d/m/Y') }}
+                                                        :</b> {{ $invoice?->created_at?->format('d/m/Y') }}
                                                 </td>
                                                 <td>
                                                     <a class="btn" target="_blank"
@@ -139,6 +139,26 @@
                                             class="sendinvoicebymail"
                                             question=""
                                             reference="send_by_mail_{{ $order->id }}"/>
+
+                                        @if ($invoice)
+                                            <br>
+                                            <div id="sage-invoice" data-invoice-id="{{ $invoice->id }}" data-ajax="{{ route('ajax') }}">
+                                                {!! \App\Helpers\Sage::renderSageInput(code:'code_facture', model:  $invoice, label:$invoice->sageFields()['code_facture'], prefix: false, maxlength:30 ) !!}
+                                                {!! \App\Helpers\Sage::limitSageInput() !!}
+
+                                                <button type="button" class="btn btn-sm btn-success">Mettre à jour</button>
+                                            </div>
+                                            <br>
+                                            @push('js')
+                                                <script>
+                                                    $(function () {
+                                                        $('#sage-invoice button').off().click(function() {
+                                                            ajax('action=updateInvoiceSageCode&invoice_id='+ $('#sage-invoice').data('invoice-id') + '&'+$('#sage-invoice input').serialize(), $('#sage-invoice'));
+                                                        });
+                                                    })
+                                                </script>
+                                            @endpush
+                                        @endif
 
                                     </div>
                                 </div>

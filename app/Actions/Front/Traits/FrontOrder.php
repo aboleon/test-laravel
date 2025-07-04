@@ -360,14 +360,15 @@ trait FrontOrder
 
         if ($total > 0) { // Ne pas enregistrer un paiement à zéro
             $this->order->payments()->save(
-                (new Payment([
+                new Payment([
                     'order_id'           => $this->order->id,
                     'date'               => now(),
                     'payment_method'     => PaymentMethod::CB_PAYBOX->value,
                     'transaction_id'     => $paymentCall->transaction?->id,
+                    'card_number'        => $paymentCall->transaction->getCardNumber(),
                     'amount'             => $total,
                     'transaction_origin' => OrderOrigin::FRONT->value,
-                ])),
+                ]),
             );
         }
     }
@@ -458,14 +459,15 @@ trait FrontOrder
 
         // Save prorata payment for deposit
         $this->depositOrder->payments()->save(
-            (new Payment([
+            new Payment([
                 'order_id'           => $this->depositOrder->id,
                 'date'               => now(),
                 'payment_method'     => PaymentMethod::CB_PAYBOX->value,
                 'transaction_id'     => $this->paymentCall->transaction?->id,
+                'card_number'        => $this->paymentCall->transaction->getCardNumber(),
                 'amount'             => $depositNet + $depositVat,
                 'transaction_origin' => OrderOrigin::FRONT->value,
-            ])),
+            ]),
         );
     }
 

@@ -12,8 +12,7 @@ class Group implements GroupVariables
     {
         return [
             self::$prefix.'Nom_Groupe' => 'Intitulé groupe',
-            self::$prefix.'Nom_Responsable' => 'Nom contact admin groupe',
-            self::$prefix.'Prenom_Responsable' => 'Prénom contact admin groupe',
+            self::$prefix.'Prenom_Nom_Responsable' => 'Prénom / Nom contact admin groupe',
         ];
     }
 

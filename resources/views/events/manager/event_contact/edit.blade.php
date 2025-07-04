@@ -21,7 +21,7 @@
                         'group' => $eventContact->participationType?->group??'all',
                         ])"
                 :use-create-route="false"
-                :show-delete-btn="(new \App\Accessors\EventContactAccessor())->setEventContact($eventContact)->hasNothing()"
+                :show-delete-btn="$eventContactAccessor->hasNothing()"
 
             />
 

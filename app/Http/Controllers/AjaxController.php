@@ -51,9 +51,10 @@ use App\Exports\EventContact\CongressGlobalExport;
 use App\Exports\EventContact\IndustryExport;
 use App\Exports\EventContact\IndustryGlobalExport;
 use App\Exports\EventContact\OratorGlobalExport;
+use App\Exports\SageExport;
 use App\Http\Controllers\Dev\ArtisanController;
 use App\MailTemplates\Models\MailTemplate;
-use App\Models\{AdvancedSearchFilter, CustomPaymentCall, Establishment, EventContact, Order\Accompanying, Order\RoomNote, Setting};
+use App\Models\{AdvancedSearchFilter, CustomPaymentCall, Establishment, EventContact, Invoice, Order\Accompanying, Order\RoomNote, Setting};
 use App\Models\EventManager\Grant\GrantDepositLocation;
 use App\Models\EventManager\Grant\GrantLocation;
 use Exception;
@@ -707,27 +708,42 @@ class AjaxController extends Controller
     {
         return new CongressGlobalExport()->run();
     }
+
     public function congressExport(): array
     {
         return new CongressExport()->run();
     }
+
     public function industryGlobalExport(): array
     {
         return new IndustryGlobalExport()->run();
     }
+
     public function industryExport(): array
     {
         return new IndustryExport()->run();
     }
+
     public function allGlobalExport(): array
     {
         return new AllGlobalExport()->run();
     }
+
     public function oratorGlobalExport(): array
     {
         return new OratorGlobalExport()->run();
     }
-    // end of Exports Event Contacts
+
+    // Exports Sage
+    public function sageInvoiceExport(): array
+    {
+        return request()->all();
+    }
+
+    public function sageArticlesExport(): array
+    {
+        return request()->all();
+    }
 
     public function exportAccountProfilesByEventContact(): array
     {
@@ -1054,10 +1070,11 @@ class AjaxController extends Controller
         if (request()->filled('row_id')) {
             foreach ((array)request('row_id') as $id) {
                 $this->pushMessages(
-                    new MailController()->ajaxMode()->distribute('resendOrder', $id)
+                    new MailController()->ajaxMode()->distribute('resendOrder', $id),
                 );
             }
         }
+
         return $this->fetchResponse();
     }
 
@@ -1223,5 +1240,22 @@ class AjaxController extends Controller
         $this->responseElement('contacts', $contacts);
 
         return $this->fetchResponse();
+    }
+
+    public function updateInvoiceSageCode(): array
+    {
+        try {
+            Invoice::find((int)request('invoice_id'))?->syncSageData();
+            $this->responseSuccess('Code mis à jour.');
+        } catch (Throwable $exception) {
+            $this->responseException($exception);
+        }
+
+        return $this->fetchResponse();
+    }
+
+    public function sageExports(): array
+    {
+        return new SageExport()->ajaxMode()->run();
     }
 }

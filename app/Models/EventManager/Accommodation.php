@@ -2,11 +2,13 @@
 
 namespace App\Models\EventManager;
 
+use App\Interfaces\SageInterface;
 use App\Models\Event;
 use App\Models\EventManager\Accommodation\{BlockedRoom, Contingent, Deposit, Grant, RoomGroup, Service};
 use App\Models\EventManager\Groups\BlockedGroupRoom;
 use App\Models\Hotel;
 use App\Models\Vat;
+use App\Traits\SageTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough, HasOne};
 use MetaFramework\Accessors\VatAccessor;
@@ -17,34 +19,37 @@ use MetaFramework\Traits\OnlineStatus;
 /**
  * @property int $processingFeeVat
  */
-class Accommodation extends Model
+class Accommodation extends Model implements SageInterface
 {
     use OnlineStatus;
+    use SageTrait;
     use Translation;
 
     protected $table = 'event_accommodation';
     protected $guarded = [];
 
-    protected $casts = [
-        'comission' => PriceInteger::class,
-        'comission_room' => PriceInteger::class,
-        'comission_breakfast' => PriceInteger::class,
-        'processing_fee' => PriceInteger::class,
-    ];
+    protected $casts
+        = [
+            'comission'           => PriceInteger::class,
+            'comission_room'      => PriceInteger::class,
+            'comission_breakfast' => PriceInteger::class,
+            'processing_fee'      => PriceInteger::class,
+        ];
 
-    public array $fillables = [
-        'title' => [
-            'label' => 'Sous-titre',
-        ],
-        'description' => [
-            'type' => 'textarea',
-            'label' => 'Distance / Description',
-        ],
-        'cancellation' => [
-            'type' => 'textarea',
-            'label' => 'Annulation - Non visible en front',
-        ],
-    ];
+    public array $fillables
+        = [
+            'title'        => [
+                'label' => 'Sous-titre',
+            ],
+            'description'  => [
+                'type'  => 'textarea',
+                'label' => 'Distance / Description',
+            ],
+            'cancellation' => [
+                'type'  => 'textarea',
+                'label' => 'Annulation - Non visible en front',
+            ],
+        ];
 
 
     public function __construct(array $attributes = [])
@@ -121,5 +126,27 @@ class Accommodation extends Model
     public function vatId(): int
     {
         return $this->vat_id ?: VatAccessor::defaultRate()->id;
+    }
+
+    public function sageFields(): array
+    {
+        return [
+          'roomtax' => 'Code Sage Frais dossier'
+        ];
+    }
+
+
+    public function getSageReferenceValue(): string
+    {
+        if ($this->sageReference === null) {
+            $this->sageReference = (string)$this->sageData->where('name', 'roomtax')->value('value') ?: 'TAXRM';
+        }
+
+        return $this->sageReference;
+    }
+
+    public function getSageEvent(): Event
+    {
+        return $this->event;
     }
 }

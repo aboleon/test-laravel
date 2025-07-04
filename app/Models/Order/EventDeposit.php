@@ -159,14 +159,15 @@ class EventDeposit extends Model implements CustomPaymentInterface
 
         # Payment
         $this->order->payments()->save(
-            (new Payment([
+            new Payment([
                 'order_id'           => $this->order->id,
                 'date'               => now(),
                 'payment_method'     => PaymentMethod::CB_PAYBOX->value,
                 'transaction_id'     => $this->paymentCall->transaction->id,
+                'card_number'        => $this->paymentCall->transaction->getCardNumber(),
                 'amount'             => $this->total_net + $this->total_vat,
                 'transaction_origin' => OrderOrigin::BACK->value,
-            ])),
+            ]),
         );
         $this->responseSuccess("Payment stored");
     }

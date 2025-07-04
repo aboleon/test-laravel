@@ -90,6 +90,9 @@
                         <x-mfw::nav-link :route="route('panel.manager.event.event_deposit.index', $event->id)"
                                          title="Cautions"
                                          class="sh-blue-grey" />
+                        <x-mfw::nav-link :route="route('panel.manager.event.sage', $event->id)"
+                                         title="SAGE"
+                                         class="sh-blue-grey" />
                     </ul>
                 </li>
 

@@ -9,7 +9,6 @@
                         <a href="https://www.wagaia.com/"
                            target="_blank"
                            class="text-body">Wagaia</a></div>
-
                     @if(isset($event) && $event->id)
 
                         <div class="mt-lg-0 mt-3">

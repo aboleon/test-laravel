@@ -68,7 +68,6 @@ class Payment extends Model
         return $this->hasOne(PaymentTransaction::class, 'id', 'transaction_id');
     }
 
-    // Then add a transaction accessor
     public function getTransactionAttribute()
     {
         if ($this->transaction_origin == OrderOrigin::FRONT->value) {

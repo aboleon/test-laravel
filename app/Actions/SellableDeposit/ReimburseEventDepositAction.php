@@ -3,6 +3,7 @@
 namespace App\Actions\SellableDeposit;
 
 use App\Actions\Ajax\AjaxAction;
+use App\Enum\EventDepositStatus;
 use App\Http\Controllers\MailController;
 use App\Models\Order\EventDeposit;
 use App\Models\Order\Refundable\RefundableDeposit;
@@ -23,10 +24,11 @@ class ReimburseEventDepositAction extends AjaxAction
                 return $this->fetchResponse();
             }
 
-            $reimbursed = (new Paybox())->sendReimbursementRequest((new RefundableDeposit($eventDeposit) ));
+            $reimbursed = new Paybox()->sendReimbursementRequest(new RefundableDeposit($eventDeposit));
 
             if ($reimbursed->isSuccessful()) {
                 $eventDeposit->reimbursed_at = now();
+                $eventDeposit->status = EventDepositStatus::REFUNDED->value;
                 $eventDeposit->save();
                 $this->responseSuccess($reimbursed->responseComment());
             } else {

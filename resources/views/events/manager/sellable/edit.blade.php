@@ -12,19 +12,19 @@
             <span>{{ $data->title ?? '' }}</span>
         </h2>
         <x-back.topbar.edit-combo
-                :event="$event"
-                :create-route="route('panel.manager.event.sellable.create', $event)"
-                :index-route="route('panel.manager.event.sellable.index', $event)"
-                :model="$data"
-                :delete-route="route('panel.manager.event.sellable.destroy', [$event, $data->id??'-1'])"
-                :item-name="fn($m) => 'la prestation ' . $m->title"
+            :event="$event"
+            :create-route="route('panel.manager.event.sellable.create', $event)"
+            :index-route="route('panel.manager.event.sellable.index', $event)"
+            :model="$data"
+            :delete-route="route('panel.manager.event.sellable.destroy', [$event, $data->id??'-1'])"
+            :item-name="fn($m) => 'la prestation ' . $m->title"
         />
 
     </x-slot>
 
     <div class="shadow p-4 bg-body-tertiary rounded">
-        <x-mfw::validation-banner />
-        <x-mfw::response-messages />
+        <x-mfw::validation-banner/>
+        <x-mfw::response-messages/>
 
         @if ($errors->has('service_price.price.*'))
             <x-mfw::alert message="Les  prix doivent être tous des chiffres, au minium 0."/>
@@ -38,7 +38,7 @@
             @if ($data->id)
                 @method('PUT')
             @endif
-            <x-mfw::tab-redirect />
+            <x-mfw::tab-redirect/>
 
             {{--
             casse le fonctionnement des tabs
@@ -55,10 +55,14 @@
                 @include('events.manager.sellable.tabs.texts')
                 @include('events.manager.sellable.tabs.participations')
                 @include('events.manager.sellable.tabs.inscriptions')
+                {!! \App\Helpers\Sage::renderTab($data, prefix: true) !!}
             </div>
 
         </form>
     </div>
+    @pushonce('js')
+        {!! \App\Helpers\Sage::limitSageInput() !!}
+    @endpushonce
 
     @push('js')
         <script>

@@ -88,7 +88,7 @@ class TransportController extends Controller
      */
     public function create(Event $event): Renderable
     {
-       $eventContact = EventContact::findOrFail((int)request('event_contact'));
+       $eventContact = EventContact::find((int)request('event_contact'));
 
         return $this->getEditView($event, $eventContact);
     }

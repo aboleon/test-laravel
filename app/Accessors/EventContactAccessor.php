@@ -8,7 +8,7 @@ use App\Accessors\Front\Sellable\Service;
 use App\Actions\EventManager\GrantActions;
 use App\DataTables\View\EventContactView;
 use App\Enum\{ApprovalResponseStatus, EventDepositStatus, OrderCartType, OrderClientType, OrderMarker, OrderSource, OrderStatus, ParticipantType};
-use App\Models\{Account, Event, EventContact, Order, Order\EventDeposit};
+use App\Models\{Account, Event, EventContact, EventManager\EventGroup, Order, Order\EventDeposit};
 use App\Models\EventManager\EventGroup\EventGroupContact;
 use App\Models\EventManager\Grant\Grant;
 use App\Services\Grants\ParsedGrant;

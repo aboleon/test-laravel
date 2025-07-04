@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Interfaces\CreatorInterface;
+use App\Interfaces\SageInterface;
+use App\Traits\SageTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,9 +16,10 @@ use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 /**
  * @property GroupAddress $address
  */
-class Group extends Model implements CreatorInterface
+class Group extends Model implements CreatorInterface, SageInterface
 {
     use HasFactory;
+    use SageTrait;
     use SoftDeletes;
 
     protected $guarded = [];
@@ -69,5 +72,12 @@ class Group extends Model implements CreatorInterface
     public function names(): string
     {
         return $this->name;
+    }
+
+    public function sageFields(): array
+    {
+        return [
+            'code_client' => 'Code Client',
+        ];
     }
 }

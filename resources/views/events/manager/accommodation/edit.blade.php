@@ -95,6 +95,10 @@
                                                    :affected="$error ? old('accommodation.processing_fee_vat_id') : ($accommodation->processing_fee_vat_id ?: \MetaFramework\Accessors\VatAccessor::defaultRate()?->id)"
                                                    :label="__('mfw-sellable.vat.label')" :nullable="false"/>
                                 </div>
+                                <div class="col-12 mt-3">
+                                    {!! \App\Helpers\Sage::renderSageInput(code:'roomtax', model:  $accommodation, label:$accommodation->sageFields()['roomtax'],prefix: true ) !!}
+                                    {!! \App\Helpers\Sage::limitSageInput() !!}
+                                </div>
                             </div>
                         </div>
                     </div>

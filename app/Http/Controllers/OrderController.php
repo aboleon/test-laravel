@@ -63,7 +63,7 @@ class OrderController extends Controller
             'event'             => $event->load('services'),
             'order'             => $order,
             'is_order'          => false,
-            'eventAccessor'     => (new EventAccessor($event)),
+            'eventAccessor'     => new EventAccessor($event),
             'orderAccessor'     => new OrderAccessor($order),
             'isSubOrder'        => false,
             'sellables'         => '',
@@ -80,7 +80,7 @@ class OrderController extends Controller
     public function edit(Event $event, Order $order): Renderable
     {
         if ($order->amended_order_id) {
-            return (new AmendedAccommodationCartController())->edit($order);
+            return new AmendedAccommodationCartController()->edit($order);
         }
 
         $order->load(['payments', 'vat', 'suborders']);
@@ -91,8 +91,8 @@ class OrderController extends Controller
             $groupParticipants = $group->getParticipantsForEvent($event->id);
         }
 
-        $orderAccessor  = new OrderAccessor($order);
-        $eventContact   = EventContactAccessor::getData($event, $order->client_id);
+        $orderAccessor = new OrderAccessor($order);
+        $eventContact  = EventContactAccessor::getData($event, $order->client_id);
 
         try {
             $dashboard_link = $orderAccessor->isGroup()
@@ -110,7 +110,7 @@ class OrderController extends Controller
 
         return view('orders.orderable')->with([
             'event'             => $event->load('services'),
-            'eventAccessor'     => (new EventAccessor($event)),
+            'eventAccessor'     => new EventAccessor($event),
             'is_order'          => true,
             'order'             => $order,
             'orderAccessor'     => $orderAccessor,
@@ -118,6 +118,7 @@ class OrderController extends Controller
             'samePayer'         => $orderAccessor->isSamePayer(),
             'groupParticipants' => $groupParticipants,
             'invoiced'          => $orderAccessor->isInvoiced(),
+            'invoice'           => $order->invoice(),
             'event_contact'     => $eventContact,
             'as_orator'         => $orderAccessor->isOrator(),
             'dashboard_link'    => $dashboard_link,

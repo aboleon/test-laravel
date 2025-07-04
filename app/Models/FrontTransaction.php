@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enum\OrderOrigin;
+use App\Traits\PaymentTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class FrontTransaction extends Model
 {
     use HasFactory;
+    use PaymentTrait;
 
     public $timestamps = false;
     protected $table = 'front_transactions';

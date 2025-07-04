@@ -25,6 +25,7 @@
                 <x-mfw::tab tag="group-tabpane" label="Fiche" :active="true"/>
                 <x-mfw::tab tag="adresses-tabpane" label="Adresses"/>
                 <x-mfw::tab tag="contacts-tabpane" label="Contacts"/>
+                <x-mfw::tab tag="sage-tabpane" label="SAGE"/>
             </div>
             <div>
                 @if($data->id)
@@ -36,6 +37,8 @@
             @include('groups.tabs.identity')
             @include('groups.tabs.address')
             @include('groups.tabs.contacts')
+
+            {!! \App\Helpers\Sage::renderTab($data) !!}
         </div>
     </fieldset>
 </form>

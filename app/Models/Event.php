@@ -5,9 +5,11 @@ namespace App\Models;
 use App\DataTables\View\EventSellableServiceStockView;
 use App\Enum\OrderCartType;
 use App\Interfaces\CreatorInterface;
+use App\Interfaces\SageInterface;
 use App\Models\EventManager\{Accommodation, EventGroup, Front\FrontConfig, Grant\Grant, Grant\GrantDeposit, Program\EventProgramDayRoom, Program\EventProgramSession, Sellable, Sellable\Choosable};
 use App\Models\Order\Cart\AccommodationAttribution;
 use App\Models\Order\Cart\ServiceAttribution;
+use App\Traits\SageTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -33,11 +35,12 @@ use MetaFramework\Traits\OnlineStatus;
  * @property array|null $transfert
  * @property int|null   $manage_transport_upfront
  */
-class Event extends Model implements CreatorInterface, MediaclassInterface
+class Event extends Model implements CreatorInterface, MediaclassInterface, SageInterface
 {
     use HasFactory;
     use Mediaclass;
     use OnlineStatus;
+    use SageTrait;
     use SoftDeletes;
 
     //  use SoftDeletes;
@@ -109,9 +112,6 @@ class Event extends Model implements CreatorInterface, MediaclassInterface
         return $this->belongsToMany(DictionnaryEntry::class, 'event_pec_domain', 'event_id', 'domain_id')->select('name', 'id');
     }
 
-    /**
-     * Récupère les types de domaines associés à un évènement, éligibles GRANT
-     */
     public function services(): BelongsToMany
     {
         return $this
@@ -347,25 +347,39 @@ class Event extends Model implements CreatorInterface, MediaclassInterface
     public function mediaclassSettings(): array
     {
         return [
-            'banner_large' => [
-                'width'     => 1270,
-                'height'    => 140,
-                'label'     => 'Bannière Large',
-                'cropable' => true
+            'banner_large'  => [
+                'width'    => 1270,
+                'height'   => 140,
+                'label'    => 'Bannière Large',
+                'cropable' => true,
             ],
             'banner_medium' => [
-                'width'     => 510,
-                'height'    => 140,
-                'label'     => 'Bannière Medium',
-                'cropable' => true
+                'width'    => 510,
+                'height'   => 140,
+                'label'    => 'Bannière Medium',
+                'cropable' => true,
             ],
-            'thumbnail' => [
-                'width'     => 600,
-                'height'    => 380,
-                'label'     => 'Image carrée',
-                'cropable' => true
+            'thumbnail'     => [
+                'width'    => 600,
+                'height'   => 380,
+                'label'    => 'Image carrée',
+                'cropable' => true,
             ],
         ];
+    }
+
+    public function sageFields(): array
+    {
+        return [
+            'code_event'  => 'Acronyme Evènement',
+            'code_client' => 'Code Client',
+            'code_stats'  => 'Code Analytique',
+        ];
+    }
+
+    public function getSageEvent(): self
+    {
+        return $this;
     }
 
 }

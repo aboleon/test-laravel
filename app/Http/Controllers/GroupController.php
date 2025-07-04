@@ -87,6 +87,8 @@ class GroupController extends Controller
                 "lon"           => $waGeoData['lon'] ?? "",
             ]);
 
+            $group->syncSageData();
+
             $redirect_to = route('panel.groups.edit', $group);
 
             if (request()->filled('event_id')) {
@@ -130,6 +132,7 @@ class GroupController extends Controller
 
         try {
             $group->update($this->validated_data['group']);
+            $group->syncSageData();
             $this->responseSuccess(__('ui.record_updated'));
             $this->redirect_to = route('panel.groups.edit', $group);
             $this->saveAndRedirect(route('panel.groups.index'));

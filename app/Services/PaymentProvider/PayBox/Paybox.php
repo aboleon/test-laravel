@@ -269,7 +269,7 @@ class Paybox implements PaymentProviderInterface
             'PBX_IDENTIFIANT'   => config('payment_providers.paybox.id'),
             'PBX_PORTEUR'       => $this->getOrderEmail(),
             'PBX_RANG'          => config('payment_providers.paybox.rang'),
-            'PBX_RETOUR'        => 'uuid:R;t:T;a:A;c:C;e:E;q:Q;s:S',
+            'PBX_RETOUR'        => 'uuid:R;t:T;a:A;c:C;e:E;q:Q;s:S;n:N;j:J',
             'PBX_SITE'          => config('payment_providers.paybox.site'),
             'PBX_TIME'          => date("c"),
             'PBX_TOTAL'         => $this->orderable->getRawOriginal('total'),
