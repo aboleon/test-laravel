@@ -86,7 +86,7 @@ class IndustryExport extends AccountExportAbstract
                 'name' => 'Pays',
             ],
             'pays_en' => [
-                'type' => 'mandatory',
+                'type' => 'optional',
                 'name' => 'Pays EN',
             ],
         ];

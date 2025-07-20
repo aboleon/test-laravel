@@ -68,6 +68,9 @@ class Event extends Model implements CreatorInterface, MediaclassInterface, Sage
     protected $guarded = [];
     public array $fillables;
 
+    public const string SAGECODEVENT = 'code_event';
+    public const string SAGECODECLIENT = 'code_client';
+    public const string SAGECODESTAT = 'code_stats';
 
     public function __construct(array $attributes = [])
     {
@@ -116,14 +119,13 @@ class Event extends Model implements CreatorInterface, MediaclassInterface, Sage
     {
         return $this
             ->belongsToMany(DictionnaryEntry::class, 'event_service', 'event_id', 'service_id')
-            ->select(
-                'name',
-                'id',
-                'max',
-                'unlimited',
-                'service_date_doesnt_count',
-                'fo_family_position',
-            );
+            ->withPivot(['id','max', 'unlimited', 'service_date_doesnt_count', 'fo_family_position'])
+            ->wherePivot('enabled', 1);
+    }
+
+    public function eventServices(): HasMany
+    {
+        return $this->hasMany(EventService::class);
     }
 
 
@@ -371,9 +373,9 @@ class Event extends Model implements CreatorInterface, MediaclassInterface, Sage
     public function sageFields(): array
     {
         return [
-            'code_event'  => 'Acronyme Evènement',
-            'code_client' => 'Code Client',
-            'code_stats'  => 'Code Analytique',
+            self::SAGECODEVENT  => 'Acronyme Evènement',
+            self::SAGECODECLIENT => 'Code Client',
+            self::SAGECODESTAT  => 'Code Analytique',
         ];
     }
 

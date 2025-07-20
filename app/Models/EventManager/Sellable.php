@@ -10,6 +10,7 @@ use App\Models\Event;
 use App\Models\EventManager\Sellable\Deposit;
 use App\Models\EventManager\Sellable\Option;
 use App\Models\EventManager\Sellable\Price;
+use App\Models\EventService;
 use App\Models\FrontCartLine;
 use App\Models\Order\Cart\ServiceAttribution;
 use App\Models\Order\Cart\ServiceCart;
@@ -18,6 +19,7 @@ use App\Models\ParticipationType;
 use App\Models\Place;
 use App\Models\PlaceRoom;
 use App\Models\Vat;
+use App\Traits\BelongsTo\BelongsToEvent;
 use App\Traits\SageTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -47,6 +49,7 @@ class Sellable extends Model implements Stockable, SageInterface
     use Translation;
     use SageTrait;
     use SoftDeletes;
+    use BelongsToEvent;
 
     protected $table = 'event_sellable_service';
     protected $guarded = [];
@@ -84,11 +87,6 @@ class Sellable extends Model implements Stockable, SageInterface
     {
         parent::__construct($attributes);
         $this->defineTranslatables();
-    }
-
-    public function event(): BelongsTo
-    {
-        return $this->belongsTo(Event::class, 'event_id');
     }
 
     public function group(): BelongsTo
@@ -217,6 +215,11 @@ class Sellable extends Model implements Stockable, SageInterface
         return $this->hasMany(ServiceAttribution::class, 'shoppable_id')->where('shoppable_type', OrderCartType::SERVICE->value);
     }
 
+    public function asEventService(): BelongsTo
+    {
+        return $this->belongsTo(EventService::class, 'service_group', 'service_id')->where('event_id', $this->event_id);
+    }
+
     public function sageFields(): array
     {
         return [
@@ -232,6 +235,16 @@ class Sellable extends Model implements Stockable, SageInterface
     public function defaultSageReferenceValue(): string
     {
         return Str::upper(Str::substr(Str::slug($this->title, ''), 0, 5));
+    }
+
+    public function getSageAccountCode(): string
+    {
+        return $this->group->getSageReferenceValue(DictionnaryEntry::SAGEACCOUNT);
+    }
+
+    public function getSageVatAccount(): string
+    {
+        return $this->asEventService->getSageReferenceValue(EventService::SAGEVAT);
     }
 
 }

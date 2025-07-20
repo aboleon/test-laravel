@@ -80,7 +80,7 @@
         </h3>
 
             <div class="col-md-6 text-end">
-                <span>Rattaché le {{ $eventContact->created_at->format('d/m/Y') }}
+                <span>Rattaché le {{ $eventContact->created_at?->format('d/m/Y') }}
  /
                     @if($eventContact->profile->created_by != $eventContact->user_id)
                         Créé par {{ $eventContact->profile->creator->names() }}

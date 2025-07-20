@@ -35,12 +35,6 @@ class TestableController extends Controller
 
     public function index()
     {
-        $id = 4;
-
-
-        d(Dictionnaries::entry('professions', $id));
-
-       exit;
         request()->merge(['event_id' => 34]);
 
         d(request()->all());

@@ -36,7 +36,7 @@ class Sage
 });</script>";
     }
 
-    public static function renderSageInput(string $code, SageInterface $model, string $label, bool $prefix = false, bool $plural = false, int $maxlength = 5): string
+    public static function renderSageInput(string $code, SageInterface $model, string $label = '', bool $prefix = false, bool $plural = false, int $maxlength = 5): string
     {
         $html = new Input(
             name: "sage.".$code.($plural ? '.'.$model->id : ''),

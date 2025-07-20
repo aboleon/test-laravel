@@ -28,6 +28,10 @@ class IndustryGlobalExport extends AccountExportAbstract
                 'type' => 'mandatory',
                 'name' => 'Domaine',
             ],
+            'fonction'           => [
+                'type' => 'mandatory',
+                'name' => 'Fonction',
+            ],
             'prenom'             => [
                 'type' => 'mandatory',
                 'name' => 'Prénom',
@@ -102,6 +106,7 @@ class IndustryGlobalExport extends AccountExportAbstract
             ],
         ];
     }
+
     protected function getRelations(): array
     {
         return [
@@ -122,6 +127,7 @@ class IndustryGlobalExport extends AccountExportAbstract
         return [
             'participation_type' => $row->participationType?->name,
             'domaine'            => Dictionnaries::entry('domain', $row->profile->domain_id)?->name,
+            'fonction'           => $row->profile->function,
             'prenom'             => $row->account->first_name,
             'nom'                => $row->account->last_name,
             'email'              => implode("\n", array_merge([$this->accountAccessor->getEmail()], $row->account->mails->pluck('email')->toArray())),
@@ -129,7 +135,7 @@ class IndustryGlobalExport extends AccountExportAbstract
                 return $phone->getRawOriginal('phone');
             })->implode("\n"),
             'raison_sociale'     => $row->profile->company_name,
-            'group' => $row->eventGroup?->name,
+            'group'              => $row->eventGroup?->name,
             'solde_ttc'          => $this->eventContactAccessor->getAllRemainingPayments(),
             'hotel'              => implode("\n", $this->accommodationData['hotel_names']),
             'check-in'           => implode("\n", $this->accommodationData['check_ins']),

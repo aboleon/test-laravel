@@ -156,7 +156,6 @@ abstract class AccountExportAbstract
             ];
         })->values()->toArray();
     }
-
     protected function prepareSheet($sheet): void
     {
         // Load all event services before processing
@@ -196,18 +195,25 @@ abstract class AccountExportAbstract
             foreach ($allFields as $field => $label) {
                 $value = $row[$field] ?? null;
 
-                // Special formatting for phone numbers
-                if (in_array($field, ['phone', 'phone_2'], true) && $value !== null) {
-                    $value = " ".$value; // make the plus prefix interpreted as text
-                }
-
                 // Handle multi-line content in cells
                 if (is_string($value) && str_contains($value, "\n")) {
                     // Enable text wrapping for cells with multi-line content
                     $sheet->getStyle($columnIndex.$rowIndex)->getAlignment()->setWrapText(true);
                 }
 
-                $sheet->setCellValue($columnIndex.$rowIndex, $value);
+                // IMPORTANT: Force RPPS to be treated as text
+                if (in_array($field, ['phone', 'phone_2','rpps']) && $value !== null) {
+                    // Use setCellValueExplicit to force string type
+                    $sheet->setCellValueExplicit(
+                        $columnIndex.$rowIndex,
+                        $value,
+                        \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                    );
+                } else {
+                    // For all other fields, use normal setCellValue
+                    $sheet->setCellValue($columnIndex.$rowIndex, $value);
+                }
+
                 $sheet
                     ->getStyle($columnIndex.$rowIndex)->getAlignment()
                     ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
@@ -296,44 +302,102 @@ abstract class AccountExportAbstract
      *
      * @return array
      */
+    /**
+     * Process accommodation data - Fixed version to consolidate date ranges
+     *
+     * @return array
+     */
     protected function processAccommodationData(): array
     {
-        if ( ! $this->eventContactAccessor) {
+        if (!$this->eventContactAccessor) {
             return [];
         }
 
-        $accommodations    = $this->eventContactAccessor->getAccommodationCheckIns();
-        $hotelNames        = [];
-        $checkIns          = [];
-        $checkOuts         = [];
-        $accompagnants     = [];
+        $accommodations = $this->eventContactAccessor->getAccommodationCheckIns();
+        $hotelNames = [];
+        $checkIns = [];
+        $checkOuts = [];
+        $accompagnants = [];
         $nbreAccompagnants = [];
 
         if ($accommodations->isNotEmpty()) {
-            foreach ($accommodations as $accommodation) {
-                if (isset($accommodation['hotel_name'])) {
-                    $hotelNames[] = $accommodation['hotel_name'];
+            // Group accommodations by hotel to consolidate date ranges
+            $groupedByHotel = $accommodations->groupBy('hotel_name');
+
+            foreach ($groupedByHotel as $hotelName => $hotelAccommodations) {
+                // Sort by check-in date
+                $sorted = $hotelAccommodations->sortBy('check_in_formatted');
+
+                // Group consecutive dates
+                $ranges = [];
+                $currentRange = null;
+
+                foreach ($sorted as $accommodation) {
+                    $checkInDate = \Carbon\Carbon::createFromFormat('d/m/Y', $accommodation['check_in_formatted']);
+                    $checkOutDate = \Carbon\Carbon::createFromFormat('d/m/Y', $accommodation['check_out_formatted']);
+
+                    if (!$currentRange) {
+                        // Start first range
+                        $currentRange = [
+                            'hotel_name' => $accommodation['hotel_name'],
+                            'check_in' => $checkInDate,
+                            'check_out' => $checkOutDate,
+                            'accompagnants' => collect([$accommodation['accompagnant'] ?? '']),
+                            'nbre_accompagnants' => collect([$accommodation['nbre_accompagnant'] ?? 0]),
+                        ];
+                    } else {
+                        // Check if this accommodation is consecutive (check-in equals previous check-out)
+                        if ($checkInDate->equalTo($currentRange['check_out'])) {
+                            // Extend current range
+                            $currentRange['check_out'] = $checkOutDate;
+                            $currentRange['accompagnants']->push($accommodation['accompagnant'] ?? '');
+                            $currentRange['nbre_accompagnants']->push($accommodation['nbre_accompagnant'] ?? 0);
+                        } else {
+                            // Save current range and start new one
+                            $ranges[] = $currentRange;
+                            $currentRange = [
+                                'hotel_name' => $accommodation['hotel_name'],
+                                'check_in' => $checkInDate,
+                                'check_out' => $checkOutDate,
+                                'accompagnants' => collect([$accommodation['accompagnant'] ?? '']),
+                                'nbre_accompagnants' => collect([$accommodation['nbre_accompagnant'] ?? 0]),
+                            ];
+                        }
+                    }
                 }
-                if (isset($accommodation['check_in_formatted'])) {
-                    $checkIns[] = $accommodation['check_in_formatted'];
+
+                // Don't forget the last range
+                if ($currentRange) {
+                    $ranges[] = $currentRange;
                 }
-                if (isset($accommodation['check_out_formatted'])) {
-                    $checkOuts[] = $accommodation['check_out_formatted'];
-                }
-                if (isset($accommodation['accompagnant'])) {
-                    $accompagnants[] = $accommodation['accompagnant'];
-                }
-                if (isset($accommodation['nbre_accompagnant'])) {
-                    $nbreAccompagnants[] = $accommodation['nbre_accompagnant'];
+
+                // Add consolidated ranges to arrays
+                foreach ($ranges as $range) {
+                    $hotelNames[] = $range['hotel_name'];
+                    $checkIns[] = $range['check_in']->format('d/m/Y');
+                    $checkOuts[] = $range['check_out']->format('d/m/Y');
+
+                    // Get unique accompagnants (remove empty strings and duplicates)
+                    $uniqueAccompagnants = $range['accompagnants']
+                        ->filter(fn($a) => !empty($a))
+                        ->unique()
+                        ->implode(', ');
+                    $accompagnants[] = $uniqueAccompagnants;
+
+                    // Sum total accompanying persons for this range
+                    $totalAccompagnants = $range['nbre_accompagnants']
+                        ->filter(fn($n) => is_numeric($n))
+                        ->sum();
+                    $nbreAccompagnants[] = $totalAccompagnants;
                 }
             }
         }
 
         return [
-            'hotel_names'        => $hotelNames,
-            'check_ins'          => $checkIns,
-            'check_outs'         => $checkOuts,
-            'accompagnants'      => $accompagnants,
+            'hotel_names' => $hotelNames,
+            'check_ins' => $checkIns,
+            'check_outs' => $checkOuts,
+            'accompagnants' => $accompagnants,
             'nbre_accompagnants' => $nbreAccompagnants,
         ];
     }

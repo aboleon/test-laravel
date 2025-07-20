@@ -8,7 +8,6 @@ use App\Http\Controllers\{AjaxController,
     TestableController};
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AccountingController;
 
 
 /*
@@ -43,7 +42,7 @@ Route::group(['middleware' => 'auth.very_basic'], function () {
 
     Route::get('/pdf-print', [PdfHubController::class, 'printPdf'])->name('pdf_print');
     Route::get('pdf/{type}/{identifier}', [PDFController::class, 'distribute'])->name('pdf-printer');
-    Route::post('/pdf-merged', [PdfController::class, 'streamMergedPdf']);
+    Route::post('/pdf-merged', [PDFController::class, 'streamMergedPdf']);
     Route::post('/pdf-global-export', [GlobalExportController::class, 'globalExport'])->name('pdf-globalExport');
 });
 

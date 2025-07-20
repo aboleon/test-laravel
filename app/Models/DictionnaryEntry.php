@@ -39,6 +39,7 @@ class DictionnaryEntry extends Model implements MediaclassInterface, SageInterfa
         'custom' => 'array',
     ];
     protected $guarded = [];
+    public const string SAGEACCOUNT = 'compte_comptable';
 
     public function __construct(array $attributes = [])
     {
@@ -67,8 +68,12 @@ class DictionnaryEntry extends Model implements MediaclassInterface, SageInterfa
     public function sageFields(): array
     {
         return [
-            'compte_comptable' => 'Compte Comptable',
-            'compte_tva' => 'Compte TVA',
+            self::SAGEACCOUNT => 'Compte Comptable'
         ];
+    }
+
+    public function defaultSageReferenceValue(): string
+    {
+        return 'ACCNT';
     }
 }

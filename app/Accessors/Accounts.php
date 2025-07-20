@@ -266,9 +266,8 @@ class Accounts
                 ->single()
                 ->first();
 
-
             if ( ! $media) {
-                return $useDefault ? url('media/logo-black.png') : null;
+                return $useDefault ? asset('front/images/user/unknown-divine-user.png') : null;
             }
 
             return mediaclass_url($media);

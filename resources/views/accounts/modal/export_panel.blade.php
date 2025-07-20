@@ -128,102 +128,97 @@
             }
         };
 
-        // Function to render fields based on field mappings
         function renderExportFields(fieldsMapping) {
-            var mandatoryFields = {};
-            var optionalFields = {};
-
-            // Separate fields by type
-            $.each(fieldsMapping, function(fieldKey, fieldData) {
-                if (fieldData.type === 'mandatory') {
-                    mandatoryFields[fieldKey] = fieldData.name;
-                } else {
-                    optionalFields[fieldKey] = fieldData.name;
-                }
-            });
-
             var html = '';
 
-            // Mandatory Fields Section
-            if (Object.keys(mandatoryFields).length > 0) {
-                html += '<div class="form-group mb-4">';
-                html += '<div class="d-flex justify-content-between align-items-center mb-2">';
-                html += '<span class="fw-bold">Champs obligatoires</span>';
-                html += '<input class="form-check-input group-toggle" type="checkbox" id="mandatory-fields" data-group="mandatory-fields" checked>';
+            // Single unified list header
+            html += '<div class="form-group mb-4">';
+            html += '<div class="d-flex justify-content-between align-items-center mb-3">';
+            html += '<div>';
+            html += '<span class="fw-bold">Champs à exporter</span>';
+            html += '<small class="text-muted ms-2">(Les champs optionnels sont en gris)</small>';
+            html += '</div>';
+            html += '<div class="form-check">';
+            html += '<input class="form-check-input" type="checkbox" id="exportSelectAll" checked>';
+            html += '<label class="form-check-label" for="exportSelectAll">Tout sélectionner</label>';
+            html += '</div>';
+            html += '</div>';
+            html += '<div class="px-3">';
+
+            // Iterate through fields in the order they appear in the array
+            $.each(fieldsMapping, function(fieldKey, fieldData) {
+                var isOptional = fieldData.type === 'optional';
+                var textClass = isOptional ? 'text-muted' : '';
+                var checked = fieldData.type === 'mandatory' ? 'checked' : '';
+
+                html += '<div class="form-check mb-2 field-item">';
+                html += '<input class="form-check-input export-field" type="checkbox" ';
+                html += 'id="field_' + fieldKey + '" ';
+                html += 'name="exportFields[]" ';
+                html += 'value="' + fieldKey + '" ';
+                html += checked + ' ';
+                if (fieldData.type === 'mandatory') {
+                    html += 'data-mandatory="true" ';
+                }
+                html += '>';
+                html += '<label class="form-check-label ' + textClass + '" for="field_' + fieldKey + '">';
+                html += fieldData.name;
+                if (fieldData.type === 'mandatory') {
+                    html += ' <span class="text-danger">*</span>';
+                }
+                html += '</label>';
                 html += '</div>';
-                html += '<div class="px-3">';
+            });
 
-                $.each(mandatoryFields, function(fieldKey, fieldLabel) {
-                    html += '<div class="form-check mb-2 field-item" data-group="mandatory-fields">';
-                    html += '<input class="form-check-input mandatory-field" type="checkbox" id="' + fieldKey + '" name="exportFields[]" value="' + fieldKey + '" checked>';
-                    html += '<label class="form-check-label small" for="' + fieldKey + '">' + fieldLabel + '</label>';
-                    html += '</div>';
-                });
+            html += '</div>';
+            html += '</div>';
 
-                html += '</div></div>';
-            }
-
-            // Add separator if both sections exist
-            if (Object.keys(mandatoryFields).length > 0 && Object.keys(optionalFields).length > 0) {
-                html += '<hr>';
-            }
-
-            // Optional Fields Section
-            if (Object.keys(optionalFields).length > 0) {
-                html += '<div class="form-group">';
-                html += '<div class="d-flex justify-content-between align-items-center mb-2">';
-                html += '<span class="fw-bold">Champs optionnels</span>';
-                html += '<input class="form-check-input group-toggle" type="checkbox" id="optional-fields" data-group="optional-fields">';
-                html += '</div>';
-                html += '<div class="px-3">';
-
-                $.each(optionalFields, function(fieldKey, fieldLabel) {
-                    html += '<div class="form-check mb-2 field-item" data-group="optional-fields">';
-                    html += '<input class="form-check-input optional-field" type="checkbox" id="' + fieldKey + '" name="exportFields[]" value="' + fieldKey + '">';
-                    html += '<label class="form-check-label small" for="' + fieldKey + '">' + fieldLabel + '</label>';
-                    html += '</div>';
-                });
-
-                html += '</div></div>';
-            }
+            // Add note about mandatory fields
+            html += '<div class="text-muted small mt-2">';
+            html += '<span class="text-danger">*</span> Champs obligatoires (ne peuvent pas être décochés)';
+            html += '</div>';
 
             return html;
         }
 
-        // Bind field event handlers
         function bindFieldEventHandlers() {
             // Handle select all checkbox
-            $('#exportSelectAll').off('change').on('change', function () {
+            $('#exportSelectAll').off('change').on('change', function() {
                 var isChecked = $(this).prop('checked');
-                $('input[name="exportFields[]"]').prop('checked', isChecked);
-                $('.group-toggle').prop('checked', isChecked);
+                $('.export-field').each(function() {
+                    // Only change non-mandatory fields
+                    if (!$(this).data('mandatory')) {
+                        $(this).prop('checked', isChecked);
+                    }
+                });
             });
 
             // Handle individual field changes
-            $('input[name="exportFields[]"]').off('change').on('change', function () {
-                // Update select all
-                var totalFields = $('input[name="exportFields[]"]').length;
-                var checkedFields = $('input[name="exportFields[]"]:checked').length;
-                $('#exportSelectAll').prop('checked', totalFields === checkedFields);
+            $('.export-field').off('change').on('change', function() {
+                // Prevent unchecking mandatory fields
+                if ($(this).data('mandatory') && !$(this).prop('checked')) {
+                    $(this).prop('checked', true);
+                    alert('Ce champ est obligatoire et ne peut pas être décoché.');
+                    return;
+                }
 
-                // Update group toggle
-                var group = $(this).closest('.field-item').data('group');
-                var groupTotal = $('.field-item[data-group="' + group + '"] input').length;
-                var groupChecked = $('.field-item[data-group="' + group + '"] input:checked').length;
-                $('#' + group).prop('checked', groupTotal === groupChecked);
+                // Update select all checkbox state
+                var totalOptionalFields = $('.export-field:not([data-mandatory="true"])').length;
+                var checkedOptionalFields = $('.export-field:not([data-mandatory="true"]):checked').length;
+                var allMandatoryChecked = $('.export-field[data-mandatory="true"]').length ===
+                    $('.export-field[data-mandatory="true"]:checked').length;
+
+                // Select all is checked only if all optional fields are checked (mandatory are always checked)
+                $('#exportSelectAll').prop('checked',
+                    totalOptionalFields === checkedOptionalFields && allMandatoryChecked
+                );
             });
 
-            // Handle group toggle
-            $('.group-toggle').off('change').on('change', function () {
-                var isChecked = $(this).prop('checked');
-                var group = $(this).data('group');
-                $('.field-item[data-group="' + group + '"] input').prop('checked', isChecked);
-
-                // Update select all
-                var totalFields = $('input[name="exportFields[]"]').length;
-                var checkedFields = $('input[name="exportFields[]"]:checked').length;
-                $('#exportSelectAll').prop('checked', totalFields === checkedFields);
-            });
+            // Add CSS to make mandatory checkboxes appear disabled
+            $('<style>')
+                .prop('type', 'text/css')
+                .html('.export-field[data-mandatory="true"] { opacity: 0.8; cursor: not-allowed; }')
+                .appendTo('head');
         }
 
         $(function() {

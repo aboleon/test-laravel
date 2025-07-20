@@ -2,10 +2,10 @@
     <!-- Primary Navigation Menu -->
     <div>
         <!-- Logo -->
-        <div class="d-flex justify-content-center align-items-center px-3 py-4"
+        <div class="d-flex justify-content-center align-items-center"
              style="background: #1A1A1A">
             <a href="{{ route('panel.dashboard') }}">
-                <x-application-mark />
+                <x-application-mark :event="$event" />
             </a>
         </div>
         <div class="nav-event-header">{{ $event->texts?->name ?: 'Non titré' }} <br /> <span class="small">du {{ $event->starts }} au  {{ $event->ends }}</span></div>

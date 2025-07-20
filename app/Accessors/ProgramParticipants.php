@@ -19,7 +19,7 @@ class ProgramParticipants
     {
         $isOrator = 'orator' === $type;
         $defaultInterventionStatus = EventProgramParticipantStatus::default();
-        $oratorName = ucfirst(strtolower($participant->user->last_name)) . " " . ucfirst(strtolower($participant->user->first_name));
+        $oratorName = $participant->account ? ucfirst(strtolower($participant->account->last_name)) . " " . ucfirst(strtolower($participant->account->first_name)) : '';
         $oratorSortName = strtolower($oratorName);
         $transport = $participant->transport;
         $interventionStatus = $defaultInterventionStatus;

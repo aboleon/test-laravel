@@ -109,6 +109,7 @@
     @endpush
 
     @pushonce('js')
+        {!! \App\Helpers\Sage::limitSageInput() !!}
         <script src="{!! asset('js/dynamic_dictionnary.js') !!}"></script>
         <script src="{!! asset('js/contacts.js') !!}"></script>
         <script src="{!! asset('js/events.js') !!}"></script>

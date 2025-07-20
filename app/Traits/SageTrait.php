@@ -41,6 +41,9 @@ trait SageTrait
         }
 
         foreach ($sageData as $code => $value) {
+            if (is_array($value)) {
+                continue; // skip syncFromPlural
+            }
             $models[] = new Sage([
                 'name'  => (string)$code,
                 'value' => (string)$value,
@@ -54,20 +57,22 @@ trait SageTrait
      * @return void
      *  Store Sage Data
      */
-    public function syncFromPlural(string $key, int $model_id): void
+    public function syncFromPlural(string $key, int $model_id, ?string $model = null): void
     {
         $value = request('sage.'.$key.'.'.$model_id) ?: $this->defaultSageReferenceValue();
+
+        $relatedModel = $model ?: static::class;
 
         Sage::updateOrCreate(
             [
                 'model_id'   => $model_id,
-                'model_type' => static::class,
+                'model_type' => $relatedModel,
                 'name'       => $key,
             ],
             [
-                'value'    => $value,
-                'model_type' => static::class,
-                'model_id' => $model_id,
+                'value'      => $value,
+                'model_id'   => $model_id,
+                'model_type' => $relatedModel,
             ],
         );
     }
@@ -121,15 +126,14 @@ trait SageTrait
         return str_pad(Str::substr($this->id, 0, 4), 4, '0', STR_PAD_LEFT);
     }
 
-    public function getSageReferenceValue(string $name='code_article'): string
+    public function getSageReferenceValue(string $name = 'code_article'): string
     {
         return (string)$this->sageData->where('name', $name)->value('value') ?: $this->defaultSageReferenceValue();
-
     }
 
     public function defaultSageReferenceValue(): string
     {
-        return '';
+        return 'UNKWN';
     }
 
     public function getSageEvent(): ?Event
@@ -145,7 +149,7 @@ trait SageTrait
                 $this->sageAnalyticsCode = '';
             }
 
-            $this->sageAnalyticsCode = (string)$event->sageData->where('name', 'code_stats')->value('value');
+            $this->sageAnalyticsCode = $event->getSageReferenceValue(Event::SAGECODESTAT);
         }
 
         return $this->sageAnalyticsCode;

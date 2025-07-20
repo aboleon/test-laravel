@@ -6,7 +6,7 @@
     $defaultThumbnail = Mediaclass::ghostUrl(\App\Models\GenericMedia::class, 'thumbnail');
 @endphp
 
-@if($event && $event instanceof \App\Models\Event)
+@if(isset($event) && $event instanceof \App\Models\Event)
 
     <x-mediaclass::printer :model="Mediaclass::forModel($event, 'thumbnail')->first()"
                            :alt="$event->texts->name"

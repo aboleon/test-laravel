@@ -1,5 +1,6 @@
 <?php
 
+use App\Dashboards\OrdersDashboard;
 use App\Http\Controllers\EventManager\{Accommodation\BlockedController,
     Accommodation\ContingentController,
     Accommodation\GrantController as AccommodationGrantController,
@@ -21,7 +22,6 @@ use App\Http\Controllers\EventManager\{Accommodation\BlockedController,
     Program\ProgramSessionController,
     SellableController,
     Transport\TransportController};
-use App\Dashboards\OrdersDashboard;
 use App\Http\Controllers\EventManagerController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Order\AmendedAccommodationCartController;
@@ -29,6 +29,7 @@ use App\Http\Controllers\Order\AttributionController;
 use App\Http\Controllers\Order\EventDepositController;
 use App\Http\Controllers\Order\RefundController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\SageController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -39,6 +40,7 @@ Route::get('event-error/{event}', function (\App\Models\Event $event) {
 Route::prefix('manager')->name('manager.')->group(function () {
     Route::prefix('event/{event}')->name('event.')->group(function () {
         Route::get('/', [EventManagerController::class, 'show'])->name('show');
+        Route::get('sage', [SageController::class, 'dashboard'])->name('sage');
 
         //--------------------------------------------
         // accommodation

@@ -6,11 +6,12 @@ use App\Accessors\{Dictionnaries, EventAccessor, Places};
 use App\Actions\EventManager\GrantActions;
 use App\DataTables\EventDataTable;
 use App\Http\Requests\EventRequest;
-use App\Models\{Event, EventManager\Grant\Domain, EventManager\Grant\Grant, EventManager\Grant\ParticipationType, EventShoppingRanges, EventTexts, Sellable, User};
+use App\Models\{Event, EventManager\Grant\Domain, EventManager\Grant\Grant, EventManager\Grant\ParticipationType, EventService, EventShoppingRanges, EventTexts, Sage, Sellable, User};
 use App\Printers\EventPrinter;
 use App\Traits\DataTables\MassDelete;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\{JsonResponse, RedirectResponse};
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use MetaFramework\Actions\Suppressor;
 use MetaFramework\Casts\BooleanNull;
@@ -96,6 +97,7 @@ class EventController extends Controller
      */
     public function update(EventRequest $request, Event $event): RedirectResponse
     {
+        //de(request()->all());
         $this->tabRedirect();
         $this->event = $event;
 
@@ -215,26 +217,7 @@ class EventController extends Controller
 
     private function syncPivots(): void
     {
-        # Manage event services
-        $eventServices = collect(request('event_services', []))
-            ->filter(function ($service) {
-                // Only sync services that were actually selected (have service_id)
-                return isset($service['service_id']);
-            })
-            ->mapWithKeys(function ($service, $serviceId) {
-                return [
-                    $serviceId => [
-                        'max'                       => $service['max'] ?? 1,
-                        'unlimited'                 => isset($service['unlimited']) && $service['unlimited'] ? 1 : null,
-                        'service_date_doesnt_count' => isset($service['service_date_doesnt_count']) && $service['service_date_doesnt_count'] ? 1 : null,
-                        'fo_family_position'        => $service['fo_family_position'] ?? 0,
-                    ],
-                ];
-            })
-            ->toArray();
-
-        $this->event->services()->sync($eventServices);
-
+        $this->syncEventServices();
         $this->event->shopDocs()->sync((array)request('shop_docs'));
         $this->event->domains()->sync((array)request('event_domains'));
         $this->event->pecDomains()->sync((array)request('pec_domains'));
@@ -302,6 +285,67 @@ class EventController extends Controller
     public function passed(): Renderable
     {
         return view('dashboard.passed_events');
+    }
+
+    private function syncEventServices()
+    {
+        # Manage event services
+        collect(request('event_services', []))
+            ->each(function ($service, $serviceId) {
+                DB::table('event_service')->updateOrInsert(
+                    [
+                        'event_id' => $this->event->id,
+                        'service_id' => $serviceId
+                    ],
+                    [
+                        'max' => $service['max'] ?? 1,
+                        'unlimited' => isset($service['unlimited']) && $service['unlimited'] ? 1 : null,
+                        'service_date_doesnt_count' => isset($service['service_date_doesnt_count']) && $service['service_date_doesnt_count'] ? 1 : null,
+                        'fo_family_position' => $service['fo_family_position'] ?? 0,
+                        'enabled' => (int)array_key_exists('service_id', $service),
+                    ]
+                );
+            });
+
+        $this->syncEventServiceSageValues();
+    }
+
+    private function syncEventServiceSageValues(): void
+    {
+        // Sync Sage Values
+        $eventServicesSageValues = array_filter(request('sage.'.EventService::SAGEVAT));
+
+       // d($eventServicesSageValues);
+        foreach ($eventServicesSageValues as $key => $value) {
+            $eventService = $this->event->eventServices->where('service_id', $key)->first();
+        //    d($eventService);
+
+            if ( ! $eventService) {
+                continue;
+            }
+/*
+            d([
+                'name'       => EventService::SAGEVAT,
+                'value'      => $value,
+                'model_id'   => $eventService->id,
+                'model_type' => EventService::class,
+            ]);
+*/
+            Sage::updateOrCreate(
+                [
+                    'model_id'   => $eventService->id,
+                    'model_type' => EventService::class,
+                    'name'       => EventService::SAGEVAT,
+                ],
+                [
+                    'name'       => EventService::SAGEVAT,
+                    'value'      => $value,
+                    'model_id'   => $eventService->id,
+                    'model_type' => EventService::class,
+                ],
+            );
+        }
+      //  exit;
     }
 }
 

@@ -24,24 +24,22 @@ class SageExport
             $this->responseWarning("Impossible de récupérer un évènement avec l'ID ".$request_event_id);
         }
 
-        $this->event->load('sellableService.sageData','sellableService.group.sageData','accommodation.contingent.configs.sageData');
+        $this->event->load('sellableService.sageData', 'sellableService.group.sageData', 'accommodation.contingent.configs.sageData');
 
         //d($this->event->sellableService);
         $exportData = [];
 
         foreach ($this->event->sellableService as $article) {
             $exportData[] = [
-                'nom_article' => $article->title,
-                'code_article' => $article->getSageCode().$article->getSageReferenceValue(),
-                'code_analytique' => $article->getSageAnalyticsCode(),
+                'nom_article'      => $article->title,
+                'code_article'     => $article->getSageCode().$article->getSageReferenceValue(),
+                'code_analytique'  => $article->getSageAnalyticsCode(),
                 'compte_comptable' => $article->getSageAccountCode(),
+                'compte_tva'       => $article->getSageVatAccount(),
             ];
         }
 
-        d($exportData,'exportData');
-
-
-
+        d($exportData, 'exportData');
         //return $this->fetchResponse();
     }
 }
