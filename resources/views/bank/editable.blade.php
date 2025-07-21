@@ -34,8 +34,8 @@
                 @endforeach
                     @foreach ($data->sageFields() as $code => $label)
                     <div class="col-lg-6 mb-3">
-                        <x-mfw::input name="sage.{{ $code }}" :value="$data->sageData()->where('name', $code)->first()?->value"
-                                      :label="$label"/>
+                        {!! \App\Helpers\Sage::renderSageInput(code:$code, model: $data, label:$label, maxlength: 10) !!}
+                        {!! \App\Helpers\Sage::limitSageInput() !!}
                     </div>
                     @endforeach
             </div>

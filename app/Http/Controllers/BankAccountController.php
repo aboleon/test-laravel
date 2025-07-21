@@ -51,6 +51,9 @@ class BankAccountController extends Controller
             $this->redirect_to = route('panel.bank.edit', $bank);
             $this->saveAndRedirect(route('panel.bank.index'));
             BankAccounts::resetCache();
+
+            $bank->syncSageData();
+
         } catch (Throwable $e) {
             $this->responseException($e);
         }
@@ -84,6 +87,9 @@ class BankAccountController extends Controller
             $this->redirect_to = route('panel.bank.edit', $bank);
             $this->saveAndRedirect(route('panel.bank.index'));
             BankAccounts::resetCache();
+
+            $bank->syncSageData();
+
         } catch (Throwable $e) {
             $this->responseException($e);
         }

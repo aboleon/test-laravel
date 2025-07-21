@@ -319,18 +319,13 @@ class SageExport
     {
         $this->paymentsData = [];
 
-        // TODO: Implement payment export logic
-        // Example structure:
-        /*
         $this->paymentsData[] = [
-            'numero_reglement' => '',
-            'date_reglement' => '',
-            'montant' => '',
-            'mode_reglement' => '',
-            'numero_facture' => '',
-            'code_client' => '',
+            'date_reglement'   => '',
+            'numero_cb'        => '',
+            'montant_ttc'      => '',
+            'compte_comptable' => '',
+            'compte_tva'       => '',
         ];
-        */
     }
 
     /**
@@ -493,5 +488,24 @@ class SageExport
         );
 
         return $this;
+    }
+
+    /* TEST METHODS*/
+    public function getTestExportData(): array
+    {
+        $this->setupEvent();
+        /*
+
+               $this->exportSellables();
+               return $this->sellablesData;
+
+
+                       $this->exportInvoices();
+
+                       return $this->invoicesData;
+              */
+
+        $this->exportPayments();
+        return $this->paymentsData;
     }
 }
