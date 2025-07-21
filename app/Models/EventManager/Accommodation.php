@@ -51,6 +51,9 @@ class Accommodation extends Model implements SageInterface
             ],
         ];
 
+    public const string SAGETAXROOM = 'roomtax';
+    public const string SAGEACCOUNT = 'compte_comptable';
+    public const string SAGEVAT = 'compte_tva';
 
     public function __construct(array $attributes = [])
     {
@@ -131,19 +134,22 @@ class Accommodation extends Model implements SageInterface
     public function sageFields(): array
     {
         return [
-          'roomtax' => 'Code Sage Frais dossier'
+            self::SAGETAXROOM => 'Code Sage Frais dossier',
+            self::SAGEACCOUNT => 'Compte comptable',
+            self::SAGEVAT     => 'Compte TVA',
         ];
     }
 
-
-    public function getSageReferenceValue(): string
+    public function defaultSageReferenceValue(string $name = ''): string
     {
-        if ($this->sageReference === null) {
-            $this->sageReference = (string)$this->sageData->where('name', 'roomtax')->value('value') ?: 'TAXRM';
-        }
-
-        return $this->sageReference;
+        return match ($name) {
+            self::SAGETAXROOM => 'TAXRM',
+            self::SAGEACCOUNT => 'ACCNT',
+            self::SAGEVAT     => 'HTVAT',
+            default => static::SAGEUNKNOWN,
+        };
     }
+
 
     public function getSageEvent(): Event
     {

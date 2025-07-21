@@ -17,6 +17,8 @@ trait SageTrait
     private ?string $sageReference = null;
     private ?string $sageAnalyticsCode = null;
 
+    public const string SAGEUNKNOWN = 'UNKWN';
+
 
     public function sageData(): MorphMany
     {
@@ -128,10 +130,10 @@ trait SageTrait
 
     public function getSageReferenceValue(string $name = 'code_article'): string
     {
-        return (string)$this->sageData->where('name', $name)->value('value') ?: $this->defaultSageReferenceValue();
+        return (string)$this->sageData->where('name', $name)->value('value') ?: $this->defaultSageReferenceValue($name);
     }
 
-    public function defaultSageReferenceValue(): string
+    public function defaultSageReferenceValue(string $name = ''): string
     {
         return 'UNKWN';
     }

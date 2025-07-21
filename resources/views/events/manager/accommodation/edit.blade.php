@@ -56,6 +56,20 @@
                     <x-mfw::translatable-tabs :fillables="$accommodation->fillables" :model="$accommodation"
                                               datakey="accommodation"/>
 
+
+                    <h4>SAGE :</h4>
+
+                    <div class="mfw-line-separator mb-4"></div>
+                    <div class="row mb-5">
+                        @foreach($accommodation->sageFields() as $sageKey => $sageLabel)
+                            <div class="col-12">
+                                {!! \App\Helpers\Sage::renderSageInput(code:$sageKey, model:  $accommodation, label:$sageLabel,prefix: $sageKey == $accommodation::SAGETAXROOM ) !!}
+                            </div>
+                        @endforeach
+                        {!! \App\Helpers\Sage::limitSageInput() !!}
+                    </div>
+
+
                     <h4>Hôtel ouvert à :</h4>
                     <div class="mfw-line-separator mb-4"></div>
                     <div class="row mb-5">
@@ -94,10 +108,6 @@
                                                    :values="MetaFramework\Accessors\VatAccessor::readableArrayList()"
                                                    :affected="$error ? old('accommodation.processing_fee_vat_id') : ($accommodation->processing_fee_vat_id ?: \MetaFramework\Accessors\VatAccessor::defaultRate()?->id)"
                                                    :label="__('mfw-sellable.vat.label')" :nullable="false"/>
-                                </div>
-                                <div class="col-12 mt-3">
-                                    {!! \App\Helpers\Sage::renderSageInput(code:'roomtax', model:  $accommodation, label:$accommodation->sageFields()['roomtax'],prefix: true ) !!}
-                                    {!! \App\Helpers\Sage::limitSageInput() !!}
                                 </div>
                             </div>
                         </div>
@@ -168,8 +178,8 @@
 
     @push('js')
         <script>
-            $('#participation_types_checker :checkbox').click(function() {
-               $('#participation_types :checkbox').prop('checked', $(this).is(':checked'));
+            $('#participation_types_checker :checkbox').click(function () {
+                $('#participation_types :checkbox').prop('checked', $(this).is(':checked'));
             });
         </script>
     @endpush

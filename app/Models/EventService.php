@@ -47,7 +47,7 @@ class EventService extends Model implements SageInterface
 
     public function defaultSageReferenceValue(): string
     {
-        return 'FVAT';
+        return 'FMVAT';
     }
 
     public function getSageEvent(): Event
