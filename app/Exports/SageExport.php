@@ -2,8 +2,10 @@
 
 namespace App\Exports;
 
+use App\Accessors\Dictionnaries;
 use App\Accessors\OrderAccessor;
 use App\Enum\OrderClientType;
+use App\Models\EventManager\Accommodation;
 use App\Traits\Models\EventModelTrait;
 use Illuminate\Support\Facades\Storage;
 use MetaFramework\Accessors\Prices;
@@ -50,6 +52,7 @@ class SageExport
     {
         $this->sellablesData = [];
 
+        // Export regular sellable services
         foreach ($this->event->sellableService as $article) {
             $this->sellablesData[] = [
                 'nom_article'      => $article->title,
@@ -57,6 +60,40 @@ class SageExport
                 'code_analytique'  => $article->getSageAnalyticsCode(),
                 'compte_comptable' => $article->getSageAccountCode(),
                 'compte_tva'       => $article->getSageVatAccount(),
+            ];
+        }
+
+        // Export accommodation items (ContingentConfig for each room)
+        foreach ($this->event->accommodation as $accommodation) {
+            // Load contingents with configs
+            $contingents = $accommodation->contingent()->with('configs.rooms')->get();
+
+            $accommodatioSageAccount = $accommodation->getSageReferenceValue(Accommodation::SAGEACCOUNT);
+            $accommodationVatAccount = $accommodation->getSageReferenceValue(Accommodation::SAGEVAT);
+
+            foreach ($contingents as $contingent) {
+                foreach ($contingent->configs as $config) {
+                    if ($config->rooms) {
+                        $roomName  = Dictionnaries::entry('type_chambres', $config->rooms->room_id)->name ?? 'Chambre';
+                        $hotelName = $accommodation->hotel->name ?? '';
+
+                        $this->sellablesData[] = [
+                            'nom_article'      => "Hébergement - {$hotelName} - {$roomName} x {$config->rooms->capacity}",
+                            'code_article'     => $config->getSageCode().$config->getSageReferenceValue(),
+                            'code_analytique'  => $config->getSageAnalyticsCode(),
+                            'compte_comptable' => $accommodatioSageAccount,
+                            'compte_tva'       => $accommodationVatAccount,
+                        ];
+                    }
+                }
+            }
+
+            $this->sellablesData[] = [
+                'nom_article'      => "Frais de dossier - {$accommodation->hotel->name}",
+                'code_article'     => $accommodation->getSageCode().$accommodation->getSageReferenceValue(Accommodation::SAGETAXROOM),
+                'code_analytique'  => $accommodation->getSageAnalyticsCode(),
+                'compte_comptable' => $accommodatioSageAccount,
+                'compte_tva'       => $accommodationVatAccount,
             ];
         }
     }
@@ -73,8 +110,9 @@ class SageExport
 
         // Load services and accommodations
         $services = $this->event->sellableService->load('event.services', 'sageData', 'group');
-        $hotels = $this->event->accommodation->load('hotel')->mapWithKeys(fn($item) => [
-            $item->id => $item->hotel->name.' '.($item->hotel->stars ? $item->hotel->stars.'*' : '').$item->title
+        $hotels   = $this->event->accommodation->load('hotel')->mapWithKeys(fn($item)
+            => [
+            $item->id => $item->hotel->name.' '.($item->hotel->stars ? $item->hotel->stars.'*' : '').$item->title,
         ])->toArray();
 
         foreach ($invoices as $invoice) {
@@ -118,7 +156,6 @@ class SageExport
                         $this->addTaxRoomLine($shoppable, $hotels, $orderAccessor);
                     }
                 }
-
             } elseif (OrderClientType::GROUP->value === $invoice->order->client_type) {
                 // Group orders - check if it's a front group order or back office group order
                 if ($orderAccessor->isNotFrontGroupOrder()) {
@@ -141,7 +178,6 @@ class SageExport
                             $this->addTaxRoomLine($shoppable, $hotels, $orderAccessor);
                         }
                     }
-
                 } else {
                     // Front group order - process suborders
                     $suborders = $invoice->order->suborders->load('services', 'accommodation', 'account', 'taxRoom');
@@ -200,7 +236,7 @@ class SageExport
     private function addAccommodationLine($cart, $hotels, $orderAccessor): void
     {
         $hotelName = $hotels[$cart->event_hotel_id] ?? '';
-        $roomType = $cart->id ? \App\Accessors\Dictionnaries::entry('type_chambres', $cart->room->room_id)->name : 'NC';
+        $roomType  = $cart->id ? Dictionnaries::entry('type_chambres', $cart->room->room_id)->name : 'NC';
 
         // Fetch the ContingentConfig for the Sage code
         $sageCode = $this->getAccommodationSageCode($cart);
@@ -219,8 +255,6 @@ class SageExport
                 '0.00'
                 : number_format($cart->total_net, 2, '.', ''),
             'Taux_TVA'        => Prices::readableFormat(VatAccessor::fetchVatRate($cart->vat_id), currency: '', decimal_separator: '.'),
-            //'Compte_comptable' => $article->getSageAccountCode(),
-            //'Compte_tva'       => $article->getSageVatAccount(),
         ];
     }
 
@@ -230,7 +264,7 @@ class SageExport
      */
     private function getAccommodationSageCode($cart): string
     {
-        if (!$cart->room_id || !$cart->event_hotel_id) {
+        if ( ! $cart->room_id || ! $cart->event_hotel_id) {
             return '';
         }
 
@@ -242,12 +276,13 @@ class SageExport
 
         // Then find the ContingentConfig that matches our room_id
         foreach ($contingents as $contingent) {
-            $config = $contingent->configs()
+            $config = $contingent
+                ->configs()
                 ->where('room_id', $cart->room_id)
                 ->first();
 
             if ($config) {
-                return $config->getSageCode() . $config->getSageReferenceValue();
+                return $config->getSageCode().$config->getSageReferenceValue();
             }
         }
 
@@ -260,7 +295,7 @@ class SageExport
     private function addTaxRoomLine($cart, $hotels, $orderAccessor): void
     {
         $hotelName = $hotels[$cart->event_hotel_id] ?? '';
-        $roomType = $cart->id ? \App\Accessors\Dictionnaries::entry('type_chambres', $cart->room->room_id)->name : 'NC';
+        $roomType  = $cart->id ? Dictionnaries::entry('type_chambres', $cart->room->room_id)->name : 'NC';
 
         $this->invoicesData[] = [
             'Type_de_Ligne'   => 'L',
@@ -307,25 +342,25 @@ class SageExport
         $eventCode = $this->event->texts->subname ?? 'event_'.$this->event->id;
 
         // Export sellables if data exists
-        if (!empty($this->sellablesData)) {
+        if ( ! empty($this->sellablesData)) {
             $filename = "sage_articles_{$eventCode}_{$timestamp}.txt";
-            $content = $this->generateTxtContent($this->sellablesData);
+            $content  = $this->generateTxtContent($this->sellablesData);
             $this->saveFile($filename, $content);
             $this->exportFiles['articles'] = $filename;
         }
 
         // Export invoices if data exists
-        if (!empty($this->invoicesData)) {
+        if ( ! empty($this->invoicesData)) {
             $filename = "sage_factures_{$eventCode}_{$timestamp}.txt";
-            $content = $this->generateTxtContent($this->invoicesData);
+            $content  = $this->generateTxtContent($this->invoicesData);
             $this->saveFile($filename, $content);
             $this->exportFiles['factures'] = $filename;
         }
 
         // Export payments if data exists
-        if (!empty($this->paymentsData)) {
+        if ( ! empty($this->paymentsData)) {
             $filename = "sage_reglements_{$eventCode}_{$timestamp}.txt";
-            $content = $this->generateTxtContent($this->paymentsData);
+            $content  = $this->generateTxtContent($this->paymentsData);
             $this->saveFile($filename, $content);
             $this->exportFiles['reglements'] = $filename;
         }
@@ -379,13 +414,13 @@ class SageExport
             return $this;
         }
 
-        $timestamp = date('Ymd_His');
-        $eventCode = $this->event->texts->subname ?? 'event_'.$this->event->id;
+        $timestamp   = date('Ymd_His');
+        $eventCode   = $this->event->texts->subname ?? 'event_'.$this->event->id;
         $zipFilename = "sage_export_{$eventCode}_{$timestamp}.zip";
-        $zipPath = storage_path('app/exports/sage/'.$zipFilename);
+        $zipPath     = storage_path('app/exports/sage/'.$zipFilename);
 
         // Ensure directory exists
-        if (!file_exists(dirname($zipPath))) {
+        if ( ! file_exists(dirname($zipPath))) {
             mkdir(dirname($zipPath), 0755, true);
         }
 
@@ -418,7 +453,7 @@ class SageExport
 
         // Set up auto-download
         $downloadUrl = route('panel.download.file', [
-            'path' => 'exports/sage/'.$zipFilename,
+            'path'     => 'exports/sage/'.$zipFilename,
             'filename' => $zipFilename,
         ]);
 
@@ -431,7 +466,7 @@ class SageExport
 
     private function setupEvent(): self
     {
-        if (!request()->filled('event_id')) {
+        if ( ! request()->filled('event_id')) {
             $this->responseWarning("Vous n'avez pas sélectionné un évènement.");
 
             return $this;
@@ -440,7 +475,7 @@ class SageExport
         $request_event_id = (int)request('event_id');
         $this->setEvent($request_event_id);
 
-        if (!$this->event) {
+        if ( ! $this->event) {
             $this->responseWarning("Impossible de récupérer un évènement avec l'ID ".$request_event_id);
 
             return $this;
@@ -449,26 +484,14 @@ class SageExport
         $this->event->load(
             'sellableService.sageData',
             'sellableService.group.sageData',
+            'accommodation.hotel',
+            'accommodation.sageData',
             'accommodation.contingent.configs.sageData',
             'accommodation.contingent.configs.rooms',
             'invoices.order.invoiceable.account',
-            'invoices.order.suborders'
+            'invoices.order.suborders',
         );
 
         return $this;
-    }
-    /* TEST METHODS*/
-    public function getTestExportData(): array
-    {
-        $this->setupEvent();
-
-        /*
-        $this->exportSellables();
-        return $this->sellablesData;
-        */
-
-        $this->exportInvoices();
-
-        return $this->invoicesData;
     }
 }
