@@ -41,7 +41,7 @@ class TestableController extends Controller
 
         d(
 
-           new SageExport()->run()
+           new SageExport()->getTestExportData()
         );
 
     }

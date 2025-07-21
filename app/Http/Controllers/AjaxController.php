@@ -1256,6 +1256,6 @@ class AjaxController extends Controller
 
     public function sageExports(): array
     {
-        return new SageExport()->ajaxMode()->run();
+        return new SageExport()->ajaxMode()->run()->fetchResponse();
     }
 }

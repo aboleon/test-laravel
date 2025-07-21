@@ -119,7 +119,7 @@ class Event extends Model implements CreatorInterface, MediaclassInterface, Sage
     {
         return $this
             ->belongsToMany(DictionnaryEntry::class, 'event_service', 'event_id', 'service_id')
-            ->withPivot(['id','max', 'unlimited', 'service_date_doesnt_count', 'fo_family_position'])
+            ->withPivot(['id', 'max', 'unlimited', 'service_date_doesnt_count', 'fo_family_position'])
             ->wherePivot('enabled', 1);
     }
 
@@ -346,6 +346,21 @@ class Event extends Model implements CreatorInterface, MediaclassInterface, Sage
         )->where('shoppable_type', OrderCartType::SERVICE->value);
     }
 
+    public function invoices(): HasManyThrough
+    {
+        return $this
+            ->hasManyThrough(
+                Invoice::class,
+                Order::class,
+                'event_id',
+                'order_id',
+                'id',
+                'id',
+            )
+            ->whereNull('order_invoices.proforma')
+            ->orderBy('order_invoices.id');
+    }
+
     public function mediaclassSettings(): array
     {
         return [
@@ -373,9 +388,9 @@ class Event extends Model implements CreatorInterface, MediaclassInterface, Sage
     public function sageFields(): array
     {
         return [
-            self::SAGECODEVENT  => 'Acronyme Evènement',
+            self::SAGECODEVENT   => 'Acronyme Evènement',
             self::SAGECODECLIENT => 'Code Client',
-            self::SAGECODESTAT  => 'Code Analytique',
+            self::SAGECODESTAT   => 'Code Analytique',
         ];
     }
 

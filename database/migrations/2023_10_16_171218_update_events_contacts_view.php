@@ -1,0 +1,71 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+
+return new class extends Migration {
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        DB::statement("DROP VIEW IF EXISTS event_contact_view");
+        DB::statement("
+CREATE VIEW event_contact_view AS
+SELECT 
+    ec.id,
+    e.id as event_id,
+    u.id AS user_id,
+    u.first_name,
+    u.last_name,
+    u.email,
+    JSON_UNQUOTE(JSON_EXTRACT(d.name, '$.fr')) AS domain,
+    ap.account_type AS participation,
+    ap.company_name,
+    aa.locality,
+    aa.country_code AS country,
+    JSON_UNQUOTE(JSON_EXTRACT(de.name, '$.fr')) AS fonction,
+    GROUP_CONCAT(g.name) AS `group`,
+    ec.created_at,
+    ec.participation_type_group,
+    CASE
+        WHEN ec.participation_type_group IS NULL THEN '-'
+        WHEN ec.participation_type_group = 'congress' THEN 'Congressistes'
+        WHEN ec.participation_type_group = 'orator' THEN 'Orateurs'
+        WHEN ec.participation_type_group = 'industry' THEN 'Industriels'
+    END AS participation_type_group_display,
+    JSON_UNQUOTE(JSON_EXTRACT(pt.name, '$.fr')) AS participation_type
+FROM events_contacts ec
+INNER JOIN users u ON u.id = ec.user_id
+INNER JOIN events e ON e.id = ec.event_id
+INNER JOIN account_profile ap ON u.id = ap.user_id
+LEFT JOIN participation_types pt ON pt.id = ec.participation_type_id
+LEFT JOIN dictionnary_entries d ON ap.domain_id = d.id
+LEFT JOIN dictionnary_entries de ON ap.profession_id = de.id
+LEFT JOIN (
+    SELECT user_id, company, locality, country_code
+    FROM (
+        SELECT user_id, company, locality, country_code,
+               CASE
+                   WHEN company IS NOT NULL THEN 1
+                   WHEN billing = 1 THEN 2
+                   ELSE 3
+               END AS priority
+        FROM account_address
+        ORDER BY priority, id
+        LIMIT 1
+    ) AS a
+) AS aa ON u.id = aa.user_id
+LEFT JOIN group_contacts gc ON u.id = gc.user_id
+LEFT JOIN `groups` g ON gc.group_id = g.id
+GROUP BY ec.id, event_id, u.id, u.first_name, u.last_name, u.email, domain, participation, ap.company_name, aa.locality, country, fonction, ec.created_at, participation_type_group, participation_type_group_display, participation_type;
+");
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        DB::statement("DROP VIEW IF EXISTS event_contact_view");
+    }
+};

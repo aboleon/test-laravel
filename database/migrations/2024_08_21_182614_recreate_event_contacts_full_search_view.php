@@ -1,0 +1,201 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+
+return new class extends Migration {
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        DB::statement("CREATE OR REPLACE VIEW event_contact_full_search_view AS
+        select `ap`.`id`                                                  AS `id`,
+       `ap`.`user_id`                                             AS `user_id`,
+       `ec`.`event_id`                                           AS `event_id`,
+       `ap`.`account_type`                                        AS `account_type`,
+       `ap`.`base_id`                                             AS `base_id`,
+       `ap`.`domain_id`                                           AS `domain_id`,
+       `ap`.`profession_id`                                       AS `profession_id`,
+       `ap`.`title_id`                                            AS `title_id`,
+       `ap`.`language_id`                                         AS `language_id`,
+       `ap`.`savant_society_id`                                   AS `savant_society_id`,
+       `ap`.`civ`                                                 AS `civ`,
+       `ap`.`birth`                                               AS `birth`,
+       `ap`.`cotisation_year`                                     AS `cotisation_year`,
+       `ap`.`blacklisted`                                         AS `blacklisted`,
+       `ap`.`created_by`                                          AS `created_by`,
+       `ap`.`blacklist_comment`                                   AS `blacklist_comment`,
+       `ap`.`notes`                                               AS `notes`,
+       `ap`.`function`                                            AS `function`,
+       `ap`.`passport_first_name`                                 AS `passport_first_name`,
+       `ap`.`passport_last_name`                                  AS `passport_last_name`,
+       `ap`.`rpps`                                                AS `rpps`,
+       `ap`.`establishment_id`                                    AS `establishment_id`,
+       `ap`.`company_name`                                        AS `company_name`,
+       `u`.`first_name`                                           AS `first_name`,
+       `u`.`last_name`                                            AS `last_name`,
+       `u`.`email`                                                AS `email`,
+       case when `u`.`deleted_at` is null then 0 else 1 end       AS `is_archived`,
+       lcase(json_unquote(json_extract(`e1`.`name`, '$.fr')))     AS `base`,
+       lcase(json_unquote(json_extract(`e2`.`name`, '$.fr')))     AS `domain`,
+       lcase(json_unquote(json_extract(`e3`.`name`, '$.fr')))     AS `title`,
+       lcase(json_unquote(json_extract(`e4`.`name`, '$.fr')))     AS `profession`,
+       lcase(json_unquote(json_extract(`e5`.`name`, '$.fr')))     AS `savant_society`,
+       concat(`creator`.`first_name`, ' ', `creator`.`last_name`) AS `created_by_fullname`,
+       `es`.`name`                                                AS `establishment_name`,
+       `es`.`country_code`                                        AS `establishment_country_code`,
+       `es`.`type`                                                AS `establishment_type`,
+       `es`.`street_number`                                       AS `establishment_street_number`,
+       `es`.`postal_code`                                         AS `establishment_postal_code`,
+       `es`.`locality`                                            AS `establishment_locality`,
+       `es`.`administrative_area_level_1`                         AS `establishment_administrative_area_level_1`,
+       `es`.`administrative_area_level_2`                         AS `establishment_administrative_area_level_2`,
+       `es`.`text_address`                                        AS `establishment_text_address`,
+       `addr1`.`street_number`                                    AS `address_1_street_number`,
+       `addr1`.`route`                                            AS `address_1_route`,
+       `addr1`.`locality`                                         AS `address_1_locality`,
+       `addr1`.`postal_code`                                      AS `address_1_postal_code`,
+       `addr1`.`country_code`                                     AS `address_1_country_code`,
+       `addr1`.`text_address`                                     AS `address_1_text_address`,
+       `addr1`.`company`                                          AS `address_1_company`,
+       `addr2`.`street_number`                                    AS `address_2_street_number`,
+       `addr2`.`route`                                            AS `address_2_route`,
+       `addr2`.`locality`                                         AS `address_2_locality`,
+       `addr2`.`postal_code`                                      AS `address_2_postal_code`,
+       `addr2`.`country_code`                                     AS `address_2_country_code`,
+       `addr2`.`text_address`                                     AS `address_2_text_address`,
+       `addr2`.`company`                                          AS `address_2_company`,
+       `addr3`.`street_number`                                    AS `address_3_street_number`,
+       `addr3`.`route`                                            AS `address_3_route`,
+       `addr3`.`locality`                                         AS `address_3_locality`,
+       `addr3`.`postal_code`                                      AS `address_3_postal_code`,
+       `addr3`.`country_code`                                     AS `address_3_country_code`,
+       `addr3`.`text_address`                                     AS `address_3_text_address`,
+       `addr3`.`company`                                          AS `address_3_company`,
+       `ph1`.`phone`                                              AS `phone_1`,
+       `ph2`.`phone`                                              AS `phone_2`,
+       `ph3`.`phone`                                              AS `phone_3`,
+       `ec`.`registration_type`                                   AS `registration_type`,
+       `ec`.`participation_type_id`                               AS `participation_type_id`,
+       lcase(json_unquote(json_extract(`pt`.`name`, '$.fr')))     AS `participation_type`,
+       `ec`.`is_attending`                                        AS `is_attending`,
+       `ec`.`comment`                                             AS `comment`,
+       `grp`.`group_names`                                        AS `group`,
+       `grp`.`group_ids`                                          AS `group_ids`,
+       `ec`.`is_pec_eligible`                                     AS `pec_eligible`,
+       `ec`.`pec_enabled`                                         AS `pec_enabled`
+from (((((((((((((((((`account_profile` `ap` join `users` `u` on (`ap`.`user_id` = `u`.`id`)) join `users` `creator`
+                     on (`ap`.`created_by` = `creator`.`id`)) left join (select `account_address`.`id`            AS `id`,
+                                                                                `account_address`.`user_id`       AS `user_id`,
+                                                                                `account_address`.`billing`       AS `billing`,
+                                                                                `account_address`.`street_number` AS `street_number`,
+                                                                                `account_address`.`route`         AS `route`,
+                                                                                `account_address`.`locality`      AS `locality`,
+                                                                                `account_address`.`postal_code`   AS `postal_code`,
+                                                                                `account_address`.`country_code`  AS `country_code`,
+                                                                                `account_address`.`text_address`  AS `text_address`,
+                                                                                `account_address`.`lat`           AS `lat`,
+                                                                                `account_address`.`lon`           AS `lon`,
+                                                                                `account_address`.`created_at`    AS `created_at`,
+                                                                                `account_address`.`updated_at`    AS `updated_at`,
+                                                                                `account_address`.`name`          AS `name`,
+                                                                                `account_address`.`company`       AS `company`,
+                                                                                `account_address`.`complementary` AS `complementary`,
+                                                                                `account_address`.`cedex`         AS `cedex`,
+                                                                                row_number()                         over ( partition by `account_address`.`user_id` order by `account_address`.`id`) AS `rn`
+                                                                         from `account_address`) `addr1`
+                    on (`ap`.`user_id` = `addr1`.`user_id` and `addr1`.`rn` = 1)) left join (select `account_address`.`id`            AS `id`,
+                                                                                                    `account_address`.`user_id`       AS `user_id`,
+                                                                                                    `account_address`.`billing`       AS `billing`,
+                                                                                                    `account_address`.`street_number` AS `street_number`,
+                                                                                                    `account_address`.`route`         AS `route`,
+                                                                                                    `account_address`.`locality`      AS `locality`,
+                                                                                                    `account_address`.`postal_code`   AS `postal_code`,
+                                                                                                    `account_address`.`country_code`  AS `country_code`,
+                                                                                                    `account_address`.`text_address`  AS `text_address`,
+                                                                                                    `account_address`.`lat`           AS `lat`,
+                                                                                                    `account_address`.`lon`           AS `lon`,
+                                                                                                    `account_address`.`created_at`    AS `created_at`,
+                                                                                                    `account_address`.`updated_at`    AS `updated_at`,
+                                                                                                    `account_address`.`name`          AS `name`,
+                                                                                                    `account_address`.`company`       AS `company`,
+                                                                                                    `account_address`.`complementary` AS `complementary`,
+                                                                                                    `account_address`.`cedex`         AS `cedex`,
+                                                                                                    row_number()                         over ( partition by `account_address`.`user_id` order by `account_address`.`id`) AS `rn`
+                                                                                             from `account_address`) `addr2`
+                   on (`ap`.`user_id` = `addr2`.`user_id` and `addr2`.`rn` = 2)) left join (select `account_address`.`id`            AS `id`,
+                                                                                                   `account_address`.`user_id`       AS `user_id`,
+                                                                                                   `account_address`.`billing`       AS `billing`,
+                                                                                                   `account_address`.`street_number` AS `street_number`,
+                                                                                                   `account_address`.`route`         AS `route`,
+                                                                                                   `account_address`.`locality`      AS `locality`,
+                                                                                                   `account_address`.`postal_code`   AS `postal_code`,
+                                                                                                   `account_address`.`country_code`  AS `country_code`,
+                                                                                                   `account_address`.`text_address`  AS `text_address`,
+                                                                                                   `account_address`.`lat`           AS `lat`,
+                                                                                                   `account_address`.`lon`           AS `lon`,
+                                                                                                   `account_address`.`created_at`    AS `created_at`,
+                                                                                                   `account_address`.`updated_at`    AS `updated_at`,
+                                                                                                   `account_address`.`name`          AS `name`,
+                                                                                                   `account_address`.`company`       AS `company`,
+                                                                                                   `account_address`.`complementary` AS `complementary`,
+                                                                                                   `account_address`.`cedex`         AS `cedex`,
+                                                                                                   row_number()                         over ( partition by `account_address`.`user_id` order by `account_address`.`id`) AS `rn`
+                                                                                            from `account_address`) `addr3`
+                  on (`ap`.`user_id` = `addr3`.`user_id` and `addr3`.`rn` = 3)) left join (select `account_phones`.`id`           AS `id`,
+                                                                                                  `account_phones`.`user_id`      AS `user_id`,
+                                                                                                  `account_phones`.`country_code` AS `country_code`,
+                                                                                                  `account_phones`.`default`      AS `default`,
+                                                                                                  `account_phones`.`phone`        AS `phone`,
+                                                                                                  `account_phones`.`name`         AS `name`,
+                                                                                                  `account_phones`.`created_at`   AS `created_at`,
+                                                                                                  `account_phones`.`updated_at`   AS `updated_at`,
+                                                                                                  row_number()                       over ( partition by `account_phones`.`user_id` order by `account_phones`.`id`) AS `rn`
+                                                                                           from `account_phones`) `ph1`
+                 on (`ap`.`user_id` = `ph1`.`user_id` and `ph1`.`rn` = 1)) left join (select `account_phones`.`id`           AS `id`,
+                                                                                             `account_phones`.`user_id`      AS `user_id`,
+                                                                                             `account_phones`.`country_code` AS `country_code`,
+                                                                                             `account_phones`.`default`      AS `default`,
+                                                                                             `account_phones`.`phone`        AS `phone`,
+                                                                                             `account_phones`.`name`         AS `name`,
+                                                                                             `account_phones`.`created_at`   AS `created_at`,
+                                                                                             `account_phones`.`updated_at`   AS `updated_at`,
+                                                                                             row_number()                       over ( partition by `account_phones`.`user_id` order by `account_phones`.`id`) AS `rn`
+                                                                                      from `account_phones`) `ph2`
+                on (`ap`.`user_id` = `ph2`.`user_id` and `ph2`.`rn` = 2)) left join (select `account_phones`.`id`           AS `id`,
+                                                                                            `account_phones`.`user_id`      AS `user_id`,
+                                                                                            `account_phones`.`country_code` AS `country_code`,
+                                                                                            `account_phones`.`default`      AS `default`,
+                                                                                            `account_phones`.`phone`        AS `phone`,
+                                                                                            `account_phones`.`name`         AS `name`,
+                                                                                            `account_phones`.`created_at`   AS `created_at`,
+                                                                                            `account_phones`.`updated_at`   AS `updated_at`,
+                                                                                            row_number()                       over ( partition by `account_phones`.`user_id` order by `account_phones`.`id`) AS `rn`
+                                                                                     from `account_phones`) `ph3`
+               on (`ap`.`user_id` = `ph3`.`user_id` and `ph3`.`rn` = 3)) left join `dictionnary_entries` `e1`
+              on (`ap`.`base_id` = `e1`.`id`)) left join `dictionnary_entries` `e2`
+             on (`ap`.`domain_id` = `e2`.`id`)) left join `dictionnary_entries` `e3`
+            on (`ap`.`title_id` = `e3`.`id`)) left join `dictionnary_entries` `e4`
+           on (`ap`.`profession_id` = `e4`.`id`)) left join `dictionnary_entries` `e5`
+          on (`ap`.`savant_society_id` = `e5`.`id`)) left join `establishments` `es`
+         on (`ap`.`establishment_id` = `es`.`id`)) left join `events_contacts` `ec`
+        on (`ec`.`user_id` = `ap`.`user_id`)) left join `participation_types` `pt`
+       on (`pt`.`id` = `ec`.`participation_type_id`)) left join (select `gc`.`user_id`                                         AS `user_id`,
+                                                                        group_concat(`g`.`name` separator ', ')                AS `group_names`,
+                                                                        concat(',', group_concat(`g`.`id` separator ','), ',') AS `group_ids`
+                                                                 from (`group_contacts` `gc` join `groups` `g` on (`gc`.`group_id` = `g`.`id`))
+                                                                 group by `gc`.`user_id`) `grp`
+      on (`u`.`id` = `grp`.`user_id`))
+        ");
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        DB::statement("CREATE OR REPLACE VIEW event_contact_full_search_view AS
+select `ap`.`id` AS `id`,`ap`.`user_id` AS `user_id`,`ap`.`account_type` AS `account_type`,`ap`.`base_id` AS `base_id`,`ap`.`domain_id` AS `domain_id`,`ap`.`profession_id` AS `profession_id`,`ap`.`title_id` AS `title_id`,`ap`.`language_id` AS `language_id`,`ap`.`savant_society_id` AS `savant_society_id`,`ap`.`civ` AS `civ`,`ap`.`birth` AS `birth`,`ap`.`cotisation_year` AS `cotisation_year`,`ap`.`blacklisted` AS `blacklisted`,`ap`.`created_by` AS `created_by`,`ap`.`blacklist_comment` AS `blacklist_comment`,`ap`.`notes` AS `notes`,`ap`.`function` AS `function`,`ap`.`passport_first_name` AS `passport_first_name`,`ap`.`passport_last_name` AS `passport_last_name`,`ap`.`rpps` AS `rpps`,`ap`.`establishment_id` AS `establishment_id`,`ap`.`company_name` AS `company_name`,`u`.`first_name` AS `first_name`,`u`.`last_name` AS `last_name`,`u`.`email` AS `email`,case when `u`.`deleted_at` is null then 0 else 1 end AS `is_archived`,lcase(json_unquote(json_extract(`e1`.`name`,'$.fr'))) AS `base`,lcase(json_unquote(json_extract(`e2`.`name`,'$.fr'))) AS `domain`,lcase(json_unquote(json_extract(`e3`.`name`,'$.fr'))) AS `title`,lcase(json_unquote(json_extract(`e4`.`name`,'$.fr'))) AS `profession`,lcase(json_unquote(json_extract(`e5`.`name`,'$.fr'))) AS `savant_society`,concat(`creator`.`first_name`,' ',`creator`.`last_name`) AS `created_by_fullname`,`es`.`name` AS `establishment_name`,`es`.`country_code` AS `establishment_country_code`,`es`.`type` AS `establishment_type`,`es`.`street_number` AS `establishment_street_number`,`es`.`postal_code` AS `establishment_postal_code`,`es`.`locality` AS `establishment_locality`,`es`.`administrative_area_level_1` AS `establishment_administrative_area_level_1`,`es`.`administrative_area_level_2` AS `establishment_administrative_area_level_2`,`es`.`text_address` AS `establishment_text_address`,`addr1`.`street_number` AS `address_1_street_number`,`addr1`.`route` AS `address_1_route`,`addr1`.`locality` AS `address_1_locality`,`addr1`.`postal_code` AS `address_1_postal_code`,`addr1`.`country_code` AS `address_1_country_code`,`addr1`.`text_address` AS `address_1_text_address`,`addr1`.`company` AS `address_1_company`,`addr2`.`street_number` AS `address_2_street_number`,`addr2`.`route` AS `address_2_route`,`addr2`.`locality` AS `address_2_locality`,`addr2`.`postal_code` AS `address_2_postal_code`,`addr2`.`country_code` AS `address_2_country_code`,`addr2`.`text_address` AS `address_2_text_address`,`addr2`.`company` AS `address_2_company`,`addr3`.`street_number` AS `address_3_street_number`,`addr3`.`route` AS `address_3_route`,`addr3`.`locality` AS `address_3_locality`,`addr3`.`postal_code` AS `address_3_postal_code`,`addr3`.`country_code` AS `address_3_country_code`,`addr3`.`text_address` AS `address_3_text_address`,`addr3`.`company` AS `address_3_company`,`ph1`.`phone` AS `phone_1`,`ph2`.`phone` AS `phone_2`,`ph3`.`phone` AS `phone_3`,`ec`.`registration_type` AS `registration_type`,`ec`.`participation_type_id` AS `participation_type_id`,lcase(json_unquote(json_extract(`pt`.`name`,'$.fr'))) AS `participation_type`,`ec`.`is_attending` AS `is_attending`,`ec`.`comment` AS `comment`,`grp`.`group_names` AS `group`,`grp`.`group_ids` AS `group_ids` from (((((((((((((((((`account_profile` `ap` join `users` `u` on(`ap`.`user_id` = `u`.`id`)) join `users` `creator` on(`ap`.`created_by` = `creator`.`id`)) left join (select `account_address`.`id` AS `id`,`account_address`.`user_id` AS `user_id`,`account_address`.`billing` AS `billing`,`account_address`.`street_number` AS `street_number`,`account_address`.`route` AS `route`,`account_address`.`locality` AS `locality`,`account_address`.`postal_code` AS `postal_code`,`account_address`.`country_code` AS `country_code`,`account_address`.`text_address` AS `text_address`,`account_address`.`lat` AS `lat`,`account_address`.`lon` AS `lon`,`account_address`.`created_at` AS `created_at`,`account_address`.`updated_at` AS `updated_at`,`account_address`.`name` AS `name`,`account_address`.`company` AS `company`,`account_address`.`complementary` AS `complementary`,`account_address`.`cedex` AS `cedex`,row_number() over ( partition by `account_address`.`user_id` order by `account_address`.`id`) AS `rn` from `account_address`) `addr1` on(`ap`.`user_id` = `addr1`.`user_id` and `addr1`.`rn` = 1)) left join (select `account_address`.`id` AS `id`,`account_address`.`user_id` AS `user_id`,`account_address`.`billing` AS `billing`,`account_address`.`street_number` AS `street_number`,`account_address`.`route` AS `route`,`account_address`.`locality` AS `locality`,`account_address`.`postal_code` AS `postal_code`,`account_address`.`country_code` AS `country_code`,`account_address`.`text_address` AS `text_address`,`account_address`.`lat` AS `lat`,`account_address`.`lon` AS `lon`,`account_address`.`created_at` AS `created_at`,`account_address`.`updated_at` AS `updated_at`,`account_address`.`name` AS `name`,`account_address`.`company` AS `company`,`account_address`.`complementary` AS `complementary`,`account_address`.`cedex` AS `cedex`,row_number() over ( partition by `account_address`.`user_id` order by `account_address`.`id`) AS `rn` from `account_address`) `addr2` on(`ap`.`user_id` = `addr2`.`user_id` and `addr2`.`rn` = 2)) left join (select `account_address`.`id` AS `id`,`account_address`.`user_id` AS `user_id`,`account_address`.`billing` AS `billing`,`account_address`.`street_number` AS `street_number`,`account_address`.`route` AS `route`,`account_address`.`locality` AS `locality`,`account_address`.`postal_code` AS `postal_code`,`account_address`.`country_code` AS `country_code`,`account_address`.`text_address` AS `text_address`,`account_address`.`lat` AS `lat`,`account_address`.`lon` AS `lon`,`account_address`.`created_at` AS `created_at`,`account_address`.`updated_at` AS `updated_at`,`account_address`.`name` AS `name`,`account_address`.`company` AS `company`,`account_address`.`complementary` AS `complementary`,`account_address`.`cedex` AS `cedex`,row_number() over ( partition by `account_address`.`user_id` order by `account_address`.`id`) AS `rn` from `account_address`) `addr3` on(`ap`.`user_id` = `addr3`.`user_id` and `addr3`.`rn` = 3)) left join (select `account_phones`.`id` AS `id`,`account_phones`.`user_id` AS `user_id`,`account_phones`.`country_code` AS `country_code`,`account_phones`.`default` AS `default`,`account_phones`.`phone` AS `phone`,`account_phones`.`name` AS `name`,`account_phones`.`created_at` AS `created_at`,`account_phones`.`updated_at` AS `updated_at`,row_number() over ( partition by `account_phones`.`user_id` order by `account_phones`.`id`) AS `rn` from `account_phones`) `ph1` on(`ap`.`user_id` = `ph1`.`user_id` and `ph1`.`rn` = 1)) left join (select `account_phones`.`id` AS `id`,`account_phones`.`user_id` AS `user_id`,`account_phones`.`country_code` AS `country_code`,`account_phones`.`default` AS `default`,`account_phones`.`phone` AS `phone`,`account_phones`.`name` AS `name`,`account_phones`.`created_at` AS `created_at`,`account_phones`.`updated_at` AS `updated_at`,row_number() over ( partition by `account_phones`.`user_id` order by `account_phones`.`id`) AS `rn` from `account_phones`) `ph2` on(`ap`.`user_id` = `ph2`.`user_id` and `ph2`.`rn` = 2)) left join (select `account_phones`.`id` AS `id`,`account_phones`.`user_id` AS `user_id`,`account_phones`.`country_code` AS `country_code`,`account_phones`.`default` AS `default`,`account_phones`.`phone` AS `phone`,`account_phones`.`name` AS `name`,`account_phones`.`created_at` AS `created_at`,`account_phones`.`updated_at` AS `updated_at`,row_number() over ( partition by `account_phones`.`user_id` order by `account_phones`.`id`) AS `rn` from `account_phones`) `ph3` on(`ap`.`user_id` = `ph3`.`user_id` and `ph3`.`rn` = 3)) left join `dictionnary_entries` `e1` on(`ap`.`base_id` = `e1`.`id`)) left join `dictionnary_entries` `e2` on(`ap`.`domain_id` = `e2`.`id`)) left join `dictionnary_entries` `e3` on(`ap`.`title_id` = `e3`.`id`)) left join `dictionnary_entries` `e4` on(`ap`.`profession_id` = `e4`.`id`)) left join `dictionnary_entries` `e5` on(`ap`.`savant_society_id` = `e5`.`id`)) left join `establishments` `es` on(`ap`.`establishment_id` = `es`.`id`)) left join `events_contacts` `ec` on(`ec`.`user_id` = `ap`.`user_id`)) left join `participation_types` `pt` on(`pt`.`id` = `ec`.`participation_type_id`)) left join (select `gc`.`user_id` AS `user_id`,group_concat(`g`.`name` separator ', ') AS `group_names`,concat(',',group_concat(`g`.`id` separator ','),',') AS `group_ids` from (`group_contacts` `gc` join `groups` `g` on(`gc`.`group_id` = `g`.`id`)) group by `gc`.`user_id`) `grp` on(`u`.`id` = `grp`.`user_id`))
+        ");
+    }
+};

@@ -66,6 +66,17 @@
     @include('lib.select2')
     @push('js')
         <script>
+            function processSageDownload(response) {
+                if (response.auto_download && response.download_url) {
+                    let link = document.createElement('a');
+                    link.href = response.download_url;
+                    link.download = '';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            }
+
             $(function () {
 
                 setTimeout(function () {
@@ -79,7 +90,12 @@
                 }, 500);
 
                 $('#sage-exports button').off().on('click', function () {
-                    ajax('action=sageExports&event_id=' + $('#sage-exports select').val(), $('#sage-exports'));
+                    let $container = $('#sage-exports');
+                    let eventId = $('#sage-exports select').val();
+
+                    $container.find('.messages').html('<div class="alert alert-info">Export en cours...</div>');
+
+                    ajax('action=sageExports&callback=processSageDownload&event_id=' + eventId, $container);
                 });
             });
         </script>
