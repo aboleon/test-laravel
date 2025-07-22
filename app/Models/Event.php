@@ -361,6 +361,11 @@ class Event extends Model implements CreatorInterface, MediaclassInterface, Sage
             ->orderBy('order_invoices.id');
     }
 
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(BankAccount::class, 'bank_account_id');
+    }
+
     public function mediaclassSettings(): array
     {
         return [

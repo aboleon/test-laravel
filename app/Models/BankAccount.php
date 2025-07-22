@@ -15,6 +15,8 @@ class BankAccount extends Model implements SageInterface
     use HasFactory;
     use SageTrait;
 
+    public const string SAGEACCOUNT = 'compte_comptable';
+
     protected $fillable = [
         'name',
         'code',
@@ -60,7 +62,7 @@ class BankAccount extends Model implements SageInterface
     public function sageFields(): array
     {
         return [
-            'compte_comptable' => 'Compte Comptable Sage',
+            self::SAGEACCOUNT => 'Compte Comptable Sage',
         ];
     }
 }

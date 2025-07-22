@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Accessors\Dictionnaries;
 use App\Accessors\OrderAccessor;
+use App\DataTables\View\OrderPaymentView;
 use App\Enum\OrderClientType;
 use App\Models\EventManager\Accommodation;
 use App\Traits\Models\EventModelTrait;
@@ -317,15 +318,20 @@ class SageExport
      */
     protected function exportPayments(): void
     {
+        $payments = OrderPaymentView::where('event_id', $this->event->id)->orderBy('id')->get();
+        $bankAccount = $this->event->bankAccount->load('sageData');
+
+        $sageAccount = $bankAccount ? $bankAccount->getSageReferenceValue($bankAccount::SAGEACCOUNT) : $bankAccount::SAGEUNKNOWN;
         $this->paymentsData = [];
 
-        $this->paymentsData[] = [
-            'date_reglement'   => '',
-            'numero_cb'        => '',
-            'montant_ttc'      => '',
-            'compte_comptable' => '',
-            'compte_tva'       => '',
-        ];
+        foreach ($payments as $payment) {
+            $this->paymentsData[] = [
+                'date_reglement'   => $payment->date,
+                'numero_cb'        => $payment->card_number,
+                'compte_comptable' => $sageAccount,
+                'montant_ttc'      => $payment->amount,
+            ];
+        }
     }
 
     /**
@@ -506,6 +512,7 @@ class SageExport
               */
 
         $this->exportPayments();
+
         return $this->paymentsData;
     }
 }
