@@ -35,7 +35,7 @@ class TestableController extends Controller
 
     public function index()
     {
-        request()->merge(['event_id' => 34]);
+        request()->merge(['sage.event' => 34]);
 
         d(request()->all());
 

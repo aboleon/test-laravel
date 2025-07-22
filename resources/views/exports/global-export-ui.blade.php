@@ -20,12 +20,12 @@
         </div>
         <div class="modal-body">
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-12 col-md-6 mb-3">
                     <x-mfw::datepicker :label="__('ui.start')"
                                        name="start"
                                        value=""/>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-12 col-md-6 mb-3">
                     <x-mfw::datepicker :label="__('ui.end')"
                                        name="end"
                                        value=""/>

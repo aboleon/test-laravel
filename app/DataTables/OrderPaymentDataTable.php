@@ -65,7 +65,7 @@ class OrderPaymentDataTable extends DataTable
         return [
             Column::make('invoice_number')->title("Num Fact"),
             Column::make('payer')->title("Payeur"),
-            Column::make('date')->title("Date"),
+            Column::make('date_formatted')->title("Date"),
             Column::make('payment_method_translated')->title("Paiement"),
             Column::make('authorization_number')->title("Autorisation"),
             Column::make('card_number')->title("Carte"),

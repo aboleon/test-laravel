@@ -37,9 +37,40 @@
                     id="sage-exports">
                     <h4>Exports Sage</h4>
                     <div class="d-block pt-2">
-                        <x-mfw::select name="event" label="Évènement"
-                                       :values="\App\Models\Event::orderByDesc('starts')->with('texts')->get()->pluck('texts.name', 'id')->toArray()"/>
+                        @php
+                            $events = \App\Models\Event::orderByDesc('starts')->with('texts')->get();
+                            $eventSelectables
+                        @endphp
+                        <select id="sage_event" name="sage[event]" class="form-control form-select">
+                            <option value="">--- Sélectionner ---</option>
+                            @foreach($events as $event)
+                                <option value="{{ $event->id }}"
+                                        data-starts="{{ $event->starts }}"
+                                        data-ends="{{ $event->ends }}">
+                                    {!! $event->texts->name .'&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;' .
+                                    (
+                                        substr($event->starts, -4) == substr($event->ends, -4)
+                                        ? substr($event->starts, 0, 5)
+                                        : $event->starts
+                                    ) . '-' . $event->ends  !!}
+                                </option>
+                            @endforeach
+
+                        </select>
                     </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6 mb-1">
+                            <x-mfw::datepicker :label="__('ui.start')"
+                                               name="sage.start"/>
+                        </div>
+                        <div class="col-md-6 mb-1">
+                            <x-mfw::datepicker :label="__('ui.end')"
+                                               name="sage.end"/>
+                        </div>
+                    </div>
+
+                    <small class="d-none d-block cursor-pointer text-danger" id="clear_sage_dates">Nettoyer les dates</small>
 
                     <b class="d-block pt-4 pb-2">Export de :</b>
                     <ul>
@@ -84,18 +115,31 @@
                     form.find('.modal-body > .row').append($('#filetypes').html());
                     form.find('.filterdata').remove();
 
-                    let sage = $('#sage-exports');
+                    let sage = $('#sage-exports'),
+                        datepickers = sage.find('.datepicker'),
+                        clearDates = $('#clear_sage_dates');
                     sage.find('select.form-control').select2();
+
+
+                    datepickers.change(function() {
+                        if ($(this).val() !== '') {
+                            clearDates.removeClass('d-none');
+                        }
+                    });
+
+                    clearDates.on('click', function () {
+                        datepickers.val('').trigger('change');
+                        clearDates.addClass('d-none');
+                    });
 
                 }, 500);
 
                 $('#sage-exports button').off().on('click', function () {
-                    let $container = $('#sage-exports');
-                    let eventId = $('#sage-exports select').val();
+                    let container = $('#sage-exports');
 
-                    $container.find('.messages').html('<div class="alert alert-info">Export en cours...</div>');
+                    container.find('.messages').html('<div class="alert alert-info">Export en cours...</div>');
 
-                    ajax('action=sageExports&callback=processSageDownload&event_id=' + eventId, $container);
+                    ajax('action=sageExports&callback=processSageDownload&' + container.find('input,select').serialize(), container);
                 });
             });
         </script>

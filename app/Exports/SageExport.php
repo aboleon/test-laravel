@@ -8,6 +8,7 @@ use App\DataTables\View\OrderPaymentView;
 use App\Enum\OrderClientType;
 use App\Models\EventManager\Accommodation;
 use App\Traits\Models\EventModelTrait;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use MetaFramework\Accessors\Prices;
 use MetaFramework\Accessors\VatAccessor;
@@ -24,9 +25,17 @@ class SageExport
     protected array $paymentsData = [];
     protected array $exportFiles = [];
 
+    public string $dateStart = '';
+    public string $dateEnd = '';
+
+
     public function run(): self
     {
-        $this->setupEvent();
+        $this->setupDataQuery();
+
+        if ($this->hasErrors()) {
+            return $this;
+        }
 
         return $this
             ->generateData()
@@ -107,7 +116,11 @@ class SageExport
         $this->invoicesData = [];
 
         // Load invoices with necessary relations
-        $invoices = $this->event->invoices->load('order', 'order.invoiceable.account', 'order.suborders');
+        $invoices = $this->event->invoices();
+        if ($this->dateStart) {
+            $invoices->whereBetween('order_invoices.created_at', [$this->dateStart, $this->dateEnd]);
+        }
+        $invoices = $invoices->with('order', 'order.invoiceable.account', 'order.suborders')->get();
 
         // Load services and accommodations
         $services = $this->event->sellableService->load('event.services', 'sageData', 'group');
@@ -314,19 +327,24 @@ class SageExport
     }
 
     /**
-     * Export payments data (to be implemented)
+     * Export payments data
      */
     protected function exportPayments(): void
     {
-        $payments = OrderPaymentView::where('event_id', $this->event->id)->orderBy('id')->get();
+        $payments = OrderPaymentView::where('event_id', $this->event->id);
+        if ($this->dateStart) {
+            $payments->whereBetween('date', [$this->dateStart, $this->dateEnd]);
+        }
+        $payments = $payments->orderBy('id')->get();
+
         $bankAccount = $this->event->bankAccount->load('sageData');
 
-        $sageAccount = $bankAccount ? $bankAccount->getSageReferenceValue($bankAccount::SAGEACCOUNT) : $bankAccount::SAGEUNKNOWN;
+        $sageAccount        = $bankAccount ? $bankAccount->getSageReferenceValue($bankAccount::SAGEACCOUNT) : $bankAccount::SAGEUNKNOWN;
         $this->paymentsData = [];
 
         foreach ($payments as $payment) {
             $this->paymentsData[] = [
-                'date_reglement'   => $payment->date,
+                'date_reglement'   => $payment->date_formatted,
                 'numero_cb'        => $payment->card_number,
                 'compte_comptable' => $sageAccount,
                 'montant_ttc'      => $payment->amount,
@@ -465,21 +483,35 @@ class SageExport
         return $this;
     }
 
-    private function setupEvent(): self
+    private function setupDataQuery(): self
     {
-        if ( ! request()->filled('event_id')) {
+        if ( ! request()->filled('sage.event')) {
             $this->responseWarning("Vous n'avez pas sélectionné un évènement.");
 
             return $this;
         }
 
-        $request_event_id = (int)request('event_id');
+        $request_event_id = (int)request('sage.event');
         $this->setEvent($request_event_id);
 
         if ( ! $this->event) {
             $this->responseWarning("Impossible de récupérer un évènement avec l'ID ".$request_event_id);
 
             return $this;
+        }
+
+        // Dates
+
+        if (request()->filled('sage.start')) {
+            $this->dateStart = Carbon::createFromFormat('d/m/Y', request('sage.start'))->toDateString();
+        }
+
+        if (request()->filled('sage.end')) {
+            $this->dateEnd = Carbon::createFromFormat('d/m/Y',request('sage.end'))->toDateString();
+        }
+
+        if ($this->dateStart && ! $this->dateEnd or $this->dateEnd && ! $this->dateStart) {
+            $this->responseWarning("Les deux dates doivent être renseignées.");
         }
 
         $this->event->load(
@@ -499,20 +531,10 @@ class SageExport
     /* TEST METHODS*/
     public function getTestExportData(): array
     {
-        $this->setupEvent();
-        /*
+        $this->setupDataQuery();
 
-               $this->exportSellables();
-               return $this->sellablesData;
+        $this->exportInvoices();
 
-
-                       $this->exportInvoices();
-
-                       return $this->invoicesData;
-              */
-
-        $this->exportPayments();
-
-        return $this->paymentsData;
+       // return $this->paymentsData;
     }
 }
