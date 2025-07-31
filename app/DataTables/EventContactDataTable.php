@@ -168,7 +168,7 @@ class EventContactDataTable extends DataTable
             Column::make('company_name')->title('Société'),
             Column::make('locality')->title('Ville'),
             Column::make('country')->title('Pays'),
-            Column::make('fonction')->title('Fonction'),
+            Column::make('fonction')->title('Profession'),
             Column::make('created_at')->title('Date Rattachement'),
             Column::make('nb_orders')->title('Commandes'),
             Column::make('order_cancellation')->title('Annulation commande'),

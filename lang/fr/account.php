@@ -59,7 +59,7 @@ return [
         'domain_id' => 'Domaine',
         'establishment_id' => 'Établissement',
         'function' => 'Fonction',
-        'language_id' => 'Language',
+        'lang' => 'Language',
         'notes' => 'Notes',
         'passport_first_name' => 'Prénom passeport',
         'passport_last_name' => 'Nom passeport',

@@ -38,7 +38,14 @@ class EventDataTable extends DataTable
      */
     public function query(EventView $model): QueryBuilder
     {
-        return $model->newQuery()->whereNull('deleted_at');
+        $query = $model->newQuery();
+        if (request()->route()->getName() == 'panel.events.archived') {
+            $query->whereNotNull('deleted_at');
+        } else {
+            $query->whereNull('deleted_at');
+        }
+
+        return $query;
     }
 
     /**

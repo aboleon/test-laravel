@@ -99,7 +99,7 @@
         domain_id: ['Domaine', 'dico', 'domain'],
         title_id: ['Titre', 'dico', 'titles'],
         profession_id: ['Profession', 'dico_meta', 'professions'],
-        language_id: ['Language', 'dico', 'language'],
+        lang: ['Langue', 'enum', {!! json_encode(\MetaFramework\Accessors\Locale::localesAsSelectable()) !!}],
         savant_society_id: ['Société savante', 'dico', 'savant_societies'],
         civ: ['Civilité', 'enum', {!! json_encode(\App\Enum\Civility::toArray()) !!}],
         birth: ['Date de naissance', 'date'],

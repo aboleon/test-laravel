@@ -10,7 +10,7 @@ return [
         "genre_required" => "Vous n'avez pas précisé votre genre",
         "first_name_required" => "Vous n'avez pas précisé votre prénom",
         "last_name_required" => "Vous n'avez pas précisé votre nom",
-        "language_id_required" => "Vous n'avez pas précisé votre langue",
+        "lang_required" => "Vous n'avez pas précisé votre langue",
         "email_required" => "Vous n'avez pas précisé votre email",
         "email_already_exists" => "Cet email est déjà utilisé",
         "email_format" => "Votre email est mal formaté",

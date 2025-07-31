@@ -1,7 +1,5 @@
 @if($transport)
 
-    {!! csscrush_inline(public_path('css/mediaclass_docs.css')) !!}
-
     <div class="card mb-3">
         <div class="card-body">
             <h4>Documents</h4>

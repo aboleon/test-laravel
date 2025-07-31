@@ -23,6 +23,8 @@ Route::post('restore/{id}', [SellableController::class, 'restore'])->name('sella
 Route::resource('sellables', SellableController::class);
 
 # Events
+Route::get('events/archived', [EventController::class, 'index'])->name('events.archived');
+Route::post('events/restore/{id}', [EventController::class, 'restore'])->name('events.restore');
 Route::resource('events', EventController::class)->except('show');
 Route::get('events/passed', [EventController::class, 'passed'])->name('passed_events');
 Route::resource('hotels', HotelController::class)->except('show');

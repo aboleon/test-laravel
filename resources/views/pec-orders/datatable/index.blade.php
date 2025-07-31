@@ -5,12 +5,12 @@
             <h2>
                 PEC
             </h2>
-    
-            <span class="text-secondary">
+
+            <span class="fs-6 text-secondary">
                 Pax avec commande PEC ou caution PEC payée
             </span>
         </div>
-        
+
 
         <div class="d-flex align-items-center" id="topbar-actions">
             <a class="btn btn-sm btn-primary me-2"

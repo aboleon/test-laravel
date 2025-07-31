@@ -33,7 +33,6 @@ use MetaFramework\Traits\OnlineStatus;
  * @property Collection $serviceAttributions
  * @property array|null $transport
  * @property array|null $transfert
- * @property int|null   $manage_transport_upfront
  */
 class Event extends Model implements CreatorInterface, MediaclassInterface, SageInterface
 {
@@ -58,7 +57,6 @@ class Event extends Model implements CreatorInterface, MediaclassInterface, Sage
             'has_program'                  => BooleanNull::class,
             'published'                    => BooleanNull::class,
             'has_external_accommodation'   => BooleanNull::class,
-            'manage_transport_upfront'     => BooleanNull::class,
             'ask_video_authorization'      => BooleanNull::class,
             'show_orators_picture'         => BooleanNull::class,
             'transport'                    => 'array',

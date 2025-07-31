@@ -28,12 +28,7 @@ class Users
 
     public static function guessPreferredLang(User $user): string
     {
-        $dicLang = $user->accountProfile?->language?->name;
-
-        return match ($dicLang) {
-            'English', 'Anglais' => 'en',
-            default => 'fr',
-        };
+        return $user->accountProfile?->lang ?: app()->getFallbackLocale();
     }
 
     public static function createBlankTmpUserByEmail(string $email): Account

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Front\User;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AccountRequest extends FormRequest
 {
@@ -31,7 +32,7 @@ class AccountRequest extends FormRequest
             'first_name' => ['required', 'string'],
             'birth' => ['required', 'string'],
             'last_name' => ['required', 'string'],
-            'language_id' => ['required', 'integer'],
+            'lang' => ['required', 'string', Rule::in(config('mfw.translatable.locales'))],
             'profession_id' => ['required', 'integer'],
             'savant_society_id' => ['nullable', 'integer'],
             'establishment_id' => ['nullable', 'integer'],
@@ -47,7 +48,7 @@ class AccountRequest extends FormRequest
             'birth.required' => __('front/account.validation.birth'),
             'first_name.required' => __('front/account.validation.first_name'),
             'last_name.required' => __('front/account.validation.last_name'),
-            'language_id.required' => __('front/account.validation.language_id'),
+            'lang.required' => __('front/account.validation.lang'),
             'profession_id.required' => __('front/account.validation.profession_id'),
             'function.required' => __('front/account.validation.function'),
         ];

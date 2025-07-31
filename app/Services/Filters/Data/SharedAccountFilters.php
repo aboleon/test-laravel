@@ -46,11 +46,11 @@ class SharedAccountFilters implements FilterProviderInterface
                 'operators' => 'select_operators',
             ],
             [
-                'id'        => 'account_profile.language_id',
+                'id'        => 'account_profile.lang',
                 'label'     => 'Langue',
                 'type'      => 'string',
                 'input'     => 'select',
-                'values'    => Dictionnaries::selectValues('language'),
+                'values'    => ['fr' => 'Français', 'en' => 'English'],
                 'operators' => 'select_operators',
             ],
             [

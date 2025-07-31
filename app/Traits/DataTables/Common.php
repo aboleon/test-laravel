@@ -15,7 +15,10 @@ trait Common
         $orderByDirection = $config['orderByDirection'] ?? "desc";
 
         $defaultLanguage = [
-            'url' => 'https://cdn.datatables.net/plug-ins/2.1.4/i18n/fr-FR.json',
+            //'url' => 'https://cdn.datatables.net/plug-ins/2.1.4/i18n/fr-FR.json',
+            /* 2025-07-29 - Access to XMLHttpRequest at 'https://cdn.datatables.net/plug-ins/2.1.4/i18n/fr-FR.json' from origin 'https://divine-id.wagaia.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+             */
+            'url' => asset('vendor/datatables/i18n/fr-FR.json'),
         ];
 
         // Merge custom language settings

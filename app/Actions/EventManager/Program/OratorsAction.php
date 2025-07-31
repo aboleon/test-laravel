@@ -77,18 +77,25 @@ class OratorsAction
             "domain_id" => ["domain", "domain"],
             "title_id" => ["titles", "title"],
             "profession_id" => ["professions", "profession"],
-            "language_id" => ["language", "language"],
             "savant_society_id" => ["savant_societies", "savant_society"],
         ];
 
-        array_walk($arr, function (&$item) use ($map) {
+        $langMap = trans('mfw-lang');
+
+        array_walk($arr, function (&$item) use ($map, $langMap) {
+            $profile = &$item['event_contact']['account']['profile'];
+
+            // Process dictionary mappings
             foreach ($map as $key => $info) {
-                if (isset($item['event_contact']['account']['profile'][$key])) {
-                    $item['event_contact']['account']['profile'][$info[1]] = Dictionnaries::entry($info[0], $item['event_contact']['account']['profile'][$key]);
-                } else {
-                    $item['event_contact']['account']['profile'][$info[1]] = null;
-                }
+                $profile[$info[1]] = isset($profile[$key])
+                    ? Dictionnaries::entry($info[0], $profile[$key])
+                    : null;
             }
+
+            // Process language
+            $profile['lang'] = isset($profile['lang'])
+                ? ($langMap[$profile['lang']] ?? null)
+                : null;
         });
     }
 

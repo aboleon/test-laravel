@@ -6,7 +6,7 @@
     @foreach(config('mfw.translatable.locales') as $locale)
         <li>
             <span class="border border-1 border-dark-subtle rounded-1 lg-link">
-                <img src="{!! asset('vendor/flags/4x3/'.$locale.'.svg') !!}" width="26" height="18" alt="{{ trans('lang.'.$locale.'.label') }}" class="d-inline-block" data-bs-placement="top" data-bs-title="{{ trans('lang.'.$locale.'.label') }}" data-bs-toggle="tooltip"/>
+                <img src="{!! asset('vendor/flags/4x3/'.$locale.'.svg') !!}" width="26" height="18" alt="{{ trans('mfw-lang.'.$locale.'.label') }}" class="d-inline-block" data-bs-placement="top" data-bs-title="{{ trans('mfw-lang.'.$locale.'.label') }}" data-bs-toggle="tooltip"/>
                 <a target="_blank" href="{{ route('panel.mailtemplates.show', ['mailtemplate' => $data, 'locale' => $locale, 'as'=>'mail']) }}" data-bs-placement="top" data-bs-title="Version Mail" data-bs-toggle="tooltip">Mail</a> |
                 <a target="_blank" href="{{ route('panel.mailtemplates.show', ['mailtemplate' => $data, 'locale' => $locale, 'as'=>'pdf']) }}" data-bs-placement="top" data-bs-title="Version PDF" data-bs-toggle="tooltip">PDF</a>
             </span>

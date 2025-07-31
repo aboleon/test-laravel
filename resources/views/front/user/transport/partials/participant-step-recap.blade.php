@@ -19,7 +19,6 @@
 
     <h5>{{__('front/transport.step_3_invoices')}}</h5>
 
-    {!! csscrush_inline(public_path('css/mediaclass_docs.css')) !!}
     <x-mediaclass::uploadable :model="$account"
                               group="transport_user_docs"
                               size="small"

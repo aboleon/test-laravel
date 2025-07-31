@@ -285,7 +285,7 @@ class Accounts
      */
     public function getLocale(): string
     {
-        $locale = Str::lower(Str::substr($this->account->profile?->language?->name, 0, 2)) ?? config('app.fallback_locale');
+        $locale = $this->account->profile?->lang ?: config('app.fallback_locale');
 
         return $locale == app()->getFallbackLocale() ? $locale : 'en';
     }

@@ -363,7 +363,7 @@ class AccountController extends Controller
         $account = Account::withTrashed()->findOrFail($account_id);
 
         try {
-            $replicated = (new Replicator($account))();
+            $replicated = new Replicator($account)();
             $this->responseSuccess("Le compte a été dupliqué");
             $this->redirectTo(route('panel.accounts.edit', $replicated));
         } catch (Throwable $e) {
@@ -451,5 +451,6 @@ class AccountController extends Controller
             $this->redirect_to = route('panel.events.edit', $this->event->id);
         }
     }
+
 }
 

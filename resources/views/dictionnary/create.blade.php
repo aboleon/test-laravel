@@ -53,8 +53,8 @@
                                 aria-controls="tab_translatable_{{ $locale }}"
                                 aria-selected="true">
                             <img src="{!! asset('vendor/flags/4x3/'.$locale.'.svg') !!}"
-                                 alt="{{ trans('lang.'.$locale.'.label') }}" class="d-inline-block"/>
-                            {!! trans('lang.'.$locale.'.label') !!}
+                                 alt="{{ trans('mfw-lang.'.$locale.'.label') }}" class="d-inline-block"/>
+                            {!! trans('mfw-lang.'.$locale.'.label') !!}
                         </button>
                     </li>
                 @endforeach

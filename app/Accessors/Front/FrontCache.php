@@ -12,7 +12,7 @@ class FrontCache
 {
     public static function accountConnected(): bool
     {
-        return auth()->check() && !auth()->user()->hasRole('dev');
+        return auth()->check() && ! auth()->user()->hasRole('dev');
     }
 
     public static function getEventContact(): ?EventContact
@@ -40,7 +40,7 @@ class FrontCache
         if ( ! session()->has('front_event_contact_model') || ! (session('front_event_contact_model') instanceof EventContact)) {
             Log::warning("Session missing: front_event_contact_model", ['session_data' => session()->all()]);
             $eventContact = self::getEventContact();
-            if($eventContact) {
+            if ($eventContact) {
                 self::setEventContactFromInstance($eventContact);
             }
         }
@@ -83,12 +83,10 @@ class FrontCache
                 $event = self::getEventModel();
             }
 
-            $canAccess = (
-                $event->manage_transport_upfront == 1
-                && (
-                    (in_array(ParticipantType::ORATOR->value, (array)$event->transport) && $group == ParticipantType::ORATOR->value)
-                    || (in_array(ParticipantType::CONGRESS->value, (array)$event->transport) && $group == ParticipantType::CONGRESS->value)
-                )
+            $canAccess
+                = (
+                (in_array(ParticipantType::ORATOR->value, (array)$event->transport) && $group == ParticipantType::ORATOR->value)
+                || (in_array(ParticipantType::CONGRESS->value, (array)$event->transport) && $group == ParticipantType::CONGRESS->value)
             );
 
             session()->put("front_event_contact_can_access_transport", $canAccess);

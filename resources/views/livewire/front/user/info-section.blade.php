@@ -1,5 +1,5 @@
 @php
-    use App\Accessors\Accounts;use App\Accessors\Dates;use App\Accessors\Front\FrontCache;use App\Enum\ParticipantType;use Illuminate\Support\Js;
+    use App\Accessors\Accounts;use App\Accessors\Dates;use App\Enum\ParticipantType;use Illuminate\Support\Js;
 
     $profile = $account?->profile;
     $accountPhoto = $account ? Accounts::getPhotoByAccount($account) : null;
@@ -170,28 +170,23 @@
 
 
             <div class="row mb-3">
-                <label for="select_language_id"
-                       class="col-md-2 col-form-label text-start text-nowrap">{!! __('front/account.labels.language') !!}</label>
+                <label for="lang"
+                       class="col-md-2 col-form-label text-start text-nowrap">
+                    {!! __('front/account.labels.language') !!}
+                </label>
                 <div class="col-md-4">
-                    <x-select-dictionary
-                        key="language"
-                        name="language_id"
-                        value="{{old('language_id', $profile?->language_id)}}"
-                        class="rounded-0 form-control"
-                        id="select_language_id"/>
+                    <x-mfw::select name="lang"
+                                   :nullable="false"
+                                   class="rounded-0"
+                                   :values="\MetaFramework\Accessors\Locale::localesAsSelectable()"
+                                   :affected="old('lang', $profile?->lang)"/>
                 </div>
-
-
                 <label for="input_rpps"
                        class="col-md-2 col-form-label text-start text-nowrap">
                     {!! __('front/account.labels.rpps') !!}
                 </label>
                 <div class="col-md-4">
-                    <input type="text"
-                           name="rpps"
-                           value="{{old('rpps', $profile?->rpps)}}"
-                           class="form-control rounded-0"
-                           id="input_rpps">
+                    <x-mfw::input name="rpps" :value="old('rpps', $profile?->rpps)" class="rounded-0"/>
 
                     <small class="text-danger d-block pt-1">{!! __('front/account.labels.rpps_notice') !!}</small>
                 </div>

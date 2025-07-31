@@ -38,7 +38,7 @@ class AccountProfileValidation extends ValidationAbstract
             'profile.title_id' => 'nullable|integer',
             'profile.base_id' => 'required',
             'profile.profession_id' => 'required',
-            'profile.language_id' => 'nullable|integer',
+            'profile.lang' => 'nullable|string',
             'profile.savant_society_id' => 'nullable|integer',
             'profile.cotisation_year' => 'nullable|integer',
             'profile.company_name' => 'nullable|string',

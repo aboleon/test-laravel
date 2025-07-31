@@ -124,7 +124,7 @@ return [
         'birth' => 'The birth date is required.',
         'first_name' => 'The first name is required.',
         'last_name' => 'The last name is required.',
-        'language_id' => 'The language is required.',
+        'lang' => 'The language is required.',
         'profession_id' => 'The profession is required.',
         'function' => 'The function is required.',
         'email' => 'The email is required.',

@@ -125,7 +125,7 @@ return [
         'birth' => 'La date de naissance est obligatoire.',
         'first_name' => 'Le prénom est obligatoire.',
         'last_name' => 'Le nom est obligatoire.',
-        'language_id' => 'La langue est obligatoire.',
+        'lang' => 'La langue est obligatoire.',
         'profession_id' => 'La profession est obligatoire.',
         'function' => 'La fonction est obligatoire.',
         'phone' => 'Le téléphone est obligatoire.',

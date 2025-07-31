@@ -1,5 +1,4 @@
 <div>
-    {!! csscrush_inline(public_path('css/mediaclass_docs.css')) !!}
     @if (!isset($disable_title))
         <h5 class="mt-3">{{ __('front/transport.stages.3.title') }}</h5>
     @endif

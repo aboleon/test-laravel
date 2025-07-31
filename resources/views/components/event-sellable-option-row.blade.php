@@ -4,8 +4,8 @@
             @foreach($fillables as $key=>$value)
                 <div class="col-sm-6">
                     <a class="nav-link active" href="#" style="cursor:default;">
-                        <img src="{!! asset('vendor/flags/4x3/'.$locale.'.svg') !!}" alt="{{ trans('lang.'.$locale.'.label') }}" class="d-inline-block me-1 ше" style="height: 16px"/>
-                        <span class="text-dark">{!! trans('lang.'.$locale.'.label') !!}</span>
+                        <img src="{!! asset('vendor/flags/4x3/'.$locale.'.svg') !!}" alt="{{ trans('mfw-lang.'.$locale.'.label') }}" class="d-inline-block me-1 ше" style="height: 16px"/>
+                        <span class="text-dark">{!! trans('mfw-lang.'.$locale.'.label') !!}</span>
                     </a>
                     <x-mfw::textarea height="100"
                                      name="service_option[{{ $random }}][{{ $key }}][{{ $locale }}]"

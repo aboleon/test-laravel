@@ -7,6 +7,7 @@ use App\Accessors\Accounts;
 use App\Accessors\Dictionnaries;
 use App\Accessors\EventContactAccessor;
 use App\Exports\SageExport;
+use App\Mail\Test;
 use App\Models\Account;
 use App\Models\Event;
 use App\Models\EventContact;
@@ -17,7 +18,9 @@ use App\Models\Sage;
 use App\Services\Filters\EventContactFilter;
 use App\Services\PaymentProvider\PayBox\Paybox;
 use App\Traits\EventCommons;
+use Illuminate\Support\Facades\Mail;
 use Mediaclass;
+use MetaFramework\Accessors\Locale;
 use MetaFramework\Services\Validation\ValidationTrait;
 use MetaFramework\Traits\DateManipulator;
 use Throwable;
@@ -35,6 +38,10 @@ class TestableController extends Controller
 
     public function index()
     {
+
+        de(Locale::localesAsSelectable());
+
+        de(Mail::to('a.mihailov@patrimonia.bg')->send(new Test()));
         request()->merge(['sage.event' => 34]);
 
         d(request()->all());

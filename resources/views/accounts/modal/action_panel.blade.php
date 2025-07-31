@@ -348,7 +348,7 @@
             participation_type_id: ['Type de participation', 'custom', 'getParticipationTypes'],
             is_attending: ['Présence', 'bool'],
             @endif
-            language_id: ['Langue', 'dico', 'language'],
+            lang: ['Langue', 'enum', {!! json_encode(\MetaFramework\Accessors\Locale::localesAsSelectable()) !!}],
             savant_society_id: ['Société savante', 'dico', 'savant_societies'],
             civ: ['Civilité', 'enum', {!! json_encode(\App\Enum\Civility::toArray()) !!}],
             birth: ['Date de naissance', 'date'],

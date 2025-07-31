@@ -225,7 +225,7 @@ class MyAccountAction
             'title_id',
             'civ',
             'rpps',
-            'language_id',
+            'lang',
             'profession_id',
             'function',
             'establishment_id',

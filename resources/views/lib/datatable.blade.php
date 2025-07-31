@@ -1,10 +1,17 @@
 @push('css')
+    {{-- // CDN Outage 2025-07-30
     <link href="https://cdn.datatables.net/2.3.0/css/dataTables.bootstrap5.min.css"
+          rel="stylesheet"/> --}}
+
+    <link href="{{ asset('vendor/datatables/datatables.min.css') }}"
           rel="stylesheet"/>
 @endpush
 @push('js')
+    {{-- // CDN Outage 2025-07-30
     <script src="https://cdn.datatables.net/2.3.0/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/2.3.0/js/dataTables.bootstrap5.min.js"></script>
+    --}}
+    <script src="{{ asset('vendor/datatables/datatables.min.js') }}"></script>
     <script>
         function reloadDatable() {
             $('.dt').DataTable().ajax.reload();

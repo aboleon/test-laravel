@@ -144,12 +144,6 @@ class UserController extends Controller
             $user->update($this->validated_data['user']);
             $user->processRoles();
 
-//            if (request()->has('profile')) {
-//                $user->profile()->update($this->validated_data['profile']);
-//            }
-//            $user->processMedia();
-            $this->processProfilePhoto($user->profile);
-
             if ($password_broker->requestedChange() && $user->id == auth()->id()) {
                 Auth::guard('web')->logout();
                 session()->flush();

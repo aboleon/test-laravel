@@ -4,7 +4,6 @@
 
         <div class="row m-0">
             <div class="col-md-12 mb-4 ps-0">
-                {!! csscrush_inline(public_path('css/mediaclass_docs.css')) !!}
                 <x-mediaclass::uploadable :model="$account"
                                           group="user_docs"
                                           size="small"

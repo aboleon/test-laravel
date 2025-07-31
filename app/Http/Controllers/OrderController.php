@@ -131,6 +131,7 @@ class OrderController extends Controller
      */
     public function store(Event $event, OrderRequest $request): RedirectResponse
     {
+        de(request()->all());
         $this->evaluatePossiblePec($event);
         $this->pecComputeAmounts();
 

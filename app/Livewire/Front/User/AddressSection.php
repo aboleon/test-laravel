@@ -30,6 +30,9 @@ class AddressSection extends Component
     public ?string $cedex = null;
     public ?string $lat = null;
     public ?string $lon = null;
+    public ?string $administrative_area_level_1 = null;
+    public ?string $administrative_area_level_2 = null;
+    public ?string $administrative_area_level_1_short = null;
 
     protected $listeners = [
         'AddressSection.checkAtLeastOneAddress' => 'checkAtLeastOneAddress',
@@ -63,6 +66,8 @@ class AddressSection extends Component
         $this->lat = "";
         $this->lon = "";
         $this->cedex = "";
+        $this->administrative_area_level_1 = "";
+        $this->administrative_area_level_2 = "";
     }
 
     public function save(): void
@@ -105,6 +110,8 @@ class AddressSection extends Component
                     "lon",
                     "complementary",
                     "cedex",
+                    "administrative_area_level_1",
+                    "administrative_area_level_2",
                 ]);
             }
 
@@ -133,6 +140,8 @@ class AddressSection extends Component
             $this->cedex = $item->cedex;
             $this->lat = $item->lat;
             $this->lon = $item->lon;
+            $this->administrative_area_level_1 = $item->administrative_area_level_1;
+            $this->administrative_area_level_2 = $item->administrative_area_level_2;
             $this->complementary = (string)$item->complementary;
         }
     }

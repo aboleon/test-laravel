@@ -14,21 +14,25 @@
             <h2>
                 {{ $topTitle }}
             </h2>
+
+
+
             @php
-                $descriptions = [
-                    route('panel.manager.event.event_contact.index', ['event' => $event->id, 'group' => 'all']) => 'Pax reliés à l\'événement avec ou sans commande',
-                    route('panel.manager.event.event_contact.index_with_order', ['event' => $event->id, 'group' => 'all', 'withOrder' => 1]) => 'Pax avec commande ou caution payée (PEC ou presta)',
-                    route('panel.manager.event.event_contact.index_with_order', ['event' => $event->id, 'group' => 'all', 'withOrder' => 0]) => 'Pax sans commande',
-                    route('panel.manager.event.event_contact.index', ['event' => $event->id, 'group' => 'congress']) => 'Pax avec commande ou caution payée (PEC ou presta)',
-                    route('panel.manager.event.event_contact.index', ['event' => $event->id, 'group' => 'industry']) => 'Pax avec commande ou caution payée (PEC ou presta)',
-                    route('panel.manager.event.event_contact.index', ['event' => $event->id, 'group' => 'orator']) => 'Pax avec commande ou caution payée (PEC ou presta)',
-                    // route('panel.manager.event.pecorder.index', $event->id) => 'Pax avec commande PEC ou caution PEC payée'
-                ];
+
+                $description = match ([$groupType, $withOrder]) {
+                    ['all', 'yes'] => 'Pax avec commande ou caution payée (PEC ou presta)',
+                    ['all', 'no'] => 'Pax sans commande',
+                    ['all', null] => 'Pax reliés à l\'événement avec ou sans commande',
+                    ['congress', null] => 'Pax avec commande ou caution payée (PEC ou presta)',
+                    ['industry', null] => 'Pax avec type de participation "industriel" avec ou sans commande',
+                    ['orator', null] => 'Pax avec type de participation "intervenant" avec ou sans commande',
+                    default => null
+                };
             @endphp
 
-            @if(isset($descriptions[url()->current()]))
-                <span class="text-secondary">
-                    {{ $descriptions[url()->current()] }}
+            @if($description)
+                <span class="fs-6 text-secondary">
+                    {{ $description }}
                 </span>
             @endif
 

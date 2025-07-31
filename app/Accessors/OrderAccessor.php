@@ -128,7 +128,7 @@ ORDER BY h.name;
         if ($this->taxRoomCart !== null) {
             return $this->taxRoomCart;
         }
-        $this->taxRoomCart = $this->order->taxroom;
+        $this->taxRoomCart = $this->order->taxRoom;
 
         return $this->taxRoomCart;
     }

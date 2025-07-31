@@ -32,11 +32,6 @@ trait Locale
         return config('app.fallback_locale');
     }
 
-    public function localesAsSelectable(): array
-    {
-        return collect(trans('lang'))->sortBy('code')->pluck('label', 'code')->toArray();
-    }
-
     public function alternateIsoLocales(): array
     {
         return collect(config('translatable.active_locales'))->reject(function ($item) {

@@ -74,16 +74,11 @@
                class="fs-4 add-dynamic"><i class="fa-solid fa-circle-plus"></i></a>
         </div>
     </div>
-    <div class="col-xl-6 mb-3 mfw-holder position-relative">
-        <div class="d-flex justify-content-between align-items-end">
-            <div class="w-100 me-3">
-                <x-selectable-dictionnary key="language"
-                                          name="profile[language_id]"
-                                          :affected="$error ? old('profile.language_id') : $account?->profile?->language_id"/>
-            </div>
-            <span class="fs-4 add-dynamic dict-dynamic"
-                  data-dict="language"><i class="fa-solid fa-circle-plus"></i></span>
-        </div>
+    <div class="col-xl-6 mb-3">
+        <x-mfw::select name="profile.lang" :nullable="false"
+                       :values="\MetaFramework\Accessors\Locale::localesAsSelectable()"
+                       label="Langue"
+                       :affected="old('profile.lang', $account?->profile?->lang)"/>
     </div>
     <div class="col-xl-6 mb-3 {{ $accessor->isMedical() ? '' : 'd-none' }}"
          id="rpps-access">

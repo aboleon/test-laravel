@@ -41,7 +41,7 @@ class AccountProfile extends Model
         'domain_id',
         'establishment_id',
         'function',
-        'language_id',
+        'lang',
         'notes',
         'passport_first_name',
         'passport_last_name',

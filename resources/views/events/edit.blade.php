@@ -42,6 +42,10 @@
                 <x-mfw::validation-errors/>
                 <x-mfw::response-messages/>
 
+                @if($data->trashed())
+                    <x-mfw::alert class="simplified" message="Cet évènement a été archivé le {{ $data->deleted_at->format('d/m/Y') }}"/>
+                @endif
+
                 <form method="post" action="{{ $route }}" id="wagaia-form" novalidate>
                     @if($data->id)
                         @method('put')

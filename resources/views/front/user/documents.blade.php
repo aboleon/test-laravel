@@ -19,8 +19,6 @@
                 <h5 class="mb-0 text-light-emphasis">{!! __('front/account.documents') !!}</h5>
             </div>
             <div class="card-body">
-
-                {!! csscrush_inline(public_path('css/mediaclass_docs.css')) !!}
                 <x-mediaclass::uploadable :model="$account"
                                           group="transport_user_docs"
                                           size="small"

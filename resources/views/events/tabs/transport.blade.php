@@ -60,13 +60,6 @@
                 </div>
 
                 <div class="mfw-line-separator col-12"></div>
-                <div class="col-sm-4">
-                    <x-mfw::checkbox name="event.config.manage_transport_upfront"
-                                     :switch="true"
-                                     label="Autoriser la gestion transport en front"
-                                     value="1"
-                                     :affected="old('event.config.manage_transport_upfront', $data->manage_transport_upfront)"/>
-                </div>
                 <div class="col-md-8 mb-3">
                     <x-mfw::datepicker
                         label="Date limite pour le prix des billets<br><span class='text-danger'>Si gestion libre par l'internaute</span>"

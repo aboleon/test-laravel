@@ -83,16 +83,30 @@ class Dictionnaries
             return null;
         }
 
-        $getAllEntries = function($entries) use (&$getAllEntries): \Illuminate\Support\Collection {
-            return collect($entries)->flatMap(fn($entry) =>
-            collect([$entry])->merge(
-                isset($entry->entries) ? $getAllEntries($entry->entries) : []
-            )
-            );
-        };
+        $dict = self::dictionnary($dictionnary);
+        if (!$dict) {
+            return null;
+        }
 
-        return $getAllEntries(self::dictionnary($dictionnary)->entries)
-            ->firstWhere('id', $entry_key);
+        // First check top-level entries
+        $entry = $dict->entries->firstWhere('id', $entry_key);
+        if ($entry) {
+            return $entry;
+        }
+
+        // If not found and it's a meta dictionary, check nested entries
+        if ($dict->type === DictionnaryType::META->value) {
+            foreach ($dict->entries as $metaEntry) {
+                if ($metaEntry->entries) {
+                    $nested = $metaEntry->entries->firstWhere('id', $entry_key);
+                    if ($nested) {
+                        return $nested;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     public static function filterAgainstMetaType($collection, $array): Collection

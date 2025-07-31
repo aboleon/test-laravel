@@ -10,7 +10,7 @@ return [
         "genre_required" => "You have not specified your gender",
         "first_name_required" => "You have not specified your first name",
         "last_name_required" => "You have not specified your last name",
-        "language_id_required" => "You have not specified your language",
+        "lang_required" => "You have not specified your language",
         "email_required" => "You have not specified your email",
         "email_already_exists" => "This email is already in use",
         "email_format" => "Your email is incorrectly formatted",
