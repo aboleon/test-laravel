@@ -28,15 +28,14 @@
             DTclickableRow();
         }
 
-        function fetchPecDistribution(model_id, container) {
-            ajax('action=fetchAlternativesForPecDistributionRecord&pec_distribution_id=' + model_id + '&callback=dispatchPecDistributionResultToModal', container)
+        function fetchPecDistribution(model_id, pec_type, container) {
+            ajax('action=fetchAlternativesForPecDistributionRecord&pec_distribution_id=' + model_id + '&pec_type='+ pec_type + '&callback=dispatchPecDistributionResultToModal', container)
         }
 
         function dispatchPecDistributionResultToModal(result) {
+
+            let c = $('#selectable-grants-container'), options = '';
             if (!result.hasOwnProperty('error')) {
-
-                let c = $('#selectable-grants-container'), options = '';
-
                 Object.entries(result.grants).forEach(([key, value]) => {
                     options += `<option value="${key}">${value}</option>`;
                 });
@@ -81,7 +80,7 @@
 
                         let body = jQuery_mfwSimpleModal.find('.modal-body');
 
-                        fetchPecDistribution(button.data('model-id'), body);
+                        fetchPecDistribution(button.data('model-id'), button.data('pec-type'), body);
 
                         $('button.modal-pec-reassign.btn-confirm').click(function () {
                             let selectedGrantId = produceNumberFromInput($('#selectable-grants').find(':selected').val());

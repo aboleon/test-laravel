@@ -130,7 +130,7 @@ class OrderDataTable extends DataTable
             Column::make('invoice_number')->title('Num Fact'),
             Column::make('date_display')->title('Date'),
             Column::make('client_type_display')->title('Type')->addClass('fw-bold small'),
-            Column::make('name_display')->data('name_display')->name('name')->title('Payeur'),
+            Column::make('name')->title('Payeur'),
             Column::make('total')->title('Prix TTC'),
             Column::make('payments_total')->title('Prix Payé'),
             Column::make('total_pec')->title('Total PEC'),

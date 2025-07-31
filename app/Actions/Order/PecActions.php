@@ -5,10 +5,12 @@ namespace App\Actions\Order;
 use App\Accessors\OrderRequestAccessor;
 use App\Actions\EventManager\GrantActions;
 use App\Enum\AmountType;
+use App\Enum\OrderType;
 use App\Models\{EventManager\Grant\GrantTransportDistribution, Order, PecDistribution};
 use App\Models\EventManager\Grant\Quota;
 use App\Models\Order\Cart\ServiceCart;
 use App\Services\Grants\QuotaType;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Services\Pec\{PecDistributionResult, PecFinder, PecParser, PecType};
 use App\Traits\Models\EventContactModelTrait;
 use App\Traits\Models\EventModelTrait;
@@ -430,15 +432,26 @@ class PecActions
         return $this;
     }
 
-    public function fetchAlternativesForPecDistributionRecord(int $pec_distribution_id): array
+    public function fetchAlternativesForPecDistributionRecord(int $pec_distribution_id, string $pec_type): array
     {
+        if ($pec_type == OrderType::GRANTDEPOSIT->value) {
+            $this->responseWarning("La réallocation d'une caution grant n'est pas autorisée.");
+
+            return $this->response;
+        }
+
         if ( ! $pec_distribution_id) {
             $this->responseWarning("Impossible d'identifier l'enregistrement PEC à récupérer.");
 
             return $this->response;
         }
 
-        $this->pecDistribution = PecDistribution::findOrFail($pec_distribution_id);
+        try {
+            $this->pecDistribution = PecDistribution::findOrFail($pec_distribution_id);
+        } catch (ModelNotFoundException $e) {
+            $this->responseError("Impossible de trouver la ligne PEC");
+            return $this->response;
+        }
 
         $pec = (new self());
         $pec
@@ -473,6 +486,8 @@ class PecActions
                         ->pluck('title', 'grant_id')
                         ->toArray(),
                 );
+            } else {
+                $this->responseWarning("Aucun autre grant ne peut couvrir ce poste.");
             }
         } else {
             $this->responseWarning("Aucun grant n'a été trouvé");

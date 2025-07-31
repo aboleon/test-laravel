@@ -30,8 +30,14 @@
                 $iteration = $loop->index;
                 $blocked_count = $group_id ? ($blocked['groups_event_group_id'][$group_id] ?? 0) : array_sum($blocked['groups_event_group_id']);
 
-                $total_booked+= $recap['confirmed']['groups']['on_quota']  + $recap['temp']['groups']['on_quota'];
-                $total_blocked+= $blocked_count;
+                // FIXED: Added safe access with default values
+                $confirmed_groups_on_quota = $recap['confirmed']['groups']['on_quota'] ?? 0;
+                $temp_groups_on_quota = $recap['temp']['groups']['on_quota'] ?? 0;
+                $confirmed_groups_free = $recap['confirmed']['groups']['free'] ?? 0;
+                $temp_groups_free = $recap['temp']['groups']['free'] ?? 0;
+
+                $total_booked += $confirmed_groups_on_quota + $temp_groups_on_quota;
+                $total_blocked += $blocked_count;
                 $tempbooked = ($availability->get('booked')['temp'][$date][$roomgroup] ?? 0);
             @endphp
 
@@ -57,18 +63,19 @@
                 </td>
                 <td class="rowspan align-top" style="max-width: 80px">
                     {{-- Réservées sur le quota bloqué --}}
-                    {{ $recap['confirmed']['groups']['on_quota'] }}
-                    @if ($recap['temp']['groups']['on_quota'])
-                        (+ {{ $recap['temp']['groups']['on_quota'] }} en attente)
+                    {{ $confirmed_groups_on_quota }}
+                    @if ($temp_groups_on_quota)
+                        (+ {{ $temp_groups_on_quota }} en attente)
                     @endif
                 </td>
                 <td class="rowspan align-top" style="max-width: 80px">
                     {{-- Restantes sur le quota bloqué --}}
-                    {{ $blocked_count - ($recap['confirmed']['groups']['on_quota'] + $recap['temp']['groups']['on_quota'])}}
+                    {{ $blocked_count - ($confirmed_groups_on_quota + $temp_groups_on_quota)}}
                 </td>
                 <td>
                     {{-- Réservées en libre --}}
-                    {{ $recap['confirmed']['groups']['free'] + $recap$re['temp']['groups']['free'] }}
+                    {{-- FIXED: Corrected typo from $recap$re to $recap --}}
+                    {{ $confirmed_groups_free + $temp_groups_free }}
                 </td>
             </tr>
         @endforeach

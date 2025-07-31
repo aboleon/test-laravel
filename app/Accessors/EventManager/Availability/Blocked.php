@@ -27,7 +27,7 @@ class Blocked extends SubAccessor
         return $this->data;
     }
 
-    protected function generate($date, $roomgroup): array
+    protected function generate(string $date, ?int $roomgroup = null): array
     {
 
         return [

@@ -105,7 +105,7 @@ class AjaxController extends Controller
 
     public function fetchAlternativesForPecDistributionRecord(): array
     {
-        return new PecActions()->ajaxMode()->fetchAlternativesForPecDistributionRecord((int)request('pec_distribution_id'));
+        return new PecActions()->ajaxMode()->fetchAlternativesForPecDistributionRecord((int)request('pec_distribution_id'), (string)request('pec_type'));
     }
 
     public function updateAdminAdressSettings(): array

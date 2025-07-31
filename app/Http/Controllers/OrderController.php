@@ -10,7 +10,7 @@ use App\Enum\OrderStatus;
 use App\Events\OrderSaved;
 use App\Http\Controllers\Order\AmendedAccommodationCartController;
 use App\Http\Requests\OrderRequest;
-use App\Models\{Event, EventManager\EventGroup, FrontCart, FrontTransaction, Order, PaymentCall};
+use App\Models\{Event, EventManager\EventGroup, EventManager\EventGroup\EventGroupContact, FrontCart, FrontTransaction, Order, PaymentCall};
 use App\Traits\OrderPecTrait;
 use App\Traits\OrderTrait;
 use Carbon\Carbon;
@@ -131,7 +131,6 @@ class OrderController extends Controller
      */
     public function store(Event $event, OrderRequest $request): RedirectResponse
     {
-        de(request()->all());
         $this->evaluatePossiblePec($event);
         $this->pecComputeAmounts();
 
@@ -142,6 +141,7 @@ class OrderController extends Controller
         $this->createOrder($event, $request);
         $this->setOrderPecState();
         $this->processPayerData($request);
+        $this->associateToGroupIfNecessary();
         $this->processAccompanying();
         $this->processRoomnotes();
         //$this->updateInvoiceableAddress();
@@ -331,6 +331,35 @@ class OrderController extends Controller
                     $this->redirect_to = route('panel.manager.event.orders.edit', [$event, $this->order]);
                     $this->saveAndRedirect(route('panel.manager.event.event_contact.edit', ['event' => $event, 'event_contact' => $eventContact['event_contact_id']]));
                 }
+            }
+        }
+    }
+
+    /**
+     * Associe un contact à un groupe si à la création de la commande
+     * le payeur est un group et le contact n'en fait pas partie
+     * @return void
+     */
+    private function associateToGroupIfNecessary(): void
+    {
+        $event_group_id = (int)request('event_group_id');
+        $values         = [
+            'event_group_id' => $event_group_id,
+            'user_id'        => $this->order->client_id,
+        ];
+        if (
+            $this->order->client_type != OrderClientType::GROUP->value
+            && $this->payerData['account_type'] == OrderClientType::GROUP->value
+            && $event_group_id
+        ) {
+            if (EventGroupContact::where($values)->doesntExist()
+            ) {
+                EventGroupContact::insert($values);
+                $this->responseNotice(
+                    'Le participant a été ajouté au groupe '.
+                    ltrim($this->payerData['first_name'].' '.$this->payerData['last_name'])
+                        .($this->payerData['company'] ? ' / '.$this->payerData['company'] : '')
+                );
             }
         }
     }
